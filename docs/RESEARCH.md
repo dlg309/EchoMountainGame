@@ -21,3 +21,9 @@
 
 - https://github.com/dlg309/Echo-Mountain/blob/main/echo-mountain/README.md, accessed 2026-11-06: the fuller prototype README describes practice recovery, multiple modes, landing-awarded tricks and separate local records. It also describes timed predefined tricks and automatic halfpipe traversal; those are reference behavior, not the target 3D physics.
 - https://github.com/dlg309/ai-game-dev-research/tree/main/docs, accessed 2026-11-06: inspected planning decisions, roadmap, engine comparison, research overview and source list through their raw files. The notebook remains early research and explicitly marks its engine choice and experiments as open; the current user brief supplies the Unity decision. No benchmark or playtest is implied.
+
+## 2026-11-06 — Unity test and build entry points
+
+- https://docs.unity3d.com/Packages/com.unity.test-framework@1.4/manual/reference-command-line.html, accessed 2026-11-06: Test Framework 1.4 documents `-runTests`, platform and result-file options. The template declares 1.4.2, while the documentation page identifies 1.4.6; actual package resolution and commands remain untested.
+- https://docs.unity3d.com/6000.3/Documentation/ScriptReference/BuildPipeline.BuildPlayer.html, accessed 2026-11-06: documents editor-driven player builds. A local development-build menu has been drafted but has not been compiled or used.
+- https://docs.unity.com/en-us/engine/6000.3/manual/get-started/install-and-upgrade/licenses-and-activation/activation-faq, accessed 2026-11-06: Unity documents license activation and troubleshooting; signing out and back into Hub is a possible troubleshooting step in some activation cases, not proof of the cause here.

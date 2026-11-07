@@ -11,3 +11,7 @@ User selected the repository as the project location. The repository root now ha
 ## Update 2026-11-06 19:34 EST — unverified lab draft
 
 A WIP diagnostic rider, camera, one-time scene generator and draft PlayMode flat-support/reset test now exist under `Assets/EchoMountain`. Nothing has been compiled or run, the scene is not yet generated, and `.meta` files for these new assets await Unity import. The template checkpoint was `311df29`; inspect HEAD and `git status` for the later lab checkpoint. Activate Unity, retry import, repair any errors, generate the lab using its editor menu, then test and inspect before claiming progress on M1. See `docs/PHYSICS_LAB.md` for scope and limitations.
+
+## Update 2026-11-06 19:43 EST — license retry
+
+Hub shows a Student license, yet 6000.3.28f1 failed both batch and Hub-launched opens with `No valid Unity Editor license found`; after a Hub license refresh batch still returned 198. The project was added to Hub and 6000.3.28f1 selected. Only the failed Echo Mountain editor was closed; the separate tutorial was left open. No `ProjectVersion.txt` or imported project exists yet. User was asked to save tutorial work and sign out/in to Hub. Once completed, retry import; do not remove licenses or force locks. A draft Windows lab build menu was added but remains uncompiled. Inspect current Git state and `docs/STATUS.md` for latest checkpoint.
