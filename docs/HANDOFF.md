@@ -1,0 +1,5 @@
+﻿# Handoff
+
+As of 2026-11-06 19:29 EST this is a **partial M0**, not a playable game. Read `AGENTS.md`, `PLANS.md`, `docs/STATUS.md`, `docs/QA.md`, and `docs/BUILD_BRIEF.md`; inspect Git and relevant nested instructions. Repository: `C:\Users\diego\OneDrive\Documents\EchoMountainGame`, branch `main`; original brief commit `fcb144a` was the base at documentation time. Check current HEAD and working tree before continuing.
+
+The repository has no Unity project markers. The open editor is 6000.6.8f1 on `C:\Users\diego\Setup Guide In-Editor Tutorial`, not Echo Mountain. Do not close it, overwrite scenes, force locks, or create a duplicate project. The user was asked for the EchoMountain3D folder containing Assets, Packages and ProjectSettings. Once supplied, inspect it and its repository relationship; preserve all user changes, confirm recorded Unity version, URP, compilation, activation and Windows support, and establish reproducible test/build entry points. Then implement M1's physics lab and validate in Unity before expanding. There are no test results, gameplay, build artifacts or running task processes to resume.
