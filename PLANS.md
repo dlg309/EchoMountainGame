@@ -13,3 +13,5 @@ The complete brief and acceptance gates are in `docs/BUILD_BRIEF.md`. No milesto
 ## Decisions and dependencies
 
 Project discovery precedes all Unity project mutations. Unity 6000.3.28f1 is installed and is beyond the first fixed 6.3 version for Unity's October 2026 eMudhra advisory, but actual project version, import and activation remain unknown. The open 6000.6 editor is running a separate setup tutorial. Do not silently migrate it or change streams. Physics and scene decisions are proposals until tested. Initial target: fixed 60 Hz physics and 1080p/60 FPS, measured in a standalone gameplay run; neither is established yet.
+
+Current update: the user chose the repository root as the project location; a URP starter template is present, but editor import is blocked by missing Unity license activation. M0 remains incomplete and M1 is unverified.
