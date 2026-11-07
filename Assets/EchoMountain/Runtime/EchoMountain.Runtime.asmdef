@@ -1,0 +1,6 @@
+﻿{
+  "name": "EchoMountain.Runtime",
+  "rootNamespace": "EchoMountain",
+  "references": ["Unity.InputSystem"],
+  "autoReferenced": true
+}

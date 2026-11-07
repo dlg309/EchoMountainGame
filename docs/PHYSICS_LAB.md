@@ -13,3 +13,9 @@ This is a test design, not an implementation or a test result. Tune dimensions a
 | Frame rates and seams | same fixed-tick inputs at 30, 60, 120 render FPS; repeat seam and high-speed cases | divergent fixed-step outcome outside declared tolerances, tunneling or contact chatter |
 
 Use PlayMode tests for quantitative state and integration and observe actual gameplay separately. Establish numerical thresholds against measured baseline before asserting a pass; never change thresholds solely to hide a failure. Verify physical contact rather than trusting only probe state. Report input injection and simulation conditions, actual test counts/results and limitations.
+
+## Unverified implementation in progress
+
+The `Assets/EchoMountain` scripts are a first diagnostic prototype, not an accepted riding controller. After activation and successful import, use **Echo Mountain > Create physics lab (once)**. It refuses to overwrite an existing lab and prompts to save modified scenes. Inspect and repair the generated geometry, contact behavior, scene references and control response in Play Mode before calling any acceptance gate complete. The scene is not yet generated or added to build settings. Input System package resolution, scripts, and 60 Hz configuration are not yet verified.
+
+A first PlayMode test draft checks flat support and that reset restores spawn and clears linear/angular velocity. It has not been imported, compiled, or executed; its thresholds and test assembly configuration require validation in the installed editor. It does not establish turning, braking, jump, landing, frame-rate or controller acceptance.
