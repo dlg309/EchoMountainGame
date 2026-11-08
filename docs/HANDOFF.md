@@ -27,3 +27,7 @@ The main Unity 6000.3.28f1 editor PID 21020 completed initial import/compilation
 ## Checkpoint 2026-11-08 17:55 EST
 
 Main editor 6000.3.28f1 imported/compiled successfully, but GUI activation failed. The lab scene was generated in `%TEMP%\EchoMountain3D_QA_20261108` and copied into the main project with its metadata; script GUID references match. One PlayMode test passed in the copy, checking flat support and reset. Isolated Windows development build is in shell session 44291; inspect its log/artifact and process before proceeding. No gameplay observation or complete M1 validation yet. Preserve the main editor and all working changes; see `docs/QA.md` and `docs/STATUS.md` for commands and limits.
+
+## Checkpoint 2026-11-08 18:01 EST
+
+Windows development build succeeded and was copied to `Builds/PhysicsLab/EchoMountainLab.exe`; player PID 28712 was launched and remained responsive, but helper window activation failed twice and no visual/gameplay verification was possible. Optional user feedback was requested. A new slope-acceleration test exists only in the isolated QA copy and is running in shell session 64500; inspect results, fix failures, then transfer verified changes. Do not overwrite the existing build. Main editor PID 21020 remains open. See `docs/QA.md` for observed checks.
