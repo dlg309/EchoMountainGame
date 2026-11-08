@@ -63,3 +63,7 @@ User requested a readable speedometer and controls, and separate themed side phy
 ## Checkpoint 2026-11-08 18:42 EST — HUD and diagnostic landing
 
 Implemented requested speedometer, readable controls, and separate diagnostics in `LabHud`; saved as new `PhysicsLabHUD.unity`, preserving earlier scenes. Eight isolated PlayMode tests passed. Added preliminary contact/landing classification with switch-aware direction and startup phantom-landing protection; its feedback is diagnostic only, without bail/recovery or scoring. The isolated HUD Windows build is running in session 35595. Verify exit, copy to a new build folder and obtain the user's visual feedback. Existing non-task working-tree changes and running editor/player windows are preserved.
+
+## Checkpoint 2026-11-08 18:43 EST — HUD build
+
+Requested HUD build succeeded and is running from `Builds/PhysicsLab-HUD/EchoMountainLab.exe`, PID 8560, title `Echo Mountain Physics Lab - HUD`; startup log showed no exception lines at inspection. Asked user to review layout; no response yet. Eight isolated PlayMode tests passed before build. Landing outcomes remain diagnostic, without real bail/recovery or scoring. Preserve unrelated unstaged changes and open processes.
