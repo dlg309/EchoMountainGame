@@ -75,3 +75,7 @@ Nine isolated PlayMode tests passed, including one actual flat-ground switch pop
 ## Checkpoint 2026-11-08 18:49 EST
 
 User said the new HUD is better and asked to continue building the game. In isolated QA, a basic severe-sideways-landing recovery was added and the complete PlayMode suite passed 10/10. Source copied to main; current HUD executable predates recovery and must be rebuilt to include it. Recovery is a timed reset, not a ragdoll or complete score/session flow. Continue M1 tests and M2 once appropriate; preserve unrelated user changes and open editor/player windows.
+
+## Checkpoint 2026-11-08 18:53 EST
+
+Isolated Unity PlayMode tests passed 10/10 at 1/60-second fixed timestep, with teardown restoring timing. The project setting remains 0.02 s, and render-frame consistency is untested. Newest HUD build predates basic recovery; rebuild to a fresh directory after further foundation checks. See `docs/STATUS.md` and `docs/QA.md`; preserve unrelated changes and open Unity/player sessions.

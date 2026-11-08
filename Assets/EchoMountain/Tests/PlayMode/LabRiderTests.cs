@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using EchoMountain.Riding;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,17 +14,29 @@ namespace EchoMountain.Tests
 {
     public sealed class LabRiderTests
     {
+        private float originalFixedDelta;
+
+        [UnitySetUp]
+        public IEnumerator SetSixtyHertz()
+        {
+            originalFixedDelta = Time.fixedDeltaTime;
+            Time.fixedDeltaTime = 1f / 60f;
+            yield return null;
+        }
 #if UNITY_EDITOR
         private Scene loadedLabScene;
-
+#endif
         [UnityTearDown]
-        public IEnumerator UnloadLabScene()
+        public IEnumerator RestoreSimulation()
         {
+#if UNITY_EDITOR
             if (loadedLabScene.IsValid() && loadedLabScene.isLoaded)
                 yield return SceneManager.UnloadSceneAsync(loadedLabScene);
             loadedLabScene = default;
-        }
 #endif
+            Time.fixedDeltaTime = originalFixedDelta;
+            yield break;
+        }
         [UnityTest]
         public IEnumerator FlatGroundSupportsBoardAndResetClearsMotion()
         {
@@ -75,7 +87,7 @@ namespace EchoMountain.Tests
                 Assert.That(body.position.z - start, Is.GreaterThan(2f),
                     "A board released on a 15-degree slope should move downhill under gravity.");
                 Assert.That(Vector3.Dot(body.linearVelocity, slope.transform.forward), Is.GreaterThan(1f),
-                    "The board should have meaningful downhill speed after three seconds.");
+                    "The board should have meaningful downhill speed after the fixed simulation interval.");
             }
             finally
             {
