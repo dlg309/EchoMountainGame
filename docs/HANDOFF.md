@@ -51,3 +51,7 @@ User reports the repaired player works now and supplied a screenshot: diagnostic
 ## Checkpoint 2026-11-08 18:27 EST
 
 M0 complete; M1 partial. User reports repaired player works and supplied a low-contrast screenshot. The separately saved `PhysicsLabReadable.unity` adds task-owned marker materials and a diagnostic rider/camera adjustment, without replacing the original lab; six PlayMode tests passed in the isolated QA copy. The readable Windows build is running in shell session 5096; inspect its exit/log and copy it to a fresh build directory, then seek visual/real controls feedback. The main editor may still be open; unrelated package/settings and generated files are unstaged and must be preserved. See `docs/STATUS.md`, `docs/QA.md`, and `README.md`.
+
+## Checkpoint 2026-11-08 18:29 EST — readable player
+
+Readable lab build succeeded, was copied to `Builds/PhysicsLab-Readable/EchoMountainLab.exe`, and launched as PID 24012 with title `Echo Mountain Physics Lab - Markers`. Process responded, no startup exception lines observed; user feedback on its new appearance is pending. Previous repaired player was reported working by user. Six isolated PlayMode tests passed, including actual scene and simulated input, but robust landings/contact and gameplay edge cases remain incomplete. Preserve the open editor, previous builds, and unrelated unstaged package/settings files. See latest `docs/STATUS.md`.
