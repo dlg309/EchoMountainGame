@@ -19,3 +19,7 @@ Hub shows a Student license, yet 6000.3.28f1 failed both batch and Hub-launched 
 ## Resume 2026-11-08 17:40 EST
 
 The project is open in Unity 6000.3.28f1 (PID 21020) and package manager is active. Initial resume inspection missed the editor's unquoted project path, so a second batch start was attempted; it exited 1 while the existing project was locked. Nothing was killed or unlocked. The running editor progressed past previous license failure into package resolution/import, but completion, compile and gameplay remain unverified. Unity changed the package manifest; preserve it, inspect lockfile and version after import. The computer-use helper failed twice to activate the "Opening project..." window. Monitor import and use the existing editor for scene generation/tests. Check actual process and lock state before any new launch. See `docs/STATUS.md` for exact observations.
+
+## Resume checkpoint 2026-11-08 17:49 EST
+
+The main Unity 6000.3.28f1 editor PID 21020 completed initial import/compilation and generated project version and metadata. GUI activation failed twice. A separate temporary copy `%TEMP%\EchoMountain3D_QA_20261108` has batch editor PID 18444 generating the lab; wait for shell session 33250 or inspect its `create-lab.log` and current process state. Its Library is separate; preserve both project locks. Main project manifest, lockfile and some Unity-generated settings remain modified; review and checkpoint after initialization settles. No Unity test, gameplay or build is verified yet.
