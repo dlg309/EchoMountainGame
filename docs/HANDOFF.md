@@ -47,3 +47,7 @@ Four isolated PlayMode tests passed, including simulated S and Space; the test t
 ## Checkpoint 2026-11-08 18:21 EST
 
 User reports the repaired player works now and supplied a screenshot: diagnostic board and ground have poor contrast and few motion cues. A corrected isolated PlayMode suite passed 6/6 including actual lab scene + virtual Space; extra tests and presentation work are not yet copied into the main project. An isolated scene authoring command adding a non-colliding rider placeholder and marker colors is running in session 35615; camera was also adjusted in the copy. Rerun tests, transfer only verified task-owned files with GUIDs preserved, and build a new version. Continue M1; no claim that all controls, camera scenarios, landings or later milestones are complete.
+
+## Checkpoint 2026-11-08 18:27 EST
+
+M0 complete; M1 partial. User reports repaired player works and supplied a low-contrast screenshot. The separately saved `PhysicsLabReadable.unity` adds task-owned marker materials and a diagnostic rider/camera adjustment, without replacing the original lab; six PlayMode tests passed in the isolated QA copy. The readable Windows build is running in shell session 5096; inspect its exit/log and copy it to a fresh build directory, then seek visual/real controls feedback. The main editor may still be open; unrelated package/settings and generated files are unstaged and must be preserved. See `docs/STATUS.md`, `docs/QA.md`, and `README.md`.

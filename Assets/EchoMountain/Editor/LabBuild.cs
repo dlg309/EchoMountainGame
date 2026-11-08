@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -8,7 +8,7 @@ namespace EchoMountain.EditorTools
 {
     public static class LabBuild
     {
-        private const string Scene = "Assets/EchoMountain/Scenes/PhysicsLab.unity";
+        private const string Scene = "Assets/EchoMountain/Scenes/PhysicsLabReadable.unity";
         private const string Output = "Builds/PhysicsLab/EchoMountainLab.exe";
 
         [MenuItem("Echo Mountain/Build Windows physics lab")]
@@ -24,7 +24,14 @@ namespace EchoMountain.EditorTools
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.Development
             };
-            BuildReport report = BuildPipeline.BuildPlayer(options);
+            string previousProductName = PlayerSettings.productName;
+            BuildReport report;
+            try
+            {
+                PlayerSettings.productName = "Echo Mountain Physics Lab - Markers";
+                report = BuildPipeline.BuildPlayer(options);
+            }
+            finally { PlayerSettings.productName = previousProductName; }
             if (report.summary.result != BuildResult.Succeeded)
                 throw new InvalidOperationException("Physics lab build failed: " + report.summary.result);
             Debug.Log("Physics lab build succeeded: " + Output);

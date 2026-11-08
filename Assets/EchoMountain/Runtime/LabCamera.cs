@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace EchoMountain.Riding
 {
@@ -10,9 +10,9 @@ namespace EchoMountain.Riding
         private void LateUpdate()
         {
             if (!target) return;
-            Vector3 desired = target.position - target.forward * 8f + Vector3.up * 4f;
+            Vector3 desired = target.position - target.forward * 6.5f + Vector3.up * 3f;
             transform.position = Vector3.Lerp(transform.position, desired, 1f - Mathf.Exp(-4f * Time.unscaledDeltaTime));
-            transform.LookAt(target.position + target.forward * 5f + Vector3.up);
+            transform.LookAt(target.position + target.forward * 3.5f + Vector3.up * 0.7f);
         }
     }
 }

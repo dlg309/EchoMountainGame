@@ -5,11 +5,26 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
+using UnityEngine.SceneManagement;
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
 
 namespace EchoMountain.Tests
 {
     public sealed class LabRiderTests
     {
+#if UNITY_EDITOR
+        private Scene loadedLabScene;
+
+        [UnityTearDown]
+        public IEnumerator UnloadLabScene()
+        {
+            if (loadedLabScene.IsValid() && loadedLabScene.isLoaded)
+                yield return SceneManager.UnloadSceneAsync(loadedLabScene);
+            loadedLabScene = default;
+        }
+#endif
         [UnityTest]
         public IEnumerator FlatGroundSupportsBoardAndResetClearsMotion()
         {
@@ -155,6 +170,84 @@ namespace EchoMountain.Tests
                 Object.Destroy(ground);
             }
         }
+
+        [UnityTest]
+        public IEnumerator KeyboardSteersAMovingBoard()
+        {
+            var originalBackground = InputSystem.settings.backgroundBehavior;
+            var originalEditorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.position = new Vector3(0f, -0.5f, 0f);
+            ground.transform.localScale = new Vector3(100f, 1f, 100f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.2f, 0f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            body.mass = 75f;
+            var rider = board.AddComponent<LabRider>();
+            try
+            {
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                body.linearVelocity = Vector3.forward * 8f;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
+                InputSystem.Update();
+                yield return null;
+                for (int step = 0; step < 35; step++) yield return new WaitForFixedUpdate();
+                float yaw = Vector3.SignedAngle(Vector3.forward, Vector3.ProjectOnPlane(board.transform.forward, Vector3.up), Vector3.up);
+                Assert.That(yaw, Is.GreaterThan(5f), "D should turn a moving board to the right.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                InputSystem.settings.backgroundBehavior = originalBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = originalEditorInput;
+                Object.Destroy(board);
+                Object.Destroy(ground);
+            }
+        }
+
+#if UNITY_EDITOR
+        [UnityTest]
+        public IEnumerator GeneratedLabMovesDownhillAndRespondsToSpace()
+        {
+            var originalBackground = InputSystem.settings.backgroundBehavior;
+            var originalEditorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/EchoMountain/Scenes/PhysicsLabReadable.unity", new LoadSceneParameters(LoadSceneMode.Additive));
+            loadedLabScene = SceneManager.GetSceneByPath("Assets/EchoMountain/Scenes/PhysicsLabReadable.unity");
+            try
+            {
+                var board = GameObject.Find("Diagnostic board");
+                Assert.That(board, Is.Not.Null, "Generated lab must contain the board.");
+                Assert.That(GameObject.Find("Visual markers"), Is.Not.Null, "The slope needs visible reference markers.");
+                var color = board.GetComponent<Renderer>().sharedMaterial.color;
+                Assert.That(color.r, Is.GreaterThan(color.b + 0.25f), "The board should contrast with snow.");
+                var rider = board.GetComponent<LabRider>();
+                var body = board.GetComponent<Rigidbody>();
+                float start = body.position.z;
+                for (int step = 0; step < 100; step++) yield return new WaitForFixedUpdate();
+                Assert.That(body.position.z - start, Is.GreaterThan(1f), "The actual lab board must move downhill.");
+                Assert.That(rider.IsGrounded, Is.True, "The board should be supported before pop.");
+                float before = body.position.y;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space));
+                yield return null;
+                for (int step = 0; step < 10; step++) yield return new WaitForFixedUpdate();
+                Assert.That(body.position.y, Is.GreaterThan(before + 0.05f), "Space should lift the board on the lab slope.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                InputSystem.settings.backgroundBehavior = originalBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = originalEditorInput;
+            }
+        }
+#endif
 
     }
 }
