@@ -39,3 +39,7 @@ User reported the first lab build appeared stationary, Space and brake failed, a
 ## Checkpoint 2026-11-08 18:09 EST
 
 Four isolated PlayMode tests passed, including simulated S and Space; the test temporarily overrides and restores input focus settings, so this is not hardware verification. Tested files have been copied to the main project. A repaired Windows development build is running in session 42680 in the isolated QA copy; after exit verify it and copy to a new `Builds/PhysicsLab-Repaired` directory without overwriting the old faulty build. Main editor and original player may remain open. Check `docs/STATUS.md` and `docs/QA.md` for results and preserved unrelated changes.
+
+## Checkpoint 2026-11-08 18:15 EST — user reports second build failure
+
+`Builds/PhysicsLab-Repaired` was built and launched, but user reports none of the controls or movement work in the new window; consider the gameplay issue open despite simple-fixture automated passes. Requested overlay/speed/contact details. An isolated test loading the actual scene runs under shell session 70593 in `%TEMP%\EchoMountain3D_QA_20261108`; inspect its result and the latest status. A virtual D test passed separately (5/5), but is not yet copied into the repository. Preserve editor, player, and unrelated user changes.
