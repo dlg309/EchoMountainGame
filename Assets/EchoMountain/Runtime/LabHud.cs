@@ -53,7 +53,7 @@ namespace EchoMountain.Riding
             float right = width - 270f;
             DrawPanel(new Rect(right, 18f, 252f, 188f));
             GUI.Label(new Rect(right + 16f, 28f, 220f, 22f), "PHYSICS  /  LAB", title);
-            GUI.Label(new Rect(right + 16f, 53f, 220f, 22f), rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
+            GUI.Label(new Rect(right + 16f, 53f, 220f, 22f), rider.IsRecovering ? "CONTACT    Recovering" : rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
             GUI.Label(new Rect(right + 16f, 77f, 220f, 22f), $"SLIP             {rider.LateralSlip:F1} m/s", text);
             GUI.Label(new Rect(right + 16f, 101f, 220f, 22f), $"EDGE           {rider.SteerInput:F2}", text);
             GUI.Label(new Rect(right + 16f, 125f, 220f, 22f), $"GRIP             {rider.GripAcceleration:F1} m/s²", text);

@@ -71,3 +71,7 @@ Requested HUD build succeeded and is running from `Builds/PhysicsLab-HUD/EchoMou
 ## Checkpoint 2026-11-08 18:46 EST
 
 Nine isolated PlayMode tests passed, including one actual flat-ground switch pop and landing with one clean result. HUD player remains at `Builds/PhysicsLab-HUD/EchoMountainLab.exe`; visual feedback is pending. M1 remains incomplete: evaluate other landing conditions, contact seams, recovery/bail, frame-rate sensitivity and real gameplay. Preserve unrelated working changes and open editor/player windows.
+
+## Checkpoint 2026-11-08 18:49 EST
+
+User said the new HUD is better and asked to continue building the game. In isolated QA, a basic severe-sideways-landing recovery was added and the complete PlayMode suite passed 10/10. Source copied to main; current HUD executable predates recovery and must be rebuilt to include it. Recovery is a timed reset, not a ragdoll or complete score/session flow. Continue M1 tests and M2 once appropriate; preserve unrelated user changes and open editor/player windows.

@@ -40,6 +40,8 @@ namespace EchoMountain.Riding
         private bool landingArmed;
         private float supportedTime;
         private float airborneTime;
+        private float recoveryRemaining;
+        public bool IsRecovering => recoveryRemaining > 0f;
         private Vector3 lastAirVelocity, lastAirSpin;
         public LandingOutcome? LastLanding { get; private set; }
         public int LandingCount { get; private set; }
@@ -91,6 +93,12 @@ namespace EchoMountain.Riding
 
         private void FixedUpdate()
         {
+            if (recoveryRemaining > 0f)
+            {
+                recoveryRemaining -= Time.fixedDeltaTime;
+                if (recoveryRemaining <= 0f) ResetRider();
+                return;
+            }
             bufferedJump = Mathf.Max(0f, bufferedJump - Time.fixedDeltaTime);
             wasContact = contact;
             contact = false;
@@ -138,6 +146,7 @@ namespace EchoMountain.Riding
                 float impact = Mathf.Max(0f, -Vector3.Dot(lastAirVelocity, normal));
                 LastLanding = LabLandingRules.Evaluate(upright, alignment, travel.magnitude, impact, lastAirSpin.magnitude, hits);
                 LandingCount++;
+                if (LastLanding == LandingOutcome.Bail) recoveryRemaining = 1.25f;
                 landingArmed = false;
                 landing = LastLanding.Value.ToString();
             }
@@ -194,6 +203,7 @@ namespace EchoMountain.Riding
             body.linearVelocity = Vector3.zero;
             body.angularVelocity = Vector3.zero;
             bufferedJump = 0f;
+            recoveryRemaining = 0f;
             lastContact = float.NegativeInfinity;
             contact = wasContact = landingArmed = false;
             supportedTime = 0f;

@@ -336,5 +336,44 @@ namespace EchoMountain.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator SevereSidewaysLandingRecoversToSpawn()
+        {
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.position = new Vector3(0f, -0.5f, 0f);
+            ground.transform.localScale = new Vector3(100f, 1f, 100f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.2f, 0f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            body.mass = 75f;
+            var rider = board.AddComponent<LabRider>();
+            try
+            {
+                for (int step = 0; step < 60; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                rider.RequestJump();
+                for (int step = 0; step < 10; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.False);
+                body.linearVelocity = new Vector3(12f, body.linearVelocity.y, 0f);
+                bool observedBail = false;
+                for (int step = 0; step < 65; step++)
+                {
+                    yield return new WaitForFixedUpdate();
+                    observedBail |= rider.IsRecovering && rider.LastLanding == LandingOutcome.Bail;
+                }
+                Assert.That(observedBail, Is.True, "A severely sideways landing should enter recovery.");
+                for (int step = 0; step < 100; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsRecovering, Is.False);
+                Assert.That(Vector3.Distance(body.position, new Vector3(0f, 0.1f, 0f)), Is.LessThan(0.3f), "Recovery should return near the safe spawn.");
+                Assert.That(body.linearVelocity.magnitude, Is.LessThan(0.5f));
+            }
+            finally
+            {
+                Object.Destroy(board);
+                Object.Destroy(ground);
+            }
+        }
+
     }
 }
