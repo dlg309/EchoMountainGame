@@ -27,3 +27,7 @@ Once the project imports successfully, use **Echo Mountain > Create physics lab 
 ## 2026-11-08 partial validation
 
 Unity generated this scene from the editor tool in a separate project copy; it was transferred without replacing an existing scene. The only PlayMode test so far passed in the copy and covers flat support/reset. Slope behavior, geometry seams, rider motion, landing and camera remain unobserved. The fixed timestep remains the template default unless changed and tested; 60 Hz is a proposal, not an established setting.
+
+## First reported gameplay failure and repair
+
+A user observed a stationary board and nonworking Space/brake in the initial Windows build; reset worked. The isolated slope test reproduced essentially no movement before repair. An isolated candidate that sets board friction to zero while applying explicit script forces and filters self hits in probes passed flat support/reset, slope acceleration, and direct supported pop (3/3 PlayMode). This is not yet evidence that keyboard input, braking, camera readability, or gameplay works; the original player build predates the repair.

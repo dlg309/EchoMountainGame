@@ -31,3 +31,7 @@ Main editor 6000.3.28f1 imported/compiled successfully, but GUI activation faile
 ## Checkpoint 2026-11-08 18:01 EST
 
 Windows development build succeeded and was copied to `Builds/PhysicsLab/EchoMountainLab.exe`; player PID 28712 was launched and remained responsive, but helper window activation failed twice and no visual/gameplay verification was possible. Optional user feedback was requested. A new slope-acceleration test exists only in the isolated QA copy and is running in shell session 64500; inspect results, fix failures, then transfer verified changes. Do not overwrite the existing build. Main editor PID 21020 remains open. See `docs/QA.md` for observed checks.
+
+## Checkpoint 2026-11-08 18:05 EST — reported controls failure
+
+User reported the first lab build appeared stationary, Space and brake failed, and reset worked. Isolated slope test confirmed near-zero downhill movement. A repair for default board friction and self-obstructed contact probes passed 3/3 isolated PlayMode tests (flat support/reset, downhill acceleration, grounded pop), and the runtime/test source was copied into the main project. Original executable is outdated. Virtual-keyboard braking/Space test is running only in `%TEMP%\EchoMountain3D_QA_20261108` via shell session 37171; check results and retain the QA copy before copying any further change. Preserve unrelated current package/settings changes and the user-open editor/player. Rebuild to a fresh location and obtain real gameplay feedback; M1 remains incomplete.

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace EchoMountain.Riding
@@ -21,7 +21,11 @@ namespace EchoMountain.Riding
             new Vector3(-0.24f, 0f, -0.48f), new Vector3(0.24f, 0f, -0.48f),
             new Vector3(-0.24f, 0f, 0.48f), new Vector3(0.24f, 0f, 0.48f)
         };
+        private readonly RaycastHit[] probeHits = new RaycastHit[16];
         private Rigidbody body;
+        private PhysicsMaterial boardMaterial;
+        public bool IsGrounded => contact;
+        public void RequestJump() => bufferedJump = jumpBufferSeconds;
         private Vector3 spawnPosition;
         private Quaternion spawnRotation;
         private float steer, brake, bufferedJump, lastContact;
@@ -33,6 +37,15 @@ namespace EchoMountain.Riding
         private void Awake()
         {
             body = GetComponent<Rigidbody>();
+            // The scripted resistance and edge model own board friction.
+            boardMaterial = new PhysicsMaterial("Lab board friction")
+            {
+                staticFriction = 0f,
+                dynamicFriction = 0f,
+                frictionCombine = PhysicsMaterialCombine.Minimum,
+                bounciness = 0f
+            };
+            GetComponent<Collider>().material = boardMaterial;
             spawnPosition = body.position;
             spawnRotation = body.rotation;
             lastContact = float.NegativeInfinity;
@@ -49,14 +62,14 @@ namespace EchoMountain.Riding
                 steer += (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed ? 1f : 0f)
                        - (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed ? 1f : 0f);
                 brake = keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ? 1f : 0f;
-                if (keyboard.spaceKey.wasPressedThisFrame) bufferedJump = jumpBufferSeconds;
+                if (keyboard.spaceKey.wasPressedThisFrame) RequestJump();
                 if (keyboard.rKey.wasPressedThisFrame) ResetRider();
             }
             if (gamepad != null)
             {
                 steer = Mathf.Clamp(steer + gamepad.leftStick.x.ReadValue(), -1f, 1f);
                 brake = Mathf.Max(brake, gamepad.leftTrigger.ReadValue());
-                if (gamepad.buttonSouth.wasPressedThisFrame) bufferedJump = jumpBufferSeconds;
+                if (gamepad.buttonSouth.wasPressedThisFrame) RequestJump();
                 if (gamepad.buttonEast.wasPressedThisFrame) ResetRider();
             }
             if (body.position.y < resetBelow) ResetRider();
@@ -72,11 +85,23 @@ namespace EchoMountain.Riding
             foreach (var offset in probes)
             {
                 Vector3 origin = body.position + body.rotation * (offset + Vector3.up * 0.15f);
-                if (Physics.Raycast(origin, -(body.rotation * Vector3.up), out RaycastHit hit,
-                    probeLength, ~0, QueryTriggerInteraction.Ignore) && hit.rigidbody != body &&
-                    Vector3.Dot(hit.normal, Vector3.up) > 0.35f)
+                int count = Physics.RaycastNonAlloc(origin, -(body.rotation * Vector3.up), probeHits,
+                    probeLength, ~0, QueryTriggerInteraction.Ignore);
+                // Results are unordered. A full buffer can omit the nearest hit, so fail closed.
+                if (count == probeHits.Length) continue;
+                float nearest = float.PositiveInfinity;
+                Vector3 nearestNormal = Vector3.zero;
+                for (int i = 0; i < count; i++)
                 {
-                    sum += hit.normal;
+                    var hit = probeHits[i];
+                    if (hit.rigidbody == body || Vector3.Dot(hit.normal, Vector3.up) <= 0.35f || hit.distance >= nearest)
+                        continue;
+                    nearest = hit.distance;
+                    nearestNormal = hit.normal;
+                }
+                if (nearest < float.PositiveInfinity)
+                {
+                    sum += nearestNormal;
                     hits++;
                 }
             }
@@ -120,6 +145,11 @@ namespace EchoMountain.Riding
                 lastContact = float.NegativeInfinity;
                 contact = false;
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (boardMaterial) Destroy(boardMaterial);
         }
 
         public void ResetRider()
