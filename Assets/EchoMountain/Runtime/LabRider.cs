@@ -25,6 +25,7 @@ namespace EchoMountain.Riding
         private Rigidbody body;
         private PhysicsMaterial boardMaterial;
         public bool IsGrounded => contact;
+        public float BrakeInput => brake;
         public void RequestJump() => bufferedJump = jumpBufferSeconds;
         private Vector3 spawnPosition;
         private Quaternion spawnRotation;

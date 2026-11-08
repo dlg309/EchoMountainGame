@@ -3,6 +3,8 @@ using EchoMountain.Riding;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace EchoMountain.Tests
 {
@@ -91,6 +93,64 @@ namespace EchoMountain.Tests
             }
             finally
             {
+                Object.Destroy(board);
+                Object.Destroy(ground);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator KeyboardBrakesAndTriggersPop()
+        {
+            var originalBackground = InputSystem.settings.backgroundBehavior;
+            var originalEditorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.position = new Vector3(0f, -0.5f, 0f);
+            ground.transform.localScale = new Vector3(100f, 1f, 100f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.2f, 0f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            body.mass = 75f;
+            var rider = board.AddComponent<LabRider>();
+            try
+            {
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                body.linearVelocity = Vector3.forward * 8f;
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                float unbraked = Vector3.Dot(body.linearVelocity, Vector3.forward);
+                rider.ResetRider();
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.S));
+                InputSystem.Update();
+                Assert.That(keyboard.sKey.isPressed, Is.True, "Virtual S key must be pressed.");
+                Assert.That(Keyboard.current, Is.SameAs(keyboard), "Virtual keyboard must be current.");
+                yield return null;
+                body.linearVelocity = Vector3.forward * 8f;
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                float braked = Vector3.Dot(body.linearVelocity, Vector3.forward);
+                Assert.That(rider.IsGrounded, Is.True, "Board should remain grounded while braking.");
+                Assert.That(keyboard.sKey.isPressed, Is.True, "Virtual S should stay pressed during braking.");
+                Assert.That(rider.BrakeInput, Is.GreaterThan(0.5f), "Rider should sample S.");
+                Assert.That(braked, Is.LessThan(unbraked - 1f), "S should slow the moving board.");
+                rider.ResetRider();
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null;
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                float before = body.position.y;
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space));
+                yield return null;
+                for (int step = 0; step < 10; step++) yield return new WaitForFixedUpdate();
+                Assert.That(body.position.y, Is.GreaterThan(before + 0.15f), "Space should trigger pop.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                InputSystem.settings.backgroundBehavior = originalBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = originalEditorInput;
                 Object.Destroy(board);
                 Object.Destroy(ground);
             }

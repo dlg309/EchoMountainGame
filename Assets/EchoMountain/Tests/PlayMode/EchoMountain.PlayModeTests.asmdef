@@ -1,7 +1,12 @@
-﻿{
+{
   "name": "EchoMountain.PlayModeTests",
   "rootNamespace": "EchoMountain.Tests",
-  "references": ["EchoMountain.Runtime"],
-  "optionalUnityReferences": ["TestAssemblies"],
+  "references": [
+    "EchoMountain.Runtime",
+    "Unity.InputSystem"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
   "autoReferenced": false
 }

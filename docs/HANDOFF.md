@@ -35,3 +35,7 @@ Windows development build succeeded and was copied to `Builds/PhysicsLab/EchoMou
 ## Checkpoint 2026-11-08 18:05 EST — reported controls failure
 
 User reported the first lab build appeared stationary, Space and brake failed, and reset worked. Isolated slope test confirmed near-zero downhill movement. A repair for default board friction and self-obstructed contact probes passed 3/3 isolated PlayMode tests (flat support/reset, downhill acceleration, grounded pop), and the runtime/test source was copied into the main project. Original executable is outdated. Virtual-keyboard braking/Space test is running only in `%TEMP%\EchoMountain3D_QA_20261108` via shell session 37171; check results and retain the QA copy before copying any further change. Preserve unrelated current package/settings changes and the user-open editor/player. Rebuild to a fresh location and obtain real gameplay feedback; M1 remains incomplete.
+
+## Checkpoint 2026-11-08 18:09 EST
+
+Four isolated PlayMode tests passed, including simulated S and Space; the test temporarily overrides and restores input focus settings, so this is not hardware verification. Tested files have been copied to the main project. A repaired Windows development build is running in session 42680 in the isolated QA copy; after exit verify it and copy to a new `Builds/PhysicsLab-Repaired` directory without overwriting the old faulty build. Main editor and original player may remain open. Check `docs/STATUS.md` and `docs/QA.md` for results and preserved unrelated changes.
