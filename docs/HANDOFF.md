@@ -55,3 +55,7 @@ M0 complete; M1 partial. User reports repaired player works and supplied a low-c
 ## Checkpoint 2026-11-08 18:29 EST — readable player
 
 Readable lab build succeeded, was copied to `Builds/PhysicsLab-Readable/EchoMountainLab.exe`, and launched as PID 24012 with title `Echo Mountain Physics Lab - Markers`. Process responded, no startup exception lines observed; user feedback on its new appearance is pending. Previous repaired player was reported working by user. Six isolated PlayMode tests passed, including actual scene and simulated input, but robust landings/contact and gameplay edge cases remain incomplete. Preserve the open editor, previous builds, and unrelated unstaged package/settings files. See latest `docs/STATUS.md`.
+
+## Checkpoint 2026-11-08 18:35 EST
+
+User requested a readable speedometer and controls, and separate themed side physics panel. Not implemented yet. A pure landing-rules draft/test passed in isolated QA (7/7) and was copied to main working tree, uncommitted. Experimental integration and contact test runs in QA session 85888; inspect results and prevent initial spawn from counting as a landing. Continue requested HUD in QA, test, copy verified files, and build a fresh version. Preserve unrelated user/package changes and open sessions.
