@@ -16,3 +16,8 @@
 - 2026-11-06: Drafted physics lab code and one PlayMode test while license activation blocked Unity. These files have not been compiled or run; no claim of successful riding, switch landings or scene generation is supported. Their Unity-generated metadata is pending. `docs/PHYSICS_LAB.md` describes the test plan.
 
 - 2026-11-06 19:40–19:43 EST: User reported a Unity Student license, confirmed visible in Hub. Direct 6000.3.28f1 batch launch, Hub launch after registering this project, and batch after Hub license refresh all failed with `No valid Unity Editor license found`; batch exit code 198. Project import, compile and tests did not start. The failed Hub-launched editor was closed, while the unrelated tutorial editor was left alone. No project editor process remains. Requested user sign out/in to Hub after saving tutorial work; cause is not established.
+
+## Resume 2026-11-08
+
+- Git was clean at `bb2b9c9`, then the already-running Unity 6000.3.28f1 editor modified the manifest while resolving packages. No completed import or test was observed at checkpoint.
+- A resume process check initially missed its unquoted `-projectPath`; batch start was inadvertently attempted on the locked project and exited 1. No locks were removed or processes killed. The existing editor advanced beyond earlier licensing failures to package resolution. Unity editor PID 21020 and Package Manager PID 7984 were still running at 17:40 EST. Window activation through the computer-use helper failed twice; no gameplay was viewed.
