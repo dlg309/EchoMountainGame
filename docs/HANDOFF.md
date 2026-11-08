@@ -59,3 +59,7 @@ Readable lab build succeeded, was copied to `Builds/PhysicsLab-Readable/EchoMoun
 ## Checkpoint 2026-11-08 18:35 EST
 
 User requested a readable speedometer and controls, and separate themed side physics panel. Not implemented yet. A pure landing-rules draft/test passed in isolated QA (7/7) and was copied to main working tree, uncommitted. Experimental integration and contact test runs in QA session 85888; inspect results and prevent initial spawn from counting as a landing. Continue requested HUD in QA, test, copy verified files, and build a fresh version. Preserve unrelated user/package changes and open sessions.
+
+## Checkpoint 2026-11-08 18:42 EST — HUD and diagnostic landing
+
+Implemented requested speedometer, readable controls, and separate diagnostics in `LabHud`; saved as new `PhysicsLabHUD.unity`, preserving earlier scenes. Eight isolated PlayMode tests passed. Added preliminary contact/landing classification with switch-aware direction and startup phantom-landing protection; its feedback is diagnostic only, without bail/recovery or scoring. The isolated HUD Windows build is running in session 35595. Verify exit, copy to a new build folder and obtain the user's visual feedback. Existing non-task working-tree changes and running editor/player windows are preserved.

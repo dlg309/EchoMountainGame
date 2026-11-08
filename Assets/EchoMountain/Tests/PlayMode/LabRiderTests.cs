@@ -219,8 +219,8 @@ namespace EchoMountain.Tests
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             var keyboard = InputSystem.AddDevice<Keyboard>();
-            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/EchoMountain/Scenes/PhysicsLabReadable.unity", new LoadSceneParameters(LoadSceneMode.Additive));
-            loadedLabScene = SceneManager.GetSceneByPath("Assets/EchoMountain/Scenes/PhysicsLabReadable.unity");
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/EchoMountain/Scenes/PhysicsLabHUD.unity", new LoadSceneParameters(LoadSceneMode.Additive));
+            loadedLabScene = SceneManager.GetSceneByPath("Assets/EchoMountain/Scenes/PhysicsLabHUD.unity");
             try
             {
                 var board = GameObject.Find("Diagnostic board");
@@ -248,6 +248,56 @@ namespace EchoMountain.Tests
             }
         }
 #endif
+
+        [Test]
+        public void LandingRulesAcceptSwitchAndDistinguishSevereImpacts()
+        {
+            Assert.That(LabLandingRules.Evaluate(0.98f, 0.95f, 8f, 2f, 0.5f, 3), Is.EqualTo(LandingOutcome.Clean));
+            Assert.That(LabLandingRules.Evaluate(0.98f, -0.95f, 8f, 2f, 0.5f, 3), Is.EqualTo(LandingOutcome.Clean));
+            Assert.That(LabLandingRules.Evaluate(0.8f, 0.5f, 8f, 6f, 4f, 2), Is.EqualTo(LandingOutcome.Recover));
+            Assert.That(LabLandingRules.Evaluate(0.95f, 0.95f, 8f, 10f, 0.5f, 3), Is.EqualTo(LandingOutcome.Bail));
+            Assert.That(LabLandingRules.Evaluate(0.95f, 0.95f, 8f, 2f, 0.5f, 0), Is.EqualTo(LandingOutcome.Bail));
+            Assert.That(LabLandingRules.Evaluate(float.NaN, 0.95f, 8f, 2f, 0.5f, 3), Is.EqualTo(LandingOutcome.Bail));
+        }
+
+        [UnityTest]
+        public IEnumerator BoardDoesNotGroundEarlyAndLandingFiresOnce()
+        {
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.position = new Vector3(0f, -0.5f, 0f);
+            ground.transform.localScale = new Vector3(20f, 1f, 20f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.55f, 0f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            body.mass = 75f;
+            var rider = board.AddComponent<LabRider>();
+            try
+            {
+                for (int step = 0; step < 100; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                Assert.That(rider.LandingCount, Is.Zero, "Initial spawn must not count as a landing.");
+                body.position = new Vector3(0f, 0.55f, 0f);
+                body.linearVelocity = Vector3.zero;
+                body.useGravity = false;
+                for (int step = 0; step < 10; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.False, "A board floating 45 cm above the surface is not supported.");
+                body.useGravity = true;
+                for (int step = 0; step < 100; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                Assert.That(rider.LandingCount, Is.EqualTo(1), "One flight must produce one landing.");
+                Assert.That(rider.LastLanding, Is.EqualTo(LandingOutcome.Clean));
+                for (int step = 0; step < 50; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.LandingCount, Is.EqualTo(1), "Resting contact must not repeatedly award landings.");
+                rider.ResetRider();
+                Assert.That(rider.LandingCount, Is.Zero);
+            }
+            finally
+            {
+                Object.Destroy(board);
+                Object.Destroy(ground);
+            }
+        }
 
     }
 }

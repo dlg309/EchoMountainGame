@@ -26,11 +26,23 @@ namespace EchoMountain.Riding
         private PhysicsMaterial boardMaterial;
         public bool IsGrounded => contact;
         public float BrakeInput => brake;
+        public float SpeedKmh => body ? body.linearVelocity.magnitude * 3.6f : 0f;
+        public Vector3 ContactNormal => normal;
+        public float LateralSlip => slip;
+        public float SteerInput => steer;
+        public float GripAcceleration => gripForce;
+        public string LandingText => landing;
         public void RequestJump() => bufferedJump = jumpBufferSeconds;
         private Vector3 spawnPosition;
         private Quaternion spawnRotation;
         private float steer, brake, bufferedJump, lastContact;
         private bool contact, wasContact;
+        private bool landingArmed;
+        private float supportedTime;
+        private float airborneTime;
+        private Vector3 lastAirVelocity, lastAirSpin;
+        public LandingOutcome? LastLanding { get; private set; }
+        public int LandingCount { get; private set; }
         private Vector3 normal = Vector3.up;
         private float slip, gripForce;
         private string landing = "--";
@@ -38,6 +50,7 @@ namespace EchoMountain.Riding
         private void Awake()
         {
             body = GetComponent<Rigidbody>();
+            if (!GetComponent<LabHud>()) gameObject.AddComponent<LabHud>();
             // The scripted resistance and edge model own board friction.
             boardMaterial = new PhysicsMaterial("Lab board friction")
             {
@@ -100,7 +113,10 @@ namespace EchoMountain.Riding
                     nearest = hit.distance;
                     nearestNormal = hit.normal;
                 }
-                if (nearest < float.PositiveInfinity)
+                // The probe starts 0.15 m above the centre of this 0.20 m board.
+                // Hysteresis is deliberately small; do not attach across a lip.
+                float supportDistance = wasContact ? 0.35f : 0.30f;
+                if (nearest <= supportDistance)
                 {
                     sum += nearestNormal;
                     hits++;
@@ -113,12 +129,30 @@ namespace EchoMountain.Riding
                 contact = true;
                 lastContact = Time.fixedTime;
             }
-            if (contact && !wasContact)
+            if (contact && !wasContact && landingArmed && airborneTime >= 0.12f)
             {
-                Vector3 travel = Vector3.ProjectOnPlane(body.linearVelocity, normal);
-                Vector3 board = Vector3.ProjectOnPlane(transform.forward, normal).normalized;
-                landing = travel.sqrMagnitude < 1f || Mathf.Abs(Vector3.Dot(travel.normalized, board)) > 0.7f
-                    ? "aligned (forward or switch)" : "sideways: review";
+                Vector3 travel = Vector3.ProjectOnPlane(lastAirVelocity, normal);
+                Vector3 boardForward = Vector3.ProjectOnPlane(body.rotation * Vector3.forward, normal).normalized;
+                float alignment = travel.sqrMagnitude > 0.0001f ? Vector3.Dot(travel.normalized, boardForward) : 1f;
+                float upright = Vector3.Dot(body.rotation * Vector3.up, normal);
+                float impact = Mathf.Max(0f, -Vector3.Dot(lastAirVelocity, normal));
+                LastLanding = LabLandingRules.Evaluate(upright, alignment, travel.magnitude, impact, lastAirSpin.magnitude, hits);
+                LandingCount++;
+                landingArmed = false;
+                landing = LastLanding.Value.ToString();
+            }
+            if (contact)
+            {
+                airborneTime = 0f;
+                supportedTime += Time.fixedDeltaTime;
+                if (supportedTime >= 0.2f) landingArmed = true;
+            }
+            else
+            {
+                supportedTime = 0f;
+                airborneTime += Time.fixedDeltaTime;
+                lastAirVelocity = body.linearVelocity;
+                lastAirSpin = body.angularVelocity;
             }
             gripForce = 0f;
             if (contact)
@@ -161,19 +195,15 @@ namespace EchoMountain.Riding
             body.angularVelocity = Vector3.zero;
             bufferedJump = 0f;
             lastContact = float.NegativeInfinity;
-            contact = wasContact = false;
+            contact = wasContact = landingArmed = false;
+            supportedTime = 0f;
             normal = Vector3.up;
             landing = "--";
+            airborneTime = 0f;
+            lastAirVelocity = lastAirSpin = Vector3.zero;
+            LastLanding = null;
+            LandingCount = 0;
         }
 
-        private void OnGUI()
-        {
-            GUI.Box(new Rect(12, 12, 410, 142), "PHYSICS LAB — diagnostic prototype");
-            GUI.Label(new Rect(24, 40, 390, 105),
-                $"Speed: {body.linearVelocity.magnitude * 3.6f:F1} km/h   Contact: {contact}\n" +
-                $"Normal: {normal:F2}   Slip: {slip:F2} m/s\n" +
-                $"Steer: {steer:F2}   Grip acceleration: {gripForce:F1} m/s²\n" +
-                $"Landing: {landing}\nA/D steer  S brake  Space pop  R reset");
-        }
     }
 }

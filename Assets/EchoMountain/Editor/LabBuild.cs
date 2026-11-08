@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -8,7 +8,7 @@ namespace EchoMountain.EditorTools
 {
     public static class LabBuild
     {
-        private const string Scene = "Assets/EchoMountain/Scenes/PhysicsLabReadable.unity";
+        private const string Scene = "Assets/EchoMountain/Scenes/PhysicsLabHUD.unity";
         private const string Output = "Builds/PhysicsLab/EchoMountainLab.exe";
 
         [MenuItem("Echo Mountain/Build Windows physics lab")]
@@ -28,7 +28,7 @@ namespace EchoMountain.EditorTools
             BuildReport report;
             try
             {
-                PlayerSettings.productName = "Echo Mountain Physics Lab - Markers";
+                PlayerSettings.productName = "Echo Mountain Physics Lab - HUD";
                 report = BuildPipeline.BuildPlayer(options);
             }
             finally { PlayerSettings.productName = previousProductName; }

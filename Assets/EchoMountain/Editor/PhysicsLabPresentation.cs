@@ -89,6 +89,31 @@ namespace EchoMountain.EditorTools
             Debug.Log("Created readable lab scene without replacing original.");
         }
 
+        [MenuItem("Echo Mountain/Add readable lab HUD (once)")]
+        public static void AddReadableHud()
+        {
+            const string path = "Assets/EchoMountain/Scenes/PhysicsLabReadable.unity";
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene(path);
+            var board = GameObject.Find("Diagnostic board");
+            if (!board) throw new InvalidOperationException("Diagnostic board missing.");
+            if (!board.GetComponent<EchoMountain.Riding.LabHud>()) board.AddComponent<EchoMountain.Riding.LabHud>();
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene, path)) throw new InvalidOperationException("Could not save lab HUD.");
+            Debug.Log("Added readable lab HUD.");
+        }
+
+        [MenuItem("Echo Mountain/Copy HUD lab scene (once)")]
+        public static void CopyHudScene()
+        {
+            const string source = "Assets/EchoMountain/Scenes/PhysicsLabReadable.unity";
+            const string destination = "Assets/EchoMountain/Scenes/PhysicsLabHUD.unity";
+            if (System.IO.File.Exists(destination)) throw new InvalidOperationException("HUD lab already exists.");
+            if (!AssetDatabase.CopyAsset(source, destination)) throw new InvalidOperationException("Could not copy HUD lab scene.");
+            AssetDatabase.SaveAssets();
+            Debug.Log("Created HUD lab scene without replacing original.");
+        }
+
         private static Material MakeMaterial(string name, Color color)
         {
             string path = ArtPath + "/" + name + ".mat";
