@@ -23,3 +23,7 @@ The project is open in Unity 6000.3.28f1 (PID 21020) and package manager is acti
 ## Resume checkpoint 2026-11-08 17:49 EST
 
 The main Unity 6000.3.28f1 editor PID 21020 completed initial import/compilation and generated project version and metadata. GUI activation failed twice. A separate temporary copy `%TEMP%\EchoMountain3D_QA_20261108` has batch editor PID 18444 generating the lab; wait for shell session 33250 or inspect its `create-lab.log` and current process state. Its Library is separate; preserve both project locks. Main project manifest, lockfile and some Unity-generated settings remain modified; review and checkpoint after initialization settles. No Unity test, gameplay or build is verified yet.
+
+## Checkpoint 2026-11-08 17:55 EST
+
+Main editor 6000.3.28f1 imported/compiled successfully, but GUI activation failed. The lab scene was generated in `%TEMP%\EchoMountain3D_QA_20261108` and copied into the main project with its metadata; script GUID references match. One PlayMode test passed in the copy, checking flat support and reset. Isolated Windows development build is in shell session 44291; inspect its log/artifact and process before proceeding. No gameplay observation or complete M1 validation yet. Preserve the main editor and all working changes; see `docs/QA.md` and `docs/STATUS.md` for commands and limits.

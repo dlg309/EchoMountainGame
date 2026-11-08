@@ -23,3 +23,7 @@ A first PlayMode test draft checks flat support and that reset restores spawn an
 ## Proposed lab entry points (not yet run)
 
 Once the project imports successfully, use **Echo Mountain > Create physics lab (once)**, inspect the scene, then **Echo Mountain > Build Windows physics lab**. The draft builder requires the lab scene and refuses to overwrite an existing `Builds/PhysicsLab` directory. A successful build operation alone is not a gameplay or performance verification. For command-line tests, close the editor on this project first and use Unity Test Framework 1.4's `-runTests -testPlatform PlayMode -testResults <absolute XML path> -logFile <absolute log path>` with `-batchmode -projectPath <project root>`; inspect the exit code, XML and log. These entry points and flags have not been exercised in this project.
+
+## 2026-11-08 partial validation
+
+Unity generated this scene from the editor tool in a separate project copy; it was transferred without replacing an existing scene. The only PlayMode test so far passed in the copy and covers flat support/reset. Slope behavior, geometry seams, rider motion, landing and camera remain unobserved. The fixed timestep remains the template default unless changed and tested; 60 Hz is a proposal, not an established setting.
