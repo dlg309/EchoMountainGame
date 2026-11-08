@@ -43,3 +43,7 @@ Four isolated PlayMode tests passed, including simulated S and Space; the test t
 ## Checkpoint 2026-11-08 18:15 EST — user reports second build failure
 
 `Builds/PhysicsLab-Repaired` was built and launched, but user reports none of the controls or movement work in the new window; consider the gameplay issue open despite simple-fixture automated passes. Requested overlay/speed/contact details. An isolated test loading the actual scene runs under shell session 70593 in `%TEMP%\EchoMountain3D_QA_20261108`; inspect its result and the latest status. A virtual D test passed separately (5/5), but is not yet copied into the repository. Preserve editor, player, and unrelated user changes.
+
+## Checkpoint 2026-11-08 18:21 EST
+
+User reports the repaired player works now and supplied a screenshot: diagnostic board and ground have poor contrast and few motion cues. A corrected isolated PlayMode suite passed 6/6 including actual lab scene + virtual Space; extra tests and presentation work are not yet copied into the main project. An isolated scene authoring command adding a non-colliding rider placeholder and marker colors is running in session 35615; camera was also adjusted in the copy. Rerun tests, transfer only verified task-owned files with GUIDs preserved, and build a new version. Continue M1; no claim that all controls, camera scenarios, landings or later milestones are complete.
