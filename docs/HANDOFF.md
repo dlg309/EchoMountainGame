@@ -67,3 +67,7 @@ Implemented requested speedometer, readable controls, and separate diagnostics i
 ## Checkpoint 2026-11-08 18:43 EST — HUD build
 
 Requested HUD build succeeded and is running from `Builds/PhysicsLab-HUD/EchoMountainLab.exe`, PID 8560, title `Echo Mountain Physics Lab - HUD`; startup log showed no exception lines at inspection. Asked user to review layout; no response yet. Eight isolated PlayMode tests passed before build. Landing outcomes remain diagnostic, without real bail/recovery or scoring. Preserve unrelated unstaged changes and open processes.
+
+## Checkpoint 2026-11-08 18:46 EST
+
+Nine isolated PlayMode tests passed, including one actual flat-ground switch pop and landing with one clean result. HUD player remains at `Builds/PhysicsLab-HUD/EchoMountainLab.exe`; visual feedback is pending. M1 remains incomplete: evaluate other landing conditions, contact seams, recovery/bail, frame-rate sensitivity and real gameplay. Preserve unrelated working changes and open editor/player windows.

@@ -299,5 +299,42 @@ namespace EchoMountain.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator SwitchPopCanLandCleanlyOnce()
+        {
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.position = new Vector3(0f, -0.5f, 0f);
+            ground.transform.localScale = new Vector3(50f, 1f, 80f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.2f, -10f);
+            board.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            body.mass = 75f;
+            var rider = board.AddComponent<LabRider>();
+            try
+            {
+                for (int step = 0; step < 60; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                body.linearVelocity = Vector3.forward * 5f;
+                rider.RequestJump();
+                bool airborne = false;
+                for (int step = 0; step < 150; step++)
+                {
+                    yield return new WaitForFixedUpdate();
+                    airborne |= !rider.IsGrounded;
+                }
+                Assert.That(airborne, Is.True, "Pop should leave the surface.");
+                Assert.That(rider.IsGrounded, Is.True, "Board should return to support.");
+                Assert.That(rider.LandingCount, Is.EqualTo(1));
+                Assert.That(rider.LastLanding, Is.EqualTo(LandingOutcome.Clean), "Aligned switch travel should be accepted.");
+            }
+            finally
+            {
+                Object.Destroy(board);
+                Object.Destroy(ground);
+            }
+        }
+
     }
 }
