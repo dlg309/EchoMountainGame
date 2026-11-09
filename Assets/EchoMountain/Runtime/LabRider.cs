@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace EchoMountain.Riding
 {
@@ -23,6 +22,8 @@ namespace EchoMountain.Riding
         };
         private readonly RaycastHit[] probeHits = new RaycastHit[16];
         private Rigidbody body;
+        private LabRideControls controls;
+        private LabHud hud;
         private PhysicsMaterial boardMaterial;
         public bool IsGrounded => contact;
         public float BrakeInput => brake;
@@ -53,7 +54,8 @@ namespace EchoMountain.Riding
         private void Awake()
         {
             body = GetComponent<Rigidbody>();
-            if (!GetComponent<LabHud>()) gameObject.AddComponent<LabHud>();
+            controls = new LabRideControls();
+            if (!TryGetComponent(out hud)) hud = gameObject.AddComponent<LabHud>();
             // The scripted resistance and edge model own board friction.
             boardMaterial = new PhysicsMaterial("Lab board friction")
             {
@@ -68,28 +70,24 @@ namespace EchoMountain.Riding
             lastContact = float.NegativeInfinity;
         }
 
+        private void OnEnable() => controls.Enable();
+
+        private void OnDisable() => controls.Disable();
+
         private void Update()
         {
-            var keyboard = Keyboard.current;
-            var gamepad = Gamepad.current;
-            steer = 0f;
-            brake = 0f;
-            if (keyboard != null)
+            bool toggledPause = controls.Pause.WasPressedThisFrame() && hud.isActiveAndEnabled;
+            if (toggledPause) hud.SetPaused(!hud.IsPaused);
+            if (toggledPause || hud.IsPaused)
             {
-                steer += (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed ? 1f : 0f)
-                       - (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed ? 1f : 0f);
-                brake = keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed ? 1f : 0f;
-                if (keyboard.spaceKey.wasPressedThisFrame) RequestJump();
-                if (keyboard.rKey.wasPressedThisFrame) ResetRider();
+                steer = brake = bufferedJump = 0f;
+                return;
             }
-            if (gamepad != null)
-            {
-                steer = Mathf.Clamp(steer + gamepad.leftStick.x.ReadValue(), -1f, 1f);
-                brake = Mathf.Max(brake, gamepad.leftTrigger.ReadValue());
-                if (gamepad.buttonSouth.wasPressedThisFrame) RequestJump();
-                if (gamepad.buttonEast.wasPressedThisFrame) ResetRider();
-            }
-            if (body.position.y < resetBelow) ResetRider();
+
+            steer = controls.Steer;
+            brake = controls.Brake;
+            if (controls.Pop.WasPressedThisFrame()) RequestJump();
+            if (controls.Reset.WasPressedThisFrame() || body.position.y < resetBelow) ResetRider();
         }
 
         private void FixedUpdate()
@@ -194,6 +192,7 @@ namespace EchoMountain.Riding
 
         private void OnDestroy()
         {
+            controls.Dispose();
             if (boardMaterial) Destroy(boardMaterial);
         }
 

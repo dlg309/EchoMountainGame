@@ -87,3 +87,7 @@ The interrupted flat-seam test is back in the repository. The 11-case baseline p
 ## Descent and camera checkpoint (2026-11-08 22:57 -05:00)
 
 Read `%TEMP%/EchoMountain3D-Resume-b7aee1a6/camera-and-descent.xml` and its log for the 15-case pass. The current lab now uses the tested 60 Hz physics step. The camera follows switch travel and snaps to the spawn on reset. The isolated Windows build uses `build-descent.log` in the same folder. Inspect its result and preserve previous builds when copying it into the repository. Next: standalone inspection and M2 controls, pause, and rider.
+
+## Controls checkpoint (2026-11-08 23:02 -05:00)
+
+See the 16-case result in `controls.xml` and the PlayMode log in the isolated snapshot. The current HUD scene now supports pause and resume via Escape or gamepad Start. The version without a development profiler is building. Inspect `build-playtest.log`, copy a successful result to a fresh build folder, and test the pause and reset flow in its window. Physical gamepad testing and the intermediate rider remain open.

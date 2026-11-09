@@ -14,7 +14,27 @@ namespace EchoMountain.Riding
         private readonly Color muted = new Color(0.67f, 0.78f, 0.82f, 1f);
         private readonly Color orange = new Color(1f, 0.57f, 0.20f, 1f);
 
+        private float resumeTimeScale;
+        internal bool IsPaused { get; private set; }
+
         private void Awake() => rider = GetComponent<LabRider>();
+
+        private void OnDisable() => SetPaused(false);
+
+        internal void SetPaused(bool paused)
+        {
+            if (paused == IsPaused || (paused && Time.timeScale <= 0f)) return;
+            IsPaused = paused;
+            if (paused)
+            {
+                resumeTimeScale = Time.timeScale;
+                Time.timeScale = 0f;
+            }
+            else
+            {
+                Time.timeScale = resumeTimeScale;
+            }
+        }
 
         private void SetupStyles()
         {
@@ -43,12 +63,14 @@ namespace EchoMountain.Riding
             float width = Screen.width / scale;
             float height = Screen.height / scale;
 
-            DrawPanel(new Rect(18f, height - 153f, 275f, 135f));
-            GUI.Label(new Rect(34f, height - 144f, 240f, 22f), "RIDE CONTROLS", title);
-            GUI.Label(new Rect(34f, height - 119f, 240f, 24f), "A / D     Steer", text);
-            GUI.Label(new Rect(34f, height - 96f, 240f, 24f), "S             Brake", text);
-            GUI.Label(new Rect(34f, height - 73f, 240f, 24f), "SPACE   Pop", text);
-            GUI.Label(new Rect(34f, height - 50f, 240f, 24f), "R             Reset", text);
+            DrawPanel(new Rect(18f, height - 176f, 275f, 158f));
+            GUI.Label(new Rect(34f, height - 167f, 240f, 22f), "RIDE CONTROLS", title);
+            GUI.Label(new Rect(34f, height - 142f, 240f, 24f), "A / D     Steer", text);
+            GUI.Label(new Rect(34f, height - 119f, 240f, 24f), "S             Brake", text);
+            GUI.Label(new Rect(34f, height - 96f, 240f, 24f), "SPACE   Pop", text);
+            GUI.Label(new Rect(34f, height - 73f, 240f, 24f), "R             Reset", text);
+
+            GUI.Label(new Rect(34f, height - 50f, 240f, 24f), "ESC         Pause", text);
 
             float right = width - 270f;
             DrawPanel(new Rect(right, 18f, 252f, 188f));
@@ -76,6 +98,22 @@ namespace EchoMountain.Riding
             DrawLine(centre, centre + needleDirection * 51f, 3f, orange);
             GUI.Label(new Rect(gaugeX + 85f, gaugeY + 117f, 110f, 42f), $"{rider.SpeedKmh:F0}", large);
             GUI.Label(new Rect(gaugeX + 154f, gaugeY + 133f, 55f, 20f), "km/h", small);
+
+            if (IsPaused)
+            {
+                float x = (width - 280f) * 0.5f;
+                float y = (height - 152f) * 0.5f;
+                DrawPanel(new Rect(x, y, 280f, 152f));
+                GUI.Label(new Rect(x + 20f, y + 12f, 240f, 28f), "RIDE PAUSED", title);
+                if (GUI.Button(new Rect(x + 20f, y + 43f, 240f, 36f), "Resume"))
+                    SetPaused(false);
+                if (GUI.Button(new Rect(x + 20f, y + 91f, 240f, 36f), "Reset run"))
+                {
+                    rider.ResetRider();
+                    SetPaused(false);
+                }
+            }
+
             GUI.color = previousColor;
             GUI.matrix = previousMatrix;
         }

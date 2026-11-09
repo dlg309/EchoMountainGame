@@ -321,6 +321,76 @@ namespace EchoMountain.Tests
 #endif
 
         [UnityTest]
+        public IEnumerator GamepadSteersBrakesPausesPopsAndResets()
+        {
+            var originalBackground = InputSystem.settings.backgroundBehavior;
+            var originalEditorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
+            float originalTimeScale = Time.timeScale;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var pad = InputSystem.AddDevice<Gamepad>();
+            var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            ground.transform.position = new Vector3(0f, -0.5f, 0f);
+            ground.transform.localScale = new Vector3(50f, 1f, 50f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.2f, 0f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            var rider = board.AddComponent<LabRider>();
+            var fixedTick = new WaitForFixedUpdate();
+
+            try
+            {
+                for (int step = 0; step < 40; step++) yield return fixedTick;
+                Assert.That(rider.IsGrounded, Is.True);
+                body.linearVelocity = Vector3.forward * 5f;
+
+                InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = Vector2.right, leftTrigger = 0.65f });
+                yield return null;
+                yield return null;
+                Assert.That(rider.SteerInput, Is.GreaterThan(0.8f));
+                Assert.That(rider.BrakeInput, Is.EqualTo(0.65f).Within(0.01f));
+
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.Start));
+                yield return null;
+                yield return null;
+                Assert.That(Time.timeScale, Is.Zero);
+                Vector3 pausedPosition = body.position;
+
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.South));
+                for (int frame = 0; frame < 5; frame++) yield return null;
+                Assert.That(body.position, Is.EqualTo(pausedPosition), "Pause must freeze physics.");
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.Start));
+                yield return null;
+                yield return null;
+                Assert.That(Time.timeScale, Is.EqualTo(originalTimeScale));
+                for (int step = 0; step < 6; step++) yield return fixedTick;
+                Assert.That(rider.IsGrounded, Is.True, "Pop pressed while paused must not be queued.");
+
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.South));
+                for (int step = 0; step < 12; step++) yield return fixedTick;
+                Assert.That(rider.IsGrounded, Is.False, "South should pop after resuming.");
+                Assert.That(body.position.y, Is.GreaterThan(pausedPosition.y + 0.2f));
+
+                uint resets = rider.ResetCount;
+                InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.East));
+                yield return null;
+                yield return null;
+                Assert.That(rider.ResetCount, Is.EqualTo(resets + 1));
+                Assert.That(body.position.z, Is.EqualTo(0f).Within(0.01f));
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(pad);
+                InputSystem.settings.backgroundBehavior = originalBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = originalEditorInput;
+                Time.timeScale = originalTimeScale;
+                Object.Destroy(board);
+                Object.Destroy(ground);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator CameraLooksAlongSwitchTravelAndSnapsOnReset()
         {
             float previousFrameTime = Time.captureDeltaTime;

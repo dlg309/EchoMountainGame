@@ -93,3 +93,7 @@ M1 physics lab remains in progress. Main branch was clean at `11d1ca1` on arriva
 ## Descent and camera checkpoint (2026-11-08 22:57 -05:00)
 
 All 15 PlayMode tests passed. The center line through the existing HUD lab is rideable across 30/60/120 simulated frame cadences. Adopted the verified 60 Hz physics step and started M2 camera work by following travel direction and snapping to spawn on reset. A Windows build is running in the isolated snapshot. Pending: verify the Windows build and playthrough, then continue controller actions, pause, and the intermediate rider. M1 remains open for the final standalone check.
+
+## Controls checkpoint (2026-11-08 23:02 -05:00)
+
+M2 is in progress. Added named keyboard/gamepad actions, Escape or Start to pause/resume, and Resume/Reset Run controls in the pause panel. All 16 PlayMode tests passed, including the virtual gamepad pause and recovery flow. The development build rendered its HUD, but the firewall prompt blocked input. The standalone playtest build without development profiling is running in the isolated snapshot. Next: launch and verify it, then continue the intermediate rider and camera review.
