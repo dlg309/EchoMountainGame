@@ -1,4 +1,4 @@
-﻿# QA evidence
+# QA evidence
 
 ## Environment discovery, 2026-11-06
 
@@ -56,3 +56,9 @@ The user supplied a screenshot of the functioning repaired player that showed a 
 - 2026-11-08: User reported the HUD layout is better and requested continued development. Isolated Unity suite passed 10/10 after adding a test of severe sideways landing, a timed recovery state and reset to spawn with cleared motion. This is a basic diagnostic recovery, not a polished bail system; the currently launched HUD build predates this change. No external playtest or broad gameplay acceptance was established.
 
 - 2026-11-08: Re-ran the 10-test PlayMode suite with `Time.fixedDeltaTime = 1/60` set per test and restored in teardown; 10/10 passed with exit 0. This is an isolated fixed-step experiment, not proof of rendering at 30/60/120 FPS, performance or cross-platform determinism. The main project's default fixed timestep remains unchanged (0.02 s at last inspection).
+
+## Resumed physics baseline
+
+- Recovered the flat-seam PlayMode test from the previous isolated QA copy, where the 11-test run passed. Then copied the current repository's Assets, Packages, and ProjectSettings (base 11d1ca1) into a fresh isolated project with the recovered test. Unity 6000.3.28f1 ran `-batchmode -projectPath <snapshot> -runTests -testPlatform PlayMode -testResults <snapshot>/baseline.xml -logFile <snapshot>/baseline.log`. Exit 0, 11 passed, 0 failed. The seam case starts at 12 m/s and checks traversal, no tunneling, no more than three consecutive unsupported ticks, and no false landing. The tests run at 60 Hz physics and restore the project default.
+- Recovered the previous Windows development build's successful build log and inspected `Builds/PhysicsLab-Recovery/player.log`. The build was produced in the earlier QA copy and launched with Direct3D 11 and PhysX initialization. The fresh baseline does not establish performance or a current standalone playthrough.
+- Evidence: `%TEMP%/EchoMountain3D-Resume-b7aee1a6/baseline.xml` and `baseline.log`. Test machine: Windows, Intel Core i9-13900H, Intel Iris Xe Graphics, 15.6 GiB RAM.

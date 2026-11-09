@@ -1,4 +1,4 @@
-﻿# Status
+# Status
 
 Checkpoint: 2026-11-06 19:29 EST (partial foundation).
 
@@ -85,3 +85,7 @@ User reviewed the HUD build and said it is better, requesting continued game dev
 ## Checkpoint 2026-11-08 18:53 EST — 60 Hz test experiment
 
 The isolated 10-test PlayMode suite passed at `Time.fixedDeltaTime = 1/60`, restoring original timing per test. This does not establish 30/60/120 rendered-frame consistency or change the main project's 0.02 s default. Copied the test setup to main. The HUD build predates the latest tested timed recovery; it remains at `Builds/PhysicsLab-HUD` and the user called its layout better. M1 remains partial. Next: validate frame-rate/contact seam/landing cases and build a new player with the recovery code; continue toward M2 without disturbing open editor/user modifications.
+
+## Resume checkpoint (2026-11-08 22:52 -05:00)
+
+M1 physics lab remains in progress. Main branch was clean at `11d1ca1` on arrival. Recovered and restored the high-speed flat-seam test. Unity 6000.3.28f1 compiled a fresh isolated snapshot of the current project and passed all 11 PlayMode cases. The previously launched Windows build with basic bail recovery is at `Builds/PhysicsLab-Recovery`. Next: check a center-line descent in the actual HUD scene across 30/60/120 simulated frame cadences, repair any ramp/landing failures, and build and inspect the current Windows lab. No main editor locks were changed.

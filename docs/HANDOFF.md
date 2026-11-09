@@ -1,4 +1,4 @@
-﻿# Handoff
+# Handoff
 
 As of 2026-11-06 19:29 EST this is a **partial M0**, not a playable game. Read `AGENTS.md`, `PLANS.md`, `docs/STATUS.md`, `docs/QA.md`, and `docs/BUILD_BRIEF.md`; inspect Git and relevant nested instructions. Repository: `C:\Users\diego\OneDrive\Documents\EchoMountainGame`, branch `main`; original brief commit `fcb144a` was the base at documentation time. Check current HEAD and working tree before continuing.
 
@@ -79,3 +79,7 @@ User said the new HUD is better and asked to continue building the game. In isol
 ## Checkpoint 2026-11-08 18:53 EST
 
 Isolated Unity PlayMode tests passed 10/10 at 1/60-second fixed timestep, with teardown restoring timing. The project setting remains 0.02 s, and render-frame consistency is untested. Newest HUD build predates basic recovery; rebuild to a fresh directory after further foundation checks. See `docs/STATUS.md` and `docs/QA.md`; preserve unrelated changes and open Unity/player sessions.
+
+## Resume checkpoint (2026-11-08 22:52 -05:00)
+
+The interrupted flat-seam test is back in the repository. The 11-case baseline passed in the current project snapshot at `%TEMP%/EchoMountain3D-Resume-b7aee1a6`. Read `baseline.xml` and `baseline.log` there. The next QA-only check in that same snapshot is the actual HUD scene from spawn through launch, landing, and runout at 30/60/120 simulated frame cadences. Inspect `descent.xml` and `descent.log` before transferring the new check. The latest earlier player is `Builds/PhysicsLab-Recovery/EchoMountainLab.exe`. Keep the main project and the older build intact while testing.

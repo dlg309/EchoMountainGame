@@ -387,5 +387,46 @@ namespace EchoMountain.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator FastBoardCrossesFlatSeamWithoutFalseLanding()
+        {
+            var near = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            near.transform.position = new Vector3(0f, -0.5f, -5f);
+            near.transform.localScale = new Vector3(20f, 1f, 10f);
+            var far = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            far.transform.position = new Vector3(0f, -0.5f, 5f);
+            far.transform.localScale = new Vector3(20f, 1f, 10f);
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.position = new Vector3(0f, 0.2f, -3f);
+            board.transform.localScale = new Vector3(0.55f, 0.2f, 1.25f);
+            var body = board.AddComponent<Rigidbody>();
+            body.mass = 75f;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            var rider = board.AddComponent<LabRider>();
+            try
+            {
+                for (int step = 0; step < 60; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded, Is.True);
+                body.linearVelocity = Vector3.forward * 12f;
+                int longestGap = 0, gap = 0;
+                for (int step = 0; step < 45; step++)
+                {
+                    yield return new WaitForFixedUpdate();
+                    gap = rider.IsGrounded ? 0 : gap + 1;
+                    longestGap = Mathf.Max(longestGap, gap);
+                }
+                Assert.That(body.position.z, Is.GreaterThan(3f), "Board should cross the seam at speed.");
+                Assert.That(body.position.y, Is.GreaterThan(-0.05f), "The board must not tunnel through the seam.");
+                Assert.That(longestGap, Is.LessThanOrEqualTo(3), "Contact should not chatter across a flat seam.");
+                Assert.That(rider.LandingCount, Is.Zero, "A flat seam must not register as a landing.");
+            }
+            finally
+            {
+                Object.Destroy(board);
+                Object.Destroy(near);
+                Object.Destroy(far);
+            }
+        }
+
     }
 }
