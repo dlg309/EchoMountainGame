@@ -46,3 +46,9 @@ Then ask your agent to "ICM this", "structure this for agents", or "build me a w
 - `scripts/`: optional standard-library Python 3 that a workspace copies into `_tools/`. They check that links and input paths resolve, draw a workspace (or several) as one interactive graph, generate indexes, and check quotes against their sources. An agent without a shell can skip them.
 
 MIT licensed, like the protocol it serves.
+
+## Run the toolkit checks
+
+From this folder, run `python -I tests/test_tools.py` (or `py -3 -I tests/test_tools.py` on Windows). The tests use temporary workspaces and cover link checks, quote matching, and graph generation.
+
+The generated graph preview renders Markdown through DOMPurify. It uses plain text for notes if the sanitizer is unavailable.

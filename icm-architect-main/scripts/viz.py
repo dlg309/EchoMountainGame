@@ -4,7 +4,7 @@
     python -I _tools/viz.py graph.jsonl [more.jsonl ...] [-o viz.html]
 
 Writes viz.html beside the first graph file unless -o names another path. Standard library only.
-The page loads cytoscape and marked from jsDelivr, so viewing it needs the internet.
+The page loads Cytoscape, Marked, and DOMPurify from jsDelivr, so viewing it needs the internet.
 - A node is a .md file; catalogs and logs (AGENTS.md and its pointers, index.md, _index.md,
   log.md) are left out because they link to everything.
 - Colors follow the frontmatter type, most common type first. The first node shown is the
@@ -129,8 +129,9 @@ def main():
     bundle = {"nodes": nodes, "bodies": bodies, "types": types, "palette": palette,
               "edges": [{"data": {"id": f"{s}__{t}", "source": s, "target": t}} for s, t in sorted(edges)],
               "root": max(degree, key=degree.get) if degree else (nodes[0]["data"]["id"] if nodes else "")}
-    data = json.dumps(bundle, ensure_ascii=False).replace("</", "<\\/")
-    html = SHELL.replace("__NAME__", json.dumps(" + ".join(names))).replace("__DATA__", data)
+    values = {"__NAME__": " + ".join(names), "__DATA__": bundle}
+    html = re.sub(r"__NAME__|__DATA__", lambda m:
+                  json.dumps(values[m.group()], ensure_ascii=False).replace("<", "\\u003c"), SHELL)
     out.write_text(html, encoding="utf-8", newline="\n")
     print(f"wrote {out.name}: {len(nodes)} nodes, {len(edges)} edges")
 
@@ -142,6 +143,7 @@ SHELL = r"""<!DOCTYPE html>
 <title>OKF Bundle Viewer</title>
 <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.4.17/dist/purify.min.js"></script>
 <style>
 * { box-sizing: border-box; }
 body {
@@ -352,14 +354,14 @@ window.BUNDLE = __DATA__;
   }
 
   // Build reverse-link index for backlinks
-  const backlinks = {};
+  const backlinks = Object.create(null);
   for (const edge of bundle.edges) {
     const { source, target } = edge.data;
     (backlinks[target] ||= []).push(source);
   }
 
   // Look up node label/type by id
-  const nodeIndex = {};
+  const nodeIndex = Object.create(null);
   for (const n of bundle.nodes) nodeIndex[n.data.id] = n.data;
 
   const cy = cytoscape({
@@ -520,9 +522,13 @@ window.BUNDLE = __DATA__;
     }
 
     const body = bundle.bodies[conceptId] || "";
-    const html = marked.parse(body, { breaks: false, gfm: true });
     const bodyEl = document.getElementById("detail-body");
-    bodyEl.innerHTML = html;
+    if (window.DOMPurify?.isSupported && window.marked) {
+      const html = marked.parse(body, { breaks: false, gfm: true });
+      bodyEl.innerHTML = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+    } else {
+      bodyEl.textContent = body;
+    }
     rewriteInternalLinks(bodyEl);
 
     const bl = backlinks[conceptId] || [];
@@ -559,7 +565,7 @@ window.BUNDLE = __DATA__;
         const target = href.slice(1, -3);
         if (nodeIndex[target]) {
           a.className = "internal";
-          a.setAttribute("href", "javascript:void(0)");
+          a.setAttribute("href", "#");
           a.addEventListener("click", (e) => {
             e.preventDefault();
             showDetail(target);

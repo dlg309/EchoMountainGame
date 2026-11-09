@@ -22,6 +22,7 @@ outside sources/raw/ and _meta/, frontmatter included. --show-cuts lists what ev
 import bisect
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 try:
@@ -46,8 +47,9 @@ problems, warnings, cuts = [], [], []
 
 
 def norm(s):
-    s = s.lower().replace("’", "'").replace("'", "")
-    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]+", " ", s)).strip()
+    s = unicodedata.normalize("NFC", s.casefold()).replace("’", "'").replace("'", "")
+    words = "".join(c if unicodedata.category(c)[0] in "LMN" else " " for c in s)
+    return " ".join(words.split())
 
 
 def secs(t):
@@ -65,25 +67,27 @@ def match_in_order(pieces, haystack):
     """Return (missing_piece, gaps): the first piece not found in order, and the text between pieces."""
     pos, gaps = 0, []
     for k, piece in enumerate(pieces):
-        i = haystack.find(piece, pos)
-        if i < 0:
+        match = re.compile(r"(?<!\S)" + re.escape(piece) + r"(?!\S)").search(haystack, pos)
+        if not match:
             return piece, gaps
         if k:
-            gaps.append(haystack[pos:i])
-        pos = i + len(piece)
+            gaps.append(haystack[pos:match.start()])
+        pos = match.end()
     return None, gaps
 
 
 def load_sources(root):
-    raw = root / "sources" / "raw"
-    files = {p.stem: p for p in sorted(raw.glob("*")) if p.is_file()} if raw.exists() else {}
+    raw = (root / "sources" / "raw").resolve()
+    files = {p.stem: p for p in sorted(raw.glob("*"))
+             if p.resolve().parent == raw and p.is_file()}
     aliases = root / "_meta" / "sources.txt"
     if aliases.exists():
         for line in aliases.read_text(encoding="utf-8-sig").splitlines():
             if "=" in line and not line.lstrip().startswith("#"):
                 key, name = (x.strip() for x in line.split("=", 1))
-                if (raw / name).is_file():
-                    files[key] = raw / name
+                candidate = (raw / name).resolve()
+                if Path(name).name == name and candidate.parent == raw and candidate.is_file():
+                    files[key] = candidate
                 else:
                     problems.append(f"_meta/sources.txt: {key} -> {name} is not in sources/raw/")
     sources = {}
@@ -93,9 +97,11 @@ def load_sources(root):
         for line in text.splitlines():
             m = re.match(rf"\s*(?:\*\*)?\[({TIME})\](?:\*\*)?\s*(.*)", line)
             if m:
-                paras.append((secs(m.group(1)), norm(m.group(2))))
+                paras.append((secs(m.group(1)), [m.group(2)]))
+            elif paras:
+                paras[-1][1].append(line)
         if paras:
-            sources[key] = ("timed", paras)
+            sources[key] = ("timed", [(time, norm(" ".join(lines))) for time, lines in paras])
             continue
         pages, current = {}, None
         for line in text.splitlines():
@@ -115,6 +121,8 @@ def load_sources(root):
 def check_quote(text, key, position, sources):
     """Return (error or None, warning or None, cut gaps)."""
     pieces = [norm(p) for p in re.split(r"\.\.\.|…", text) if norm(p)]
+    if not pieces:
+        return "a quote must contain words", None, []
     if len(pieces) > 1 and any(len(p.split()) < 2 for p in pieces):
         return "a piece of a cut quote is too short to verify", None, []
     kind, data = sources[key]
@@ -126,15 +134,22 @@ def check_quote(text, key, position, sources):
         if not m:
             return "the citation has no page", None, []
         first, last = int(m.group(1)), int(m.group(2) or m.group(1))
-        absent = [n for n in range(first, last + 1) if n not in data]
-        if absent:
-            return f"page {absent[0]} is not in the source", None, []
+        if first > last:
+            return "the cited page range is reversed", None, []
+        if first not in data or last not in data:
+            absent = first if first not in data else last
+            return f"page {absent} is not in the source", None, []
+        absent = next((n for n in range(first, last + 1) if n not in data), None)
+        if absent is not None:
+            return f"page {absent} is not in the source", None, []
         missing, gaps = match_in_order(pieces, " ".join(data[n] for n in range(first, last + 1)))
         return (f"not found on the cited page: {missing[:60]}" if missing else None), None, gaps
     m = POSITION.search(position or "")
     if not m:
         return "the citation has no timestamp", None, []
     start, end = secs(m.group(1)), secs(m.group(2) or m.group(1))
+    if start > end:
+        return "the cited timestamp range is reversed", None, []
     times = [t for t, _ in data]
     lo, hi = bisect.bisect_right(times, start) - 1, bisect.bisect_right(times, end) - 1
     wide = " ".join(p for _, p in data[max(0, lo - 1): hi + 2])
@@ -158,7 +173,8 @@ def body_of(text):
 def keep_out_patterns(root):
     path = root / "_meta" / "keep-out.txt"
     lines = (x.strip() for x in path.read_text(encoding="utf-8-sig").splitlines()) if path.exists() else ()
-    return [re.compile(r"(?<!\w)" + re.escape(p) + r"(?!\w)", re.I) for p in lines if p and not p.startswith("#")]
+    return [re.compile(r"(?<!\w)" + re.escape(unicodedata.normalize("NFC", p)) + r"(?!\w)", re.I)
+            for p in lines if p and not p.startswith("#")]
 
 
 def check_words_sections(rel, body, sources):
@@ -176,6 +192,8 @@ def check_words_sections(rel, body, sources):
 def main():
     args = [a for a in sys.argv[1:] if a != "--show-cuts"]
     root = Path(args[0]).resolve() if args else Path(__file__).resolve().parent.parent
+    if not root.is_dir():
+        sys.exit(f"workspace is not a directory: {root}")
     sources = load_sources(root)
     keep_out = keep_out_patterns(root)
 
@@ -184,7 +202,8 @@ def main():
     for f in files:
         rel = f.relative_to(root).as_posix()
         text = f.read_text(encoding="utf-8-sig", errors="replace")
-        if any(p.search(text) for p in keep_out):  # every file, frontmatter included
+        normalized = unicodedata.normalize("NFC", text) if keep_out else text
+        if any(p.search(normalized) for p in keep_out):  # every file, frontmatter included
             problems.append(f"{rel}: contains a phrase from _meta/keep-out.txt")
         if f.name.lower() in NOT_NOTES:
             continue

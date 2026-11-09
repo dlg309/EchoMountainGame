@@ -19,6 +19,7 @@ Fenced code blocks are skipped.
 to FILE), then each file (path, type, title, description, tags) and each link between .md files.
 viz.py draws it.
 """
+import argparse
 import json
 import os
 import re
@@ -33,7 +34,7 @@ except Exception:
 
 SKIP = {"node_modules", "_archive", "_templates", "raw"}
 LINK = re.compile(r"\[[^\]]*\]\((<[^>]+>|[^)\s]+)\)")
-TICK = re.compile(r"`([^`\s]+)`")
+TICK = re.compile(r"`([^`\r\n]+)`")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 LINK_KEYS = re.compile(r"^(?:consumes|produces):\s*(.+)$", re.M)
 IMPORT = re.compile(r"^@(\S+\.md)\s*$")
@@ -65,12 +66,15 @@ def field(front, name):
 def lines_outside_fences(body):
     fence = None
     for line in body.splitlines():
-        s = line.lstrip()
-        if s.startswith("```") or s.startswith("~~~"):
-            mark = s[:3]
-            fence = None if fence == mark else (fence or mark)
-            continue
-        if fence is None:
+        match = re.match(r"^(`{3,}|~{3,})(.*)$", line.lstrip())
+        if fence is not None:
+            if match:
+                mark, tail = match.groups()
+                if mark[0] == fence[0] and len(mark) >= len(fence) and not tail.strip():
+                    fence = None
+        elif match:
+            fence = match.group(1)
+        else:
             yield line
 
 
@@ -81,19 +85,21 @@ def looks_like_path(s):
 
 
 def main():
-    args, skip, graph_out = sys.argv[1:], set(SKIP), None
-    while "--skip" in args:
-        i = args.index("--skip")
-        skip.add(args[i + 1])
-        del args[i:i + 2]
-    if "--graph" in args:
-        i = args.index("--graph")
-        graph_out = Path(args[i + 1]).resolve()
-        del args[i:i + 2]
-    root = Path(args[0]).resolve() if args else Path(__file__).resolve().parent.parent
-
-    files = sorted(f for f in root.rglob("*.md")
-                   if not any(p.startswith(".") or p in skip for p in f.relative_to(root).parts[:-1]))
+    parser = argparse.ArgumentParser(description="Check relative links and contract inputs.")
+    parser.add_argument("root", type=Path, nargs="?", default=Path(__file__).resolve().parent.parent)
+    parser.add_argument("--skip", action="append", default=[], metavar="FOLDER")
+    parser.add_argument("--graph", type=Path, metavar="FILE")
+    args = parser.parse_args()
+    root = args.root.resolve()
+    if not root.is_dir():
+        parser.error(f"workspace is not a directory: {root}")
+    graph_out = args.graph.resolve() if args.graph else None
+    skip = {name.casefold() for name in SKIP.union(args.skip)}
+    files = []
+    for folder, subdirs, names in os.walk(root):
+        subdirs[:] = [name for name in subdirs if not name.startswith(".") and name.casefold() not in skip]
+        files.extend(Path(folder) / name for name in names if name.lower().endswith(".md"))
+    files.sort()
     broken, nodes, edges, checked = [], [], [], 0
 
     def link(f, rel, target):
@@ -104,7 +110,7 @@ def main():
         path = (f.parent / urllib.parse.unquote(target.split("#")[0])).resolve()
         if not path.exists():
             broken.append(f"{rel}: {target}")
-        elif path.suffix == ".md" and path != f.resolve():
+        elif path.suffix.lower() == ".md" and path != f.resolve():
             try:
                 edges.append((rel, Path(os.path.relpath(path, root)).as_posix()))
             except ValueError:  # another drive
@@ -130,9 +136,9 @@ def main():
             for m in LINK.finditer(line):
                 link(f, rel, m.group(1)[1:-1] if m.group(1).startswith("<") else m.group(1))
             if in_inputs and re.match(r"\s*[-*]\s", line):
-                strict = "reference" in line.lower()  # every-run inputs must already exist
+                strict = bool(re.match(r"\s*[-*]\s+(?:\*\*)?reference\b", line, re.I))
                 for m in TICK.finditer(line):
-                    p = m.group(1)
+                    p = m.group(1).strip()
                     if not looks_like_path(p):
                         continue
                     checked += 1
