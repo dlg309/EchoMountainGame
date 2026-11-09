@@ -109,3 +109,7 @@ The 17-case suite and Windows x64 rider playtest build succeeded. The player lau
 ## Glacier Pass checkpoint (2026-11-08 23:52 -05:00)
 
 M3 has begun with Glacier Pass, the first 860 m connected run. The smooth Pine line and the Summit rollers are selectable at drop-in. Progress, elapsed time, top speed, finish results, retry and line switching are implemented. Both full course tests and all 17 lab tests passed in the isolated QA copy. The standalone build is underway. The rest of the vertical slice includes tricks, scoring, and replay.
+
+## Glacier Pass Windows verification (2026-11-08 23:56 -05:00)
+
+Built and launched the Windows x64 player. Mouse-driven Pine selection, drop-in, finish, results, and retry worked. The results screen displayed 01:24.48 and 45 km/h. Both routes passed the full PlayMode suite, with Summit steered by a virtual gamepad. Current Windows executable is `Builds/GlacierPass/EchoMountain.exe`. Remaining work includes physical input and Summit playtesting, then tricks, scoring, and replay.

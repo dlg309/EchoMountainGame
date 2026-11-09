@@ -103,3 +103,7 @@ The latest Windows playtest is `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.
 ## Glacier Pass checkpoint (2026-11-08 23:52 -05:00)
 
 Glacier Pass is generated and transferred alongside the preserved rider lab. Run `EchoMountain.EditorTools.MountainBuilder.Create` only if authoring a fresh copy without existing course assets. The build entry is `EchoMountain.EditorTools.LabBuild.BuildWindowsMountain`. Inspect `mountain-regression.xml` and `mountain-build.log` in the isolated snapshot. Both lines finished in the 60–90 second target with retry verified. Continue standalone UI/input review and then M3 tricks and scoring.
+
+## Glacier Pass Windows verification (2026-11-08 23:56 -05:00)
+
+The first mountain course is playable through results and retry on Windows. Use `Builds/GlacierPass/EchoMountain.exe` and keep the complete build folder together. Pine was run through the actual player, and Summit passed with simulated steering in PlayMode. See `mountain-build.log` and `mountain-player.log` in the isolated snapshot. Resume with a physical input playtest or the next independent M3 feature, starting with tricks and landing-based scoring.
