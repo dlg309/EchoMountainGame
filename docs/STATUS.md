@@ -105,3 +105,7 @@ Added the articulated lab rider in a separate scene and preserved the prior HUD 
 ## Windows rider playtest (2026-11-08 23:11 -05:00)
 
 The 17-case suite and Windows x64 rider playtest build succeeded. The player launched and rendered the HUD with a changing speed readout. The firewall dialog obstructed manual control and rider inspection. Latest executable: `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe`. Next: manual input and visual review, physical device behavior and camera tuning, then the first connected mountain run.
+
+## Glacier Pass checkpoint (2026-11-08 23:52 -05:00)
+
+M3 has begun with Glacier Pass, the first 860 m connected run. The smooth Pine line and the Summit rollers are selectable at drop-in. Progress, elapsed time, top speed, finish results, retry and line switching are implemented. Both full course tests and all 17 lab tests passed in the isolated QA copy. The standalone build is underway. The rest of the vertical slice includes tricks, scoring, and replay.

@@ -99,3 +99,7 @@ The current snapshot contains `PhysicsLabRider.unity`, a separate version of the
 ## Windows rider playtest (2026-11-08 23:11 -05:00)
 
 The latest Windows playtest is `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe`. It contains the articulated rider, pause panel, switch camera and verified 60 Hz physics. Review `build-rider.log` in the isolated snapshot and `rider-player.log` in the build folder. Startup and HUD rendering were observed. Interactive verification still requires clearing the desktop firewall dialog. Then ride a complete run, check input and camera, and continue the authored course.
+
+## Glacier Pass checkpoint (2026-11-08 23:52 -05:00)
+
+Glacier Pass is generated and transferred alongside the preserved rider lab. Run `EchoMountain.EditorTools.MountainBuilder.Create` only if authoring a fresh copy without existing course assets. The build entry is `EchoMountain.EditorTools.LabBuild.BuildWindowsMountain`. Inspect `mountain-regression.xml` and `mountain-build.log` in the isolated snapshot. Both lines finished in the 60–90 second target with retry verified. Continue standalone UI/input review and then M3 tricks and scoring.

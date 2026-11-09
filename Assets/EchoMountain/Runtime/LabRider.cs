@@ -11,6 +11,7 @@ namespace EchoMountain.Riding
         [SerializeField] private float maxGripAcceleration = 12f;
         [SerializeField] private float braking = 5f;
         [SerializeField] private float rollingResistance = 0.22f;
+        [SerializeField] private float quadraticDrag;
         [SerializeField] private float turnAcceleration = 2.8f;
         [SerializeField] private float popVelocity = 4.2f;
         [SerializeField] private float jumpBufferSeconds = 0.15f;
@@ -97,6 +98,11 @@ namespace EchoMountain.Riding
                 recoveryRemaining -= Time.fixedDeltaTime;
                 if (recoveryRemaining <= 0f) ResetRider();
                 return;
+            }
+            if (quadraticDrag > 0f)
+            {
+                Vector3 velocity = body.linearVelocity;
+                body.AddForce(-velocity * (quadraticDrag * velocity.magnitude), ForceMode.Acceleration);
             }
             bufferedJump = Mathf.Max(0f, bufferedJump - Time.fixedDeltaTime);
             wasContact = contact;
@@ -194,6 +200,13 @@ namespace EchoMountain.Riding
         {
             controls.Dispose();
             if (boardMaterial) Destroy(boardMaterial);
+        }
+
+        public void SetSpawn(Vector3 position, Quaternion rotation)
+        {
+            spawnPosition = position;
+            spawnRotation = rotation;
+            ResetRider();
         }
 
         public void ResetRider()

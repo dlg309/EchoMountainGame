@@ -16,6 +16,7 @@ namespace EchoMountain.Riding
 
         private float resumeTimeScale;
         internal bool IsPaused { get; private set; }
+        internal bool ShowDiagnostics { get; set; } = true;
 
         private void Awake() => rider = GetComponent<LabRider>();
 
@@ -72,15 +73,18 @@ namespace EchoMountain.Riding
 
             GUI.Label(new Rect(34f, height - 50f, 240f, 24f), "ESC         Pause", text);
 
-            float right = width - 270f;
-            DrawPanel(new Rect(right, 18f, 252f, 188f));
-            GUI.Label(new Rect(right + 16f, 28f, 220f, 22f), "PHYSICS  /  LAB", title);
-            GUI.Label(new Rect(right + 16f, 53f, 220f, 22f), rider.IsRecovering ? "CONTACT    Recovering" : rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
-            GUI.Label(new Rect(right + 16f, 77f, 220f, 22f), $"SLIP             {rider.LateralSlip:F1} m/s", text);
-            GUI.Label(new Rect(right + 16f, 101f, 220f, 22f), $"EDGE           {rider.SteerInput:F2}", text);
-            GUI.Label(new Rect(right + 16f, 125f, 220f, 22f), $"GRIP             {rider.GripAcceleration:F1} m/s²", text);
-            GUI.Label(new Rect(right + 16f, 149f, 220f, 22f), $"NORMAL      {rider.ContactNormal.x:F1}, {rider.ContactNormal.y:F1}, {rider.ContactNormal.z:F1}", small);
-            GUI.Label(new Rect(right + 16f, 171f, 220f, 22f), $"LANDING     {rider.LandingText}", small);
+            if (ShowDiagnostics)
+            {
+                float right = width - 270f;
+                DrawPanel(new Rect(right, 18f, 252f, 188f));
+                GUI.Label(new Rect(right + 16f, 28f, 220f, 22f), "PHYSICS  /  LAB", title);
+                GUI.Label(new Rect(right + 16f, 53f, 220f, 22f), rider.IsRecovering ? "CONTACT    Recovering" : rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
+                GUI.Label(new Rect(right + 16f, 77f, 220f, 22f), $"SLIP             {rider.LateralSlip:F1} m/s", text);
+                GUI.Label(new Rect(right + 16f, 101f, 220f, 22f), $"EDGE           {rider.SteerInput:F2}", text);
+                GUI.Label(new Rect(right + 16f, 125f, 220f, 22f), $"GRIP             {rider.GripAcceleration:F1} m/s²", text);
+                GUI.Label(new Rect(right + 16f, 149f, 220f, 22f), $"NORMAL      {rider.ContactNormal.x:F1}, {rider.ContactNormal.y:F1}, {rider.ContactNormal.z:F1}", small);
+                GUI.Label(new Rect(right + 16f, 171f, 220f, 22f), $"LANDING     {rider.LandingText}", small);
+            }
 
             float gaugeX = width - 270f;
             float gaugeY = height - 184f;

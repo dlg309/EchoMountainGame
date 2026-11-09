@@ -19,6 +19,10 @@ namespace EchoMountain.EditorTools
         public static void BuildWindowsPlaytest() =>
             BuildPlayer(RiderScene, "Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe", BuildOptions.None, "Echo Mountain Rider Lab");
 
+        [MenuItem("Echo Mountain/Build Windows Glacier Pass")]
+        public static void BuildWindowsMountain() =>
+            BuildPlayer(MountainBuilder.ScenePath, "Builds/GlacierPass/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
+
         private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName)
         {
             if (!File.Exists(scene)) throw new InvalidOperationException("Create and verify the physics lab scene first.");

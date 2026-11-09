@@ -82,3 +82,10 @@ The user supplied a screenshot of the functioning repaired player that showed a 
 
 - The Windows x64 rider playtest built successfully with `-batchmode -quit -buildTarget StandaloneWindows64 -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsPlaytest`. The build log reported success and exit 0. Copied the complete build to `Builds/PhysicsLab-RiderPlaytest` and launched it windowed at 1280×720. The player initialized Direct3D 11 and PhysX and rendered a live speedometer and HUD. The Windows Firewall dialog continued to obscure the center of the window, so the current standalone manual control and rider review remain open. No settings were changed in that dialog.
 - The downloadable ZIP was checked for the executable, Unity player library, runtime assembly, and game data. The locally launched build was the source of the ZIP.
+
+## Glacier Pass course
+
+- Unity 6000.3.28f1 generated the independent course scene and original scenery assets with `-batchmode -quit -executeMethod EchoMountain.EditorTools.MountainBuilder.Create`. Exit 0. The rider lab remains available for regression.
+- Full headless regression used `-batchmode -nographics -runTests -testPlatform PlayMode -testResults mountain-regression.xml -logFile mountain-regression.log`. Exit 0, 19 passed, 0 failed. Both tests loaded the actual Glacier Pass scene, selected their line, traversed 860 m with 60 Hz physics, reached Results, and verified that retry returned to the same spawn with a fresh timer. Test time was accelerated at six times normal game time.
+- Pine coasted to the finish in 84.49 s with a 44.7 km/h peak. Summit finished in 87.14 s with a 43.3 km/h peak and one counted landing. Summit uses a virtual gamepad for lane correction. An earlier unattended Summit run drifted beyond the course boundary and triggered its safe reset. The logs and XML are in the isolated snapshot.
+- On the earlier Windows rider lab, the firewall dialog was gone and the rider and HUD were visible. Injected reset and pause keys did not produce a clear response. A deliberate hardware input run remains open.

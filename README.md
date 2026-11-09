@@ -1,23 +1,27 @@
 # Echo Mountain
 
-A Windows snowboarding project built with Unity 6.3 LTS and URP. The current playtest is a physics course with a slope, takeoff, landing, runout, and automatic recovery. The rider is an intermediate segmented rig with board-mounted boots and a pose that responds to steering and airtime.
+Glacier Pass is the first connected Windows course in Echo Mountain. Ride an 860 m descent on the smooth **Pine line** or follow the **Summit line** over three marked rollers. The run ends at a finish arch with your time, top speed, and a retry option.
 
-## Play the lab
+## Play Glacier Pass
 
-Run `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe` from its full build folder. To run in the editor, open the repository in Unity Hub with **6000.3.28f1**, load `Assets/EchoMountain/Scenes/PhysicsLabRider.unity`, and press Play.
+Run `Builds/GlacierPass/EchoMountain.exe` from its full build folder. Choose the blue Pine line or amber Summit line and select **Drop in**. Follow the markers to the finish. Use **Retry** to ride the same line again or **Choose line** to switch.
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
+| Choose a line | Left/Right | D-pad Left/Right |
+| Drop in or retry | Enter | South button |
 | Steer | A/D or Left/Right | Left stick |
 | Brake | S or Down | Left trigger |
 | Pop | Space | South button |
 | Reset | R | East button |
 | Pause or resume | Escape | Start |
 
-The pause panel also has Resume and Reset Run buttons. Gamepad actions have been checked with a virtual device. Physical gamepad testing is pending.
+The pause panel also has Resume and Reset Run buttons. The course uses the articulated lab rider and travel-aware camera. Gamepad actions have been tested with a virtual device.
 
-## Build and verify
+## Edit, build, and test
 
-Use **Echo Mountain → Build Windows lab playtest** to build the rider scene without the development profiler. The menu preserves existing output folders. Use **Echo Mountain → Build Windows physics lab** for a development build of the earlier HUD scene.
+Open the repository in Unity Hub with **6000.3.28f1** and load `Assets/EchoMountain/Scenes/GlacierPass.unity`. Use **Echo Mountain → Build Windows Glacier Pass** to produce the course build. The menu preserves existing output folders.
 
-Run **Window → General → Test Runner → PlayMode → Run All** in the editor. The tests cover support, simulated controls, landings, reset, the descent, the camera, and the rider pose. See the [QA record](docs/QA.md) and [milestones](PLANS.md).
+The earlier physics lab remains at `Assets/EchoMountain/Scenes/PhysicsLabRider.unity`. Its Windows build uses **Echo Mountain → Build Windows lab playtest**.
+
+Run **Window → General → Test Runner → PlayMode → Run All** in the editor. The course tests cover both descents, timing, finish, and retry. See the [QA record](docs/QA.md) and [milestones](PLANS.md).
