@@ -33,3 +33,7 @@
 - https://unity.com/security and https://unity.com/security/unity-brotli-decoder-vulnerability, accessed 2026-11-08. Unity lists October 2026 eMudhra and Brotli advisories; check the current fixed-version tables against the exact editor and deployed target before shipping. 6000.3.28f1 is running, but the advisory-specific result and security posture need confirmation; no general security guarantee is implied.
 
 Unity's Brotli advisory, updated November 7, lists 6000.3.27f2 as the first fixed 6.3 LTS release; installed/running 6000.3.28f1 is later. Source: https://gw-prd.hexagon.unity.com/security/unity-brotli-decoder-vulnerability, accessed 2026-11-08. This finding addresses that advisory only; application exposure also depends on use of the affected APIs and data.
+
+## 2026-11-08 — Simulated frame cadence
+
+- Unity 6.3 documents `Time.captureFramerate` as the reciprocal of `Time.captureDeltaTime`. The lab test uses it to vary the frame time supplied to the engine while keeping physics at 60 Hz. This experiment measures simulation behavior across update cadences. Standalone frame times require separate measurement. https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/time/captureframerate

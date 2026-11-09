@@ -45,6 +45,7 @@ namespace EchoMountain.Riding
         private Vector3 lastAirVelocity, lastAirSpin;
         public LandingOutcome? LastLanding { get; private set; }
         public int LandingCount { get; private set; }
+        public uint ResetCount { get; private set; }
         private Vector3 normal = Vector3.up;
         private float slip, gripForce;
         private string landing = "--";
@@ -213,6 +214,7 @@ namespace EchoMountain.Riding
             lastAirVelocity = lastAirSpin = Vector3.zero;
             LastLanding = null;
             LandingCount = 0;
+            ResetCount++;
         }
 
     }

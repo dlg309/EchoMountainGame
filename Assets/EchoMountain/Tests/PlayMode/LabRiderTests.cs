@@ -259,7 +259,101 @@ namespace EchoMountain.Tests
                 InputSystem.settings.editorInputBehaviorInPlayMode = originalEditorInput;
             }
         }
+
+        private static readonly int[] RenderCadences = { 30, 60, 120 };
+
+        [UnityTest]
+        public IEnumerator CenterLineClearsTakeoffAndReachesRunout([ValueSource(nameof(RenderCadences))] int renderHz)
+        {
+            float previousFrameTime = Time.captureDeltaTime;
+            Time.captureFramerate = renderHz;
+            try
+            {
+                const string scenePath = "Assets/EchoMountain/Scenes/PhysicsLabHUD.unity";
+                yield return EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Additive));
+                loadedLabScene = SceneManager.GetSceneByPath(scenePath);
+                yield return null;
+                Assert.That(Time.deltaTime, Is.EqualTo(1f / renderHz).Within(0.0001f));
+
+                var board = GameObject.Find("Diagnostic board");
+                Assert.That(board, Is.Not.Null);
+                var rider = board.GetComponent<LabRider>();
+                var body = board.GetComponent<Rigidbody>();
+                float furthest = body.position.z;
+                float flightStarted = -1f;
+                float flightEnded = -1f;
+                float landingZ = -1f;
+                float approachSpeed = 0f;
+                var fixedTick = new WaitForFixedUpdate();
+                float deadline = Time.fixedTime + 12f;
+                while (Time.fixedTime < deadline && body.position.z < 69f && !rider.IsRecovering)
+                {
+                    yield return fixedTick;
+                    float z = body.position.z;
+                    furthest = Mathf.Max(furthest, z);
+                    if (z >= 42f && z < 45f)
+                        approachSpeed = Mathf.Max(approachSpeed, body.linearVelocity.z);
+                    if (flightStarted < 0f && z >= 43f && z < 46f && !rider.IsGrounded)
+                        flightStarted = Time.fixedTime;
+                    if (flightStarted >= 0f && flightEnded < 0f && rider.IsGrounded)
+                    {
+                        flightEnded = Time.fixedTime;
+                        landingZ = z;
+                    }
+                }
+
+                float flightDuration = flightEnded - flightStarted;
+                Debug.Log($"Lab descent {renderHz} Hz: approach={approachSpeed:F2} m/s, air={flightDuration:F3} s, landing z={landingZ:F2}, furthest z={furthest:F2}, end={body.position}, landings={rider.LandingCount}, outcome={rider.LastLanding}.");
+                Assert.That(approachSpeed, Is.GreaterThan(8f), "The center line should carry speed onto the ramp.");
+                Assert.That(flightStarted, Is.GreaterThanOrEqualTo(0f), "The board should become airborne at the lip without requiring pop.");
+                Assert.That(flightDuration, Is.EqualTo(0.92f).Within(0.1f), "The drop should produce a sustained flight.");
+                Assert.That(landingZ, Is.EqualTo(54.8f).Within(0.6f), "The board should regain support within the landing slope.");
+                Assert.That(rider.LandingCount, Is.EqualTo(1), "The descent should register a single landing.");
+                Assert.That(rider.IsRecovering, Is.False, "The center line should be rideable through landing.");
+                Assert.That(furthest, Is.GreaterThanOrEqualTo(69f), "The rider must reach the runout.");
+                Assert.That(rider.IsGrounded, Is.True, "The board must be supported in the runout.");
+            }
+            finally
+            {
+                Time.captureDeltaTime = previousFrameTime;
+            }
+        }
 #endif
+
+        [UnityTest]
+        public IEnumerator CameraLooksAlongSwitchTravelAndSnapsOnReset()
+        {
+            float previousFrameTime = Time.captureDeltaTime;
+            Time.captureDeltaTime = 1f / 60f;
+            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            board.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            var body = board.AddComponent<Rigidbody>();
+            body.useGravity = false;
+            var rider = board.AddComponent<LabRider>();
+            var view = new GameObject("Lab camera");
+            view.AddComponent<LabCamera>().SetTarget(board.transform);
+            try
+            {
+                body.linearVelocity = Vector3.forward * 10f;
+                for (int frame = 0; frame < 90; frame++) yield return null;
+                Assert.That(body.position.z, Is.GreaterThan(10f));
+                Assert.That(Vector3.Dot(view.transform.forward, Vector3.forward), Is.GreaterThan(0.8f),
+                    "The view should face the direction of travel when the board rides switch.");
+                Assert.That(Mathf.Abs(Vector3.Dot(view.transform.right, Vector3.up)), Is.LessThan(0.001f),
+                    "The horizon should remain level.");
+
+                rider.ResetRider();
+                yield return null;
+                Assert.That(Vector3.Distance(view.transform.position, new Vector3(0f, 3f, 6.5f)), Is.LessThan(0.02f),
+                    "The camera should return directly behind the spawn heading.");
+            }
+            finally
+            {
+                Time.captureDeltaTime = previousFrameTime;
+                Object.Destroy(view);
+                Object.Destroy(board);
+            }
+        }
 
         [Test]
         public void LandingRulesAcceptSwitchAndDistinguishSevereImpacts()

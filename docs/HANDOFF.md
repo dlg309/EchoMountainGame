@@ -83,3 +83,7 @@ Isolated Unity PlayMode tests passed 10/10 at 1/60-second fixed timestep, with t
 ## Resume checkpoint (2026-11-08 22:52 -05:00)
 
 The interrupted flat-seam test is back in the repository. The 11-case baseline passed in the current project snapshot at `%TEMP%/EchoMountain3D-Resume-b7aee1a6`. Read `baseline.xml` and `baseline.log` there. The next QA-only check in that same snapshot is the actual HUD scene from spawn through launch, landing, and runout at 30/60/120 simulated frame cadences. Inspect `descent.xml` and `descent.log` before transferring the new check. The latest earlier player is `Builds/PhysicsLab-Recovery/EchoMountainLab.exe`. Keep the main project and the older build intact while testing.
+
+## Descent and camera checkpoint (2026-11-08 22:57 -05:00)
+
+Read `%TEMP%/EchoMountain3D-Resume-b7aee1a6/camera-and-descent.xml` and its log for the 15-case pass. The current lab now uses the tested 60 Hz physics step. The camera follows switch travel and snaps to the spawn on reset. The isolated Windows build uses `build-descent.log` in the same folder. Inspect its result and preserve previous builds when copying it into the repository. Next: standalone inspection and M2 controls, pause, and rider.

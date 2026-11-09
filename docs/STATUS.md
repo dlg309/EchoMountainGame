@@ -89,3 +89,7 @@ The isolated 10-test PlayMode suite passed at `Time.fixedDeltaTime = 1/60`, rest
 ## Resume checkpoint (2026-11-08 22:52 -05:00)
 
 M1 physics lab remains in progress. Main branch was clean at `11d1ca1` on arrival. Recovered and restored the high-speed flat-seam test. Unity 6000.3.28f1 compiled a fresh isolated snapshot of the current project and passed all 11 PlayMode cases. The previously launched Windows build with basic bail recovery is at `Builds/PhysicsLab-Recovery`. Next: check a center-line descent in the actual HUD scene across 30/60/120 simulated frame cadences, repair any ramp/landing failures, and build and inspect the current Windows lab. No main editor locks were changed.
+
+## Descent and camera checkpoint (2026-11-08 22:57 -05:00)
+
+All 15 PlayMode tests passed. The center line through the existing HUD lab is rideable across 30/60/120 simulated frame cadences. Adopted the verified 60 Hz physics step and started M2 camera work by following travel direction and snapping to spawn on reset. A Windows build is running in the isolated snapshot. Pending: verify the Windows build and playthrough, then continue controller actions, pause, and the intermediate rider. M1 remains open for the final standalone check.
