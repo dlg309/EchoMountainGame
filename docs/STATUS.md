@@ -117,3 +117,7 @@ Built and launched the Windows x64 player. Mouse-driven Pine selection, drop-in,
 ## Tricks checkpoint (2026-11-09 00:12 -05:00)
 
 Added measured 180s and 360s, Indy and Melon poses, landing-based scoring with chains and repetition, Summit jump practice, a score HUD, on-screen Pause and mute, and synthesized riding audio. Unity passed 22/22, including real board rotation and banking in the authored scene with virtual keyboard input. Windows build and desktop verification are underway. Ghosts, replay, and progression remain open.
+
+## Windows tricks playtest (2026-11-09 00:19 -05:00)
+
+The final build is at `Builds/GlacierPass-Tricks/EchoMountain.exe`. The revised Windows playtest passed the mouse-driven practice, pause, resume, retry, mute, full Pine descent, and quit flow. The final camera revision passed the full 22-case suite and launched to the title screen. Hardware input and listening remain open. The next independent milestone is saved records, then previous-run ghost and replay.

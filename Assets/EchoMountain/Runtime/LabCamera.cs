@@ -10,6 +10,7 @@ namespace EchoMountain.Riding
         private LabRider rider;
         private uint lastReset;
         private float heading;
+        private Vector3 lastTargetPosition;
 
         public void SetTarget(Transform value) => target = value;
 
@@ -31,7 +32,12 @@ namespace EchoMountain.Riding
                 snap = true;
             }
 
-            Vector3 travel = targetBody
+            Vector3 trackingPosition = targetBody ? targetBody.position : target.position;
+            // Course menu transitions can teleport the board without a rider reset.
+            snap |= (trackingPosition - lastTargetPosition).sqrMagnitude > 32f * 32f;
+            lastTargetPosition = trackingPosition;
+
+            Vector3 travel = targetBody && !targetBody.isKinematic
                 ? Vector3.ProjectOnPlane(targetBody.linearVelocity, Vector3.up)
                 : Vector3.zero;
             float speed = travel.magnitude;
@@ -48,7 +54,7 @@ namespace EchoMountain.Riding
             }
 
             Vector3 direction = Quaternion.Euler(0f, heading, 0f) * Vector3.forward;
-            Vector3 position = snap && targetBody ? targetBody.position : target.position;
+            Vector3 position = snap ? trackingPosition : target.position;
             Vector3 desired = position - direction * 6.5f + Vector3.up * 3f;
             transform.position = snap ? desired : Vector3.Lerp(transform.position, desired, damping);
             float lookAhead = Mathf.Lerp(3.5f, 8f, Mathf.InverseLerp(2f, 22f, speed));

@@ -125,6 +125,15 @@ namespace EchoMountain.Tests
                 Assert.That(run.IsPractice, Is.True);
                 Assert.That(run.Tricks.Points, Is.Zero);
                 Assert.That(body.position.z, Is.EqualTo(MountainRun.PracticeStart).Within(0.01f));
+
+                yield return null;
+                run.ShowStart();
+                yield return null;
+                yield return null;
+                var camera = GameObject.Find("Lab Camera").transform;
+                Assert.That(run.IsPractice, Is.False);
+                Assert.That(Vector3.Distance(camera.position, body.position), Is.LessThan(8f),
+                    "The camera should snap to the distant menu spawn.");
             }
             finally
             {

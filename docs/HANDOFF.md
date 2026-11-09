@@ -111,3 +111,7 @@ The first mountain course is playable through results and retry on Windows. Use 
 ## Tricks checkpoint (2026-11-09 00:12 -05:00)
 
 The current course scene enables `TrickScore` and the original procedural sound component at runtime. No scene reauthoring is needed. Read `tricks-baseline.xml`, `tricks-regression.xml` and `tricks-build.log` in the isolated copy. The revised build outputs to `Builds/GlacierPass-Tricks`, keeping the previous Windows version available. Next, verify the revised standalone and move toward previous-run ghosts and replay.
+
+## Windows tricks playtest (2026-11-09 00:19 -05:00)
+
+Use `Builds/GlacierPass-Tricks/EchoMountain.exe` for the latest build. Review `tricks-final.xml`, `tricks-final-build.log`, and `tricks-final-player.log` in the isolated copy. The revised player passed Windows practice and a full Pine run before the last camera-only fix. Final startup and the 22-case regression passed after that fix. Physical inputs and listening remain open. Proceed toward local run records and replay.
