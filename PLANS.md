@@ -17,3 +17,5 @@ The Unity project is on 6000.3.28f1 with URP. The current physics step is 60 Hz.
 M1 covers the center-line descent, switch landing, high-speed seam, and basic recovery in PlayMode. The current standalone input check is pending. M2 has named keyboard and gamepad actions, pause/reset, a travel-aware camera, and an intermediate articulated rider. Finish the manual controls, rider/camera review, and device behavior checks before expanding the course.
 
 M3 is underway. Glacier Pass has two selectable lines, an 860 m connected surface, elapsed time and top speed, and a finish-to-retry flow. Both lines met the 60–90 second target in PlayMode. Tricks, scoring, audio, and replay remain open.
+
+Glacier Pass now includes spins, grabs, landing-based scoring, a short practice segment, and riding audio. Persistent records, replay, ghosts, and progression remain open.

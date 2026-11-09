@@ -17,6 +17,7 @@ namespace EchoMountain.Riding
         private float resumeTimeScale;
         internal bool IsPaused { get; private set; }
         internal bool ShowDiagnostics { get; set; } = true;
+        internal bool ShowTricks { get; set; }
 
         private void Awake() => rider = GetComponent<LabRider>();
 
@@ -64,14 +65,20 @@ namespace EchoMountain.Riding
             float width = Screen.width / scale;
             float height = Screen.height / scale;
 
-            DrawPanel(new Rect(18f, height - 176f, 275f, 158f));
-            GUI.Label(new Rect(34f, height - 167f, 240f, 22f), "RIDE CONTROLS", title);
-            GUI.Label(new Rect(34f, height - 142f, 240f, 24f), "A / D     Steer", text);
-            GUI.Label(new Rect(34f, height - 119f, 240f, 24f), "S             Brake", text);
-            GUI.Label(new Rect(34f, height - 96f, 240f, 24f), "SPACE   Pop", text);
-            GUI.Label(new Rect(34f, height - 73f, 240f, 24f), "R             Reset", text);
-
-            GUI.Label(new Rect(34f, height - 50f, 240f, 24f), "ESC         Pause", text);
+            float trickOffset = ShowTricks ? 47f : 0f;
+            float controlTop = height - 176f - trickOffset;
+            DrawPanel(new Rect(18f, controlTop, 275f, 158f + trickOffset));
+            GUI.Label(new Rect(34f, controlTop + 9f, 240f, 22f), "RIDE CONTROLS", title);
+            GUI.Label(new Rect(34f, controlTop + 34f, 240f, 24f), "A / D     Steer", text);
+            GUI.Label(new Rect(34f, controlTop + 57f, 240f, 24f), "S             Brake", text);
+            GUI.Label(new Rect(34f, controlTop + 80f, 240f, 24f), "SPACE   Pop", text);
+            GUI.Label(new Rect(34f, controlTop + 103f, 240f, 24f), "R             Reset", text);
+            GUI.Label(new Rect(34f, controlTop + 126f, 240f, 24f), "ESC         Pause", text);
+            if (ShowTricks)
+            {
+                GUI.Label(new Rect(34f, controlTop + 149f, 240f, 24f), "Z / C       Spin in the air", text);
+                GUI.Label(new Rect(34f, controlTop + 172f, 240f, 24f), "Q / E      Indy / Melon", text);
+            }
 
             if (ShowDiagnostics)
             {

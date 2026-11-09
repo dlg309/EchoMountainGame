@@ -25,6 +25,12 @@ namespace EchoMountain.Riding
         private Rigidbody body;
         private LabRideControls controls;
         private LabHud hud;
+        private TrickScore tricks;
+        private float spinInput;
+        private bool spinEngaged;
+        private BoardGrab grabInput;
+        public BoardGrab ActiveGrab => tricks?.CurrentGrab ?? BoardGrab.None;
+        internal void EnableTricks(TrickScore score) => tricks = score;
         private PhysicsMaterial boardMaterial;
         public bool IsGrounded => contact;
         public float BrakeInput => brake;
@@ -81,18 +87,25 @@ namespace EchoMountain.Riding
             if (toggledPause) hud.SetPaused(!hud.IsPaused);
             if (toggledPause || hud.IsPaused)
             {
-                steer = brake = bufferedJump = 0f;
+                steer = brake = bufferedJump = spinInput = 0f;
+                grabInput = BoardGrab.None;
                 return;
             }
 
             steer = controls.Steer;
             brake = controls.Brake;
+            if (tricks != null)
+            {
+                spinInput = controls.Spin;
+                grabInput = controls.Grab;
+            }
             if (controls.Pop.WasPressedThisFrame()) RequestJump();
             if (controls.Reset.WasPressedThisFrame() || body.position.y < resetBelow) ResetRider();
         }
 
         private void FixedUpdate()
         {
+            tricks?.Tick(Time.fixedDeltaTime);
             if (recoveryRemaining > 0f)
             {
                 recoveryRemaining -= Time.fixedDeltaTime;
@@ -154,9 +167,12 @@ namespace EchoMountain.Riding
                 if (LastLanding == LandingOutcome.Bail) recoveryRemaining = 1.25f;
                 landingArmed = false;
                 landing = LastLanding.Value.ToString();
+                tricks?.Land(body.rotation.eulerAngles.y, LastLanding.Value);
             }
             if (contact)
             {
+                tricks?.CancelAir();
+                spinEngaged = false;
                 airborneTime = 0f;
                 supportedTime += Time.fixedDeltaTime;
                 if (supportedTime >= 0.2f) landingArmed = true;
@@ -167,6 +183,17 @@ namespace EchoMountain.Riding
                 airborneTime += Time.fixedDeltaTime;
                 lastAirVelocity = body.linearVelocity;
                 lastAirSpin = body.angularVelocity;
+                if (landingArmed && tricks != null)
+                {
+                    tricks.SampleAir(body.rotation.eulerAngles.y, grabInput, Time.fixedDeltaTime);
+                    spinEngaged |= Mathf.Abs(spinInput) > 0.05f;
+                    if (spinEngaged)
+                    {
+                        float target = spinInput * 9.2f;
+                        float acceleration = Mathf.Clamp((target - body.angularVelocity.y) * 18f, -145f, 145f);
+                        body.AddTorque(Vector3.up * acceleration, ForceMode.Acceleration);
+                    }
+                }
             }
             gripForce = 0f;
             if (contact)
@@ -226,6 +253,10 @@ namespace EchoMountain.Riding
             lastAirVelocity = lastAirSpin = Vector3.zero;
             LastLanding = null;
             LandingCount = 0;
+            steer = brake = slip = gripForce = spinInput = 0f;
+            spinEngaged = false;
+            grabInput = BoardGrab.None;
+            tricks?.Reset();
             ResetCount++;
         }
 

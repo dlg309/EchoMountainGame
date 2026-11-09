@@ -92,3 +92,9 @@ The user supplied a screenshot of the functioning repaired player that showed a 
 
 - The Windows x64 player build used `-batchmode -quit -buildTarget StandaloneWindows64 -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsMountain`. Exit 0. The window opened at 1280×720 with Direct3D 11 and PhysX. In the actual player, clicked both line selectors, selected Pine, clicked Drop in, observed the rider and progress mid-run, reached Results at 01:24.48 with a displayed 45 km/h top speed, and clicked Retry. Pine started again at 0% with the timer reset. No exception or error lines appeared in the inspected player log. Physical keyboard and gamepad input and a manually steered Summit run remain open. Automated Summit used a virtual gamepad.
 - The Windows archive contains 220 checked entries, including the executable, runtime, and game data. The repository build is at `Builds/GlacierPass`.
+
+## Tricks and jump practice
+
+- Reran the prior full PlayMode baseline in the isolated copy before editing. Exit 0, 19 passed. The revised full headless suite used `-batchmode -nographics -runTests -testPlatform PlayMode -testResults tricks-regression.xml -logFile tricks-regression.log`. Exit 0, 22 passed, 0 failed. Pine again completed in 84.49 s and Summit in 87.14 s with virtual steering.
+- In the actual Glacier Pass scene, virtual keyboard inputs opened practice, popped, spun, held a grab, and released the spin to settle for landing. The board measured about 184° for a clean 180 Indy worth 260 and 365° for a clean 360 Melon worth 450. Practice results held the points and retry reset the score and spawn. The score test also covers wraparound, no awards before landing, duplicate prevention, repetition, chain expiry, recover, and bail.
+- The three synthesized clips have a mute control and follow the run and pause state. This pass checks execution and controls. Listening and mix balance still need a pass.

@@ -107,3 +107,7 @@ Glacier Pass is generated and transferred alongside the preserved rider lab. Run
 ## Glacier Pass Windows verification (2026-11-08 23:56 -05:00)
 
 The first mountain course is playable through results and retry on Windows. Use `Builds/GlacierPass/EchoMountain.exe` and keep the complete build folder together. Pine was run through the actual player, and Summit passed with simulated steering in PlayMode. See `mountain-build.log` and `mountain-player.log` in the isolated snapshot. Resume with a physical input playtest or the next independent M3 feature, starting with tricks and landing-based scoring.
+
+## Tricks checkpoint (2026-11-09 00:12 -05:00)
+
+The current course scene enables `TrickScore` and the original procedural sound component at runtime. No scene reauthoring is needed. Read `tricks-baseline.xml`, `tricks-regression.xml` and `tricks-build.log` in the isolated copy. The revised build outputs to `Builds/GlacierPass-Tricks`, keeping the previous Windows version available. Next, verify the revised standalone and move toward previous-run ghosts and replay.

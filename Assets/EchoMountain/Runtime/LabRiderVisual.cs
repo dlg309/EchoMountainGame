@@ -21,6 +21,7 @@ namespace EchoMountain.Riding
         private float hipHeight = 0.91f;
         private float lean;
         private float tuck;
+        private readonly float[] grabBlend = new float[2];
 
         public void SetPalette(Material source) => paletteSource = source;
 
@@ -77,6 +78,7 @@ namespace EchoMountain.Riding
             rig.SetPositionAndRotation(transform.position, transform.rotation);
             float edge = rider.SteerInput;
             float targetHeight = rider.IsRecovering ? 0.59f : rider.IsGrounded ? 0.91f - 0.12f * Mathf.Abs(edge) : 0.76f;
+            if (rider.ActiveGrab != BoardGrab.None) targetHeight = Mathf.Min(targetHeight, 0.58f);
             hipHeight = Mathf.Lerp(hipHeight, targetHeight, blend);
             lean = Mathf.Lerp(lean, edge * 0.22f, blend);
             tuck = Mathf.Lerp(tuck, rider.IsGrounded ? 0f : 1f, blend);
@@ -103,6 +105,11 @@ namespace EchoMountain.Riding
                 Vector3 upper = shoulder + new Vector3(0f, 0f, side * 0.23f);
                 Vector3 elbow = upper + new Vector3(0.10f, -0.18f, side * 0.22f);
                 Vector3 hand = elbow + new Vector3(0.15f + tuck * 0.08f, -0.15f + side * lean, side * 0.05f);
+                BoardGrab edgeGrab = i == 0 ? BoardGrab.Indy : BoardGrab.Melon;
+                grabBlend[i] = Mathf.Lerp(grabBlend[i], rider.ActiveGrab == edgeGrab ? 1f : 0f, blend);
+                Vector3 boardEdge = new(-side * 0.263f, 0.14f, side * -0.06f);
+                hand = Vector3.Lerp(hand, boardEdge, grabBlend[i]);
+                elbow = Vector3.Lerp(elbow, (upper + hand) * 0.5f + new Vector3(0.04f, 0f, side * 0.15f), grabBlend[i]);
                 SetSegment(sleeves[i], upper, elbow, 0.15f, 0.15f, 0.08f);
                 SetSegment(forearms[i], elbow, hand, 0.13f, 0.13f, 0.08f);
                 gloves[i].localPosition = hand;

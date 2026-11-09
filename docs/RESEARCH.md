@@ -37,3 +37,7 @@ Unity's Brotli advisory, updated November 7, lists 6000.3.27f2 as the first fixe
 ## 2026-11-08 — Simulated frame cadence
 
 - Unity 6.3 documents `Time.captureFramerate` as the reciprocal of `Time.captureDeltaTime`. The lab test uses it to vary the frame time supplied to the engine while keeping physics at 60 Hz. This experiment measures simulation behavior across update cadences. Standalone frame times require separate measurement. https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/time/captureframerate
+
+## 2026-11-09 — Grab pose reference
+
+- Snowboard Addiction identifies Indy as the rear hand on the toe edge between the bindings and Melon as the front hand on the heel edge. The segmented rig uses those hand and edge combinations. The current pose is an approximation with board-mounted boots. https://snowboardaddiction.com/blogs/training-education/basic-grabs-on-a-snowboard
