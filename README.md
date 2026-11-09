@@ -1,15 +1,23 @@
-﻿# Echo Mountain
+# Echo Mountain
 
-Unity 6.3 LTS / URP snowboarding project. Current state: **physics laboratory in progress**, not a finished game. See [PLANS.md](PLANS.md) and [docs/STATUS.md](docs/STATUS.md) for milestones and the latest checkpoint.
+A Windows snowboarding project built with Unity 6.3 LTS and URP. The current playtest is a physics course with a slope, takeoff, landing, runout, and automatic recovery. The rider is an intermediate segmented rig with board-mounted boots and a pose that responds to steering and airtime.
 
-## Open the lab
+## Play the lab
 
-Open this repository folder in Unity Hub with Unity **6000.3.28f1**. The original diagnostic scene is `Assets/EchoMountain/Scenes/PhysicsLab.unity`; the contrast/marker version is `Assets/EchoMountain/Scenes/PhysicsLabReadable.unity`; the latest HUD version is `Assets/EchoMountain/Scenes/PhysicsLabHUD.unity`. Open the scene in the editor and press Play. The rider is a diagnostic primitive, not final character art.
+Run `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe` from its full build folder. To run in the editor, open the repository in Unity Hub with **6000.3.28f1**, load `Assets/EchoMountain/Scenes/PhysicsLabRider.unity`, and press Play.
 
-Controls: **A/D or left/right arrows** steer, **S or down arrow** brakes, **Space** pops, and **R** resets. A gamepad mapping is present but has not been verified on physical hardware. The speedometer and controls are on the lower corners; physics diagnostics appear at the upper right. Landing feedback is an initial diagnostic classification, not a full recovery system. There are no menus, scoring, saves or authored mountain yet.
+| Action | Keyboard | Gamepad |
+| --- | --- | --- |
+| Steer | A/D or Left/Right | Left stick |
+| Brake | S or Down | Left trigger |
+| Pop | Space | South button |
+| Reset | R | East button |
+| Pause or resume | Escape | Start |
 
-A previously built Windows diagnostic executable is at `Builds/PhysicsLab-Repaired/EchoMountainLab.exe` if present locally; build outputs are ignored by Git. It predates the higher-contrast scene. For a new development build use **Echo Mountain > Build Windows physics lab** after Unity imports the project; the command refuses to overwrite `Builds/PhysicsLab` if that folder already exists. Archive an old build to a safe location before rebuilding. Check `docs/QA.md` for tests actually run and remaining limitations.
+The pause panel also has Resume and Reset Run buttons. Gamepad actions have been checked with a virtual device. Physical gamepad testing is pending.
 
-The latest local diagnostic build, when present, is `Builds/PhysicsLab-Readable/EchoMountainLab.exe`. It was built and launched on November 8; it is still a work-in-progress lab, not a release build.
+## Build and verify
 
-The newest local lab build, when present, is `Builds/PhysicsLab-HUD/EchoMountainLab.exe`; its layout is awaiting visual review.
+Use **Echo Mountain → Build Windows lab playtest** to build the rider scene without the development profiler. The menu preserves existing output folders. Use **Echo Mountain → Build Windows physics lab** for a development build of the earlier HUD scene.
+
+Run **Window → General → Test Runner → PlayMode → Run All** in the editor. The tests cover support, simulated controls, landings, reset, the descent, the camera, and the rider pose. See the [QA record](docs/QA.md) and [milestones](PLANS.md).

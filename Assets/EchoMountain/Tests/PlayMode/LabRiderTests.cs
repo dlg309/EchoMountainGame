@@ -260,6 +260,41 @@ namespace EchoMountain.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator RiderRigKeepsBootsOnBoardDuringPop()
+        {
+            const string scenePath = "Assets/EchoMountain/Scenes/PhysicsLabRider.unity";
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Additive));
+            loadedLabScene = SceneManager.GetSceneByPath(scenePath);
+            var board = GameObject.Find("Diagnostic board");
+            Assert.That(board, Is.Not.Null);
+            var rider = board.GetComponent<LabRider>();
+            var rig = board.transform.parent.Find("Segmented rider");
+            Assert.That(rig, Is.Not.Null);
+            var boot = rig.Find("Front boot");
+            var jacket = rig.Find("Jacket");
+            Assert.That(boot, Is.Not.Null);
+            Assert.That(jacket, Is.Not.Null);
+
+            var fixedTick = new WaitForFixedUpdate();
+            for (int step = 0; step < 60; step++) yield return fixedTick;
+            yield return null;
+            Assert.That(rider.IsGrounded, Is.True);
+            Assert.That(rig.GetComponentsInChildren<Collider>(), Is.Empty, "The pose rig must not affect physics.");
+            var bootOffset = boot.localPosition;
+            float standingHeight = jacket.localPosition.y;
+
+            rider.RequestJump();
+            for (int step = 0; step < 24; step++) yield return fixedTick;
+            yield return null;
+            Assert.That(rider.IsGrounded, Is.False);
+            Assert.That(jacket.localPosition.y, Is.LessThan(standingHeight - 0.07f), "The rider should tuck in flight.");
+            Assert.That(boot.localPosition, Is.EqualTo(bootOffset));
+            Assert.That(Vector3.Distance(rig.position, board.transform.position), Is.LessThan(0.35f),
+                "The pose rig should follow the interpolated board pose.");
+            Assert.That(Vector3.Distance(boot.position, rig.TransformPoint(bootOffset)), Is.LessThan(0.01f));
+        }
+
         private static readonly int[] RenderCadences = { 30, 60, 120 };
 
         [UnityTest]

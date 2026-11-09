@@ -114,6 +114,30 @@ namespace EchoMountain.EditorTools
             Debug.Log("Created HUD lab scene without replacing original.");
         }
 
+        [MenuItem("Echo Mountain/Create articulated rider lab (once)")]
+        public static void CreateRiderScene()
+        {
+            const string source = "Assets/EchoMountain/Scenes/PhysicsLabHUD.unity";
+            const string destination = "Assets/EchoMountain/Scenes/PhysicsLabRider.unity";
+            if (System.IO.File.Exists(destination)) throw new InvalidOperationException("Rider lab already exists.");
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
+            var scene = EditorSceneManager.OpenScene(source);
+            var board = GameObject.Find("Diagnostic board");
+            if (!board) throw new InvalidOperationException("Diagnostic board missing.");
+            var placeholder = board.transform.Find("Diagnostic rider");
+            if (!placeholder) throw new InvalidOperationException("Diagnostic rider placeholder missing.");
+            var palette = AssetDatabase.LoadAssetAtPath<Material>(ArtPath + "/Board.mat");
+            if (!palette) throw new InvalidOperationException("Lab board material missing.");
+
+            placeholder.gameObject.SetActive(false);
+            board.AddComponent<EchoMountain.Riding.LabRiderVisual>().SetPalette(palette);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene, destination))
+                throw new InvalidOperationException("Could not save the articulated rider lab.");
+            AssetDatabase.SaveAssets();
+        }
+
         private static Material MakeMaterial(string name, Color color)
         {
             string path = ArtPath + "/" + name + ".mat";

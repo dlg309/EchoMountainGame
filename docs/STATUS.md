@@ -97,3 +97,11 @@ All 15 PlayMode tests passed. The center line through the existing HUD lab is ri
 ## Controls checkpoint (2026-11-08 23:02 -05:00)
 
 M2 is in progress. Added named keyboard/gamepad actions, Escape or Start to pause/resume, and Resume/Reset Run controls in the pause panel. All 16 PlayMode tests passed, including the virtual gamepad pause and recovery flow. The development build rendered its HUD, but the firewall prompt blocked input. The standalone playtest build without development profiling is running in the isolated snapshot. Next: launch and verify it, then continue the intermediate rider and camera review.
+
+## Rider checkpoint (2026-11-08 23:09 -05:00)
+
+Added the articulated lab rider in a separate scene and preserved the prior HUD scene. Unity generated the scene and the full PlayMode suite passed 17/17. The Windows rider build is running in the isolated copy. Next: verify its startup and manual controls where the desktop allows, then continue M2 rider/camera tuning and the first authored mountain run.
+
+## Windows rider playtest (2026-11-08 23:11 -05:00)
+
+The 17-case suite and Windows x64 rider playtest build succeeded. The player launched and rendered the HUD with a changing speed readout. The firewall dialog obstructed manual control and rider inspection. Latest executable: `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe`. Next: manual input and visual review, physical device behavior and camera tuning, then the first connected mountain run.

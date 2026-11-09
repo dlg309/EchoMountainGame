@@ -91,3 +91,11 @@ Read `%TEMP%/EchoMountain3D-Resume-b7aee1a6/camera-and-descent.xml` and its log 
 ## Controls checkpoint (2026-11-08 23:02 -05:00)
 
 See the 16-case result in `controls.xml` and the PlayMode log in the isolated snapshot. The current HUD scene now supports pause and resume via Escape or gamepad Start. The version without a development profiler is building. Inspect `build-playtest.log`, copy a successful result to a fresh build folder, and test the pause and reset flow in its window. Physical gamepad testing and the intermediate rider remain open.
+
+## Rider checkpoint (2026-11-08 23:09 -05:00)
+
+The current snapshot contains `PhysicsLabRider.unity`, a separate version of the physics lab with the board-mounted visual rig. Unity generated the scene successfully, and all 17 cases passed. Inspect `rider.xml`, `rider.log`, and `build-rider.log` in the isolated snapshot. Keep previous builds and scenes. The desktop firewall prompt prevented the earlier manual input check. Resume with the rider build, then continue M2 before the mountain slice.
+
+## Windows rider playtest (2026-11-08 23:11 -05:00)
+
+The latest Windows playtest is `Builds/PhysicsLab-RiderPlaytest/EchoMountainLab.exe`. It contains the articulated rider, pause panel, switch camera and verified 60 Hz physics. Review `build-rider.log` in the isolated snapshot and `rider-player.log` in the build folder. Startup and HUD rendering were observed. Interactive verification still requires clearing the desktop firewall dialog. Then ride a complete run, check input and camera, and continue the authored course.
