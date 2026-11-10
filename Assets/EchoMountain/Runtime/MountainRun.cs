@@ -17,6 +17,7 @@ namespace EchoMountain.Riding
         public const int PracticeGoal = 250;
         public bool IsPractice { get; private set; }
         public bool SoundEnabled { get; private set; } = true;
+        public LocalRunStore Records { get; private set; }
         public TrickScore Tricks { get; } = new();
         public float StartZ => IsPractice ? PracticeStart : MountainCourse.Start;
         public float FinishZ => IsPractice ? PracticeFinish : MountainCourse.Finish;
@@ -56,6 +57,9 @@ namespace EchoMountain.Riding
 
         private void Start()
         {
+            Records ??= LocalRunStore.OpenDefault();
+            SoundEnabled = Records.Data.sound;
+            Line = Records.Data.selectedLine;
             hud.ShowDiagnostics = false;
             hud.ShowTricks = true;
             body.maxAngularVelocity = Mathf.Max(body.maxAngularVelocity, 10f);
@@ -131,16 +135,19 @@ namespace EchoMountain.Riding
                 Tricks.CancelAir();
                 Phase = MountainPhase.Results;
                 SetRiding(false);
+                Records.Finish(Line, IsPractice, Elapsed, PeakSpeed, Tricks.Points, Application.version);
             }
         }
 
         public void SelectLine(MountainLine line)
         {
             if (Phase != MountainPhase.Ready) return;
+            bool changed = Line != line;
             Line = line;
             float x = MountainCourse.LaneX(line);
             body.position = MountainCourse.Point(x, StartZ, 0.15f);
             body.rotation = MountainCourse.Heading(x, StartZ);
+            if (changed) Records?.SetPreferences(SoundEnabled, Line);
         }
 
         public void StartRun()
@@ -170,6 +177,20 @@ namespace EchoMountain.Riding
             Phase = MountainPhase.Ready;
             SetRiding(false);
             SelectLine(Line);
+        }
+
+        // Allows scene integration tests to use a temporary store without touching player data.
+        public void UseRecords(LocalRunStore store)
+        {
+            if (Phase == MountainPhase.Riding || store == null) return;
+            Records = store;
+            SoundEnabled = store.Data.sound;
+        }
+
+        public void ToggleSound()
+        {
+            SoundEnabled = !SoundEnabled;
+            Records?.SetPreferences(SoundEnabled, Line);
         }
 
         private void SetRiding(bool active)
@@ -217,8 +238,8 @@ namespace EchoMountain.Riding
             else
             {
                 float x = (width - 644f) * 0.5f;
-                float y = (height - 366f) * 0.5f;
-                Panel(new Rect(x, y, 644f, 366f), LineColor);
+                float y = (height - 436f) * 0.5f;
+                Panel(new Rect(x, y, 644f, 436f), LineColor);
                 GUI.Label(new Rect(x + 29f, y + 20f, 580f, 27f), "ECHO MOUNTAIN    /    COURSE 01", eyebrow);
                 GUI.Label(new Rect(x + 27f, y + 48f, 590f, 70f),
                     Phase == MountainPhase.Ready ? "Glacier Pass" : IsPractice ? "Practice complete" : "Descent complete", headline);
@@ -242,6 +263,7 @@ namespace EchoMountain.Riding
                     if (GUI.Button(new Rect(x + 29f, y + 299f, 281f, 44f), "Retry  [Enter / A]", button)) StartRun();
                     if (GUI.Button(new Rect(x + 334f, y + 299f, 281f, 44f), "Choose line  [Esc / B]", button)) ShowStart();
                 }
+                DrawRecords(x + 29f, y + 353f);
             }
 
             GUI.color = color;
@@ -274,7 +296,18 @@ namespace EchoMountain.Riding
 
         private void SoundButton(Rect rect)
         {
-            if (GUI.Button(rect, SoundEnabled ? "Sound on" : "Sound off")) SoundEnabled = !SoundEnabled;
+            if (GUI.Button(rect, SoundEnabled ? "Sound on" : "Sound off")) ToggleSound();
+        }
+
+        private void DrawRecords(float x, float y)
+        {
+            var record = Records?.Record(Line, IsPractice);
+            string best = record?.fastest == null ? "Finish a run to set your first local record."
+                : $"Best {TimeText(record.fastest.seconds)}   /   {record.highestScore.points:N0} pts   /   {record.finishes} finishes";
+            GUI.Label(new Rect(x, y, 585f, 28f), best, eyebrow);
+            string saved = IsPractice && record?.highestScore?.points >= PracticeGoal
+                ? "Practice target achieved. " : "";
+            GUI.Label(new Rect(x, y + 29f, 585f, 34f), saved + (Records?.Notice ?? ""), GUI.skin.label);
         }
 
         private string LineName => Line == MountainLine.Pine ? "PINE LINE" : "SUMMIT LINE";

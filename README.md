@@ -23,6 +23,8 @@ The on-screen Pause button freezes the run and trick timer. Sound can be switche
 
 ### Scoring
 
+Completed runs also update local previous, fastest, and highest-score records for each line and jump practice. The practice target, sound preference, and last-selected line survive restart. Saves use a versioned JSON file with a backup under Unity's persistent data folder; invalid or incompatible data produces a visible notice. Editor tests use separate temporary stores.
+
 A completed 180 earns 180 base points and a 360 earns 360. Holding an Indy or Melon for 0.15 seconds adds 80 or 90 points. Release the spin input before touching down so the board can settle. The in-air display shows rotation and pending base points.
 
 A clean landing banks the points. A recovered landing earns half and ends the chain. A bail earns zero. Different clean tricks within eight seconds build a multiplier from ×1 to ×1.75. Consecutive repeats earn 60% of their usual value and restart the chain. For example, a clean 180 Indy starts at 260 points, followed by a clean 360 Melon for 562 points at ×1.25.

@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections;
+using System;
+using System.IO;
 using EchoMountain.Riding;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
@@ -16,6 +18,7 @@ namespace EchoMountain.Tests
         private static readonly MountainLine[] Lines = { MountainLine.Pine, MountainLine.Summit };
 
         private Scene loaded;
+        private string recordDirectory;
 
         [UnityTearDown]
         public IEnumerator UnloadCourse()
@@ -23,6 +26,8 @@ namespace EchoMountain.Tests
             if (loaded.IsValid() && loaded.isLoaded)
                 yield return SceneManager.UnloadSceneAsync(loaded);
             loaded = default;
+            if (recordDirectory != null && Directory.Exists(recordDirectory)) Directory.Delete(recordDirectory, true);
+            recordDirectory = null;
         }
 
         [UnityTest]
@@ -53,6 +58,9 @@ namespace EchoMountain.Tests
                 var run = board.GetComponent<MountainRun>();
                 var rider = board.GetComponent<LabRider>();
                 var body = board.GetComponent<Rigidbody>();
+                recordDirectory = Path.Combine(Path.GetTempPath(), "EchoMountain-SceneRecords-" + Guid.NewGuid().ToString("N"));
+                string recordPath = Path.Combine(recordDirectory, "runs.json");
+                run.UseRecords(new LocalRunStore(recordPath));
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Ready));
                 Assert.That(body.isKinematic, Is.True);
 
@@ -87,6 +95,13 @@ namespace EchoMountain.Tests
                 Assert.That(run.Progress, Is.EqualTo(1f));
                 Assert.That(body.isKinematic, Is.True);
 
+                var saved = new LocalRunStore(recordPath);
+                Assert.That(saved.Record(line, false).finishes, Is.EqualTo(1));
+                Assert.That(saved.Record(line, false).previous.seconds, Is.EqualTo(run.Elapsed).Within(0.001f));
+                for (int frame = 0; frame < 3; frame++) yield return null;
+                Assert.That(new LocalRunStore(recordPath).Record(line, false).finishes, Is.EqualTo(1),
+                    "Results must not bank a completed run more than once.");
+
                 run.StartRun();
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding));
                 Assert.That(body.isKinematic, Is.False);
@@ -94,6 +109,8 @@ namespace EchoMountain.Tests
                 Assert.That(run.PeakSpeed, Is.Zero);
                 Assert.That(body.position.z, Is.EqualTo(MountainCourse.Start).Within(0.01f));
                 Assert.That(body.position.x, Is.EqualTo(MountainCourse.LaneX(line)).Within(0.01f));
+                Assert.That(new LocalRunStore(recordPath).Record(line, false).finishes, Is.EqualTo(1),
+                    "Retry must leave the stored completed run intact.");
             }
             finally
             {

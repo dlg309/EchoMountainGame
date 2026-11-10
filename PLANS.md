@@ -18,4 +18,6 @@ M1 covers the center-line descent, switch landing, high-speed seam, and basic re
 
 M3 is underway. Glacier Pass has two selectable lines, an 860 m connected surface, elapsed time and top speed, and a finish-to-retry flow. Both lines met the 60–90 second target in PlayMode. Tricks, scoring, audio, and replay remain open.
 
-Glacier Pass now includes spins, grabs, landing-based scoring, a short practice segment, and riding audio. Persistent records, replay, ghosts, and progression remain open.
+Glacier Pass now includes spins, grabs, landing-based scoring, a short practice segment, and riding audio.
+
+2026-11-09: Local route/practice records, practice-goal status, sound and last-line preferences now persist through versioned recoverable files. The full 28-case Unity regression passed, including one-bank-per-finish and disk reload for both routes. Snapshot replay is the next M3 implementation step, followed by basic snow spray and the Windows acceptance flow. Standalone persistence, M1/M2 hardware review, ghosts and further progression remain open.
