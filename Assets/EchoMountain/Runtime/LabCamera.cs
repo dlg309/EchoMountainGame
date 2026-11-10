@@ -11,6 +11,12 @@ namespace EchoMountain.Riding
         private uint lastReset;
         private float heading;
         private Vector3 lastTargetPosition;
+        private bool forceSnap, replayTravel;
+        private Vector3 recordedVelocity;
+
+        public void SnapNextFrame() => forceSnap = true;
+        public void SetReplayTravel(Vector3 velocity) { replayTravel = true; recordedVelocity = velocity; }
+        public void ClearReplayTravel() => replayTravel = false;
 
         public void SetTarget(Transform value) => target = value;
 
@@ -18,8 +24,10 @@ namespace EchoMountain.Riding
         {
             if (!target) return;
 
-            bool snap = target != followedTarget;
-            if (snap)
+            bool changed = target != followedTarget;
+            bool snap = changed || forceSnap;
+            forceSnap = false;
+            if (changed)
             {
                 followedTarget = target;
                 targetBody = target.GetComponent<Rigidbody>();
@@ -37,7 +45,7 @@ namespace EchoMountain.Riding
             snap |= (trackingPosition - lastTargetPosition).sqrMagnitude > 32f * 32f;
             lastTargetPosition = trackingPosition;
 
-            Vector3 travel = targetBody && !targetBody.isKinematic
+            Vector3 travel = replayTravel ? Vector3.ProjectOnPlane(recordedVelocity, Vector3.up) : targetBody && !targetBody.isKinematic
                 ? Vector3.ProjectOnPlane(targetBody.linearVelocity, Vector3.up)
                 : Vector3.zero;
             float speed = travel.magnitude;

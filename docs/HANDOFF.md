@@ -1,10 +1,10 @@
 # Handoff
 
-## Current resume — 2026-11-09 20:24 EST (local records checkpoint)
+## Current resume — 2026-11-09 20:30 EST (saves and replay checkpoint)
 
 Use `C:\Users\diego\EchoMountainGame`, branch `main`, stable base `5ee28f3`. The historical entries below are retained for provenance, not current instructions. The actual closed project reproduced 22/22 tests in `Logs/Resume-20261109/baseline.xml`; `baseline.log` records test exit 0. The installed editor is still 6000.3.28f1. Earlier ignored builds and QA snapshots are not present here.
 
-Local records/settings passed the full 28/28 regression with process exit 0 (`records-final.xml`, `records-final.log`). The tests cover disk restart/recovery and actual course one-bank-per-finish/retry. No task Unity process remains. Never force locks. Next: implement bounded snapshot replay, rerun regression, and build a fresh Windows player to verify cold launch, saved records and replay. Earlier ignored player builds are unavailable here. Preserve user scenes and GUIDs. Hardware input, listening and M1/M2 review remain pending. Inspect Git for the save checkpoint commit after `5ee28f3`.
+Local records/settings were committed as `7be5d0a` (28/28 tests). Snapshot replay then passed 30/30 with process exit 0 (`replay.xml`, `replay.log`). Inspect Git for the newer replay checkpoint. Replay is memory-only, bounded to three minutes, and does not simulate physics, bank points or submit records. Use Results > Replay (V / gamepad West); Space/South pauses, arrows/D-pad seek, H/North hides the overlay, Escape/East returns to results. No task Unity process remains. Never force locks. Next: basic snow spray, full regression, fresh Windows player and actual save/replay/retry/restart checks. Earlier ignored player builds are unavailable here. Preserve user scenes and GUIDs. Physical input, listening, persistent replay/ghosts and M1/M2 review remain pending.
 
 As of 2026-11-06 19:29 EST this is a **partial M0**, not a playable game. Read `AGENTS.md`, `PLANS.md`, `docs/STATUS.md`, `docs/QA.md`, and `docs/BUILD_BRIEF.md`; inspect Git and relevant nested instructions. Repository: `C:\Users\diego\OneDrive\Documents\EchoMountainGame`, branch `main`; original brief commit `fcb144a` was the base at documentation time. Check current HEAD and working tree before continuing.
 

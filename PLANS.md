@@ -20,4 +20,4 @@ M3 is underway. Glacier Pass has two selectable lines, an 860 m connected surfac
 
 Glacier Pass now includes spins, grabs, landing-based scoring, a short practice segment, and riding audio.
 
-2026-11-09: Local route/practice records, practice-goal status, sound and last-line preferences now persist through versioned recoverable files. The full 28-case Unity regression passed, including one-bank-per-finish and disk reload for both routes. Snapshot replay is the next M3 implementation step, followed by basic snow spray and the Windows acceptance flow. Standalone persistence, M1/M2 hardware review, ghosts and further progression remain open.
+2026-11-09: Local route/practice records, practice-goal status, sound and last-line preferences now persist through versioned recoverable files. Snapshot replay provides pause, seeking, speed and HUD hiding. The full 30-case Unity regression passed, including both routes' record banking, replay isolation and retry. Next: basic snow spray and the actual Windows acceptance flow. Standalone persistence/replay, M1/M2 hardware review, persistent ghosts and further progression remain open.

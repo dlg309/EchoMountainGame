@@ -23,6 +23,8 @@ The on-screen Pause button freezes the run and trick timer. Sound can be switche
 
 ### Scoring
 
+From Results, select **Replay [V / gamepad West]** to watch the current completed attempt. Space/South pauses; arrows/D-pad seek five seconds; use the slider and 0.5x/1x/2x buttons for review. H/North hides or restores the overlay; Escape/East returns to Results. Replay uses recorded motion and poses, disables collisions and riding, and leaves scores and records unchanged. Recordings are limited to three minutes and remain in memory until retry or exit. Saved ghosts and replay files are still pending.
+
 Completed runs also update local previous, fastest, and highest-score records for each line and jump practice. The practice target, sound preference, and last-selected line survive restart. Saves use a versioned JSON file with a backup under Unity's persistent data folder; invalid or incompatible data produces a visible notice. Editor tests use separate temporary stores.
 
 A completed 180 earns 180 base points and a 360 earns 360. Holding an Indy or Melon for 0.15 seconds adds 80 or 90 points. Release the spin input before touching down so the board can settle. The in-air display shows rotation and pending base points.
