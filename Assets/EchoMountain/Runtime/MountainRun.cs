@@ -70,6 +70,7 @@ namespace EchoMountain.Riding
             rider.EnableTricks(Tricks);
             gameObject.AddComponent<MountainRideAudio>();
             Replay = gameObject.AddComponent<MountainReplay>();
+            gameObject.AddComponent<MountainSnowSpray>();
             ShowStart();
         }
 

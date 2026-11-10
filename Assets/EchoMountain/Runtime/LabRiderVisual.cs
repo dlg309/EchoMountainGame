@@ -49,13 +49,13 @@ namespace EchoMountain.Riding
 
         private void Awake()
         {
+            rider = GetComponent<LabRider>();
             if (!paletteSource)
             {
                 enabled = false;
                 return;
             }
 
-            rider = GetComponent<LabRider>();
             rig = new GameObject("Segmented rider").transform;
             rig.SetParent(transform.parent, false);
             trousers = MakeMaterial("Slate trousers", new Color(0.10f, 0.19f, 0.25f));

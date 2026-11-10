@@ -68,6 +68,9 @@ namespace EchoMountain.Tests
                 run.StartRun();
                 uint resets = rider.ResetCount;
                 int landings = 0;
+                bool sawSpray = false;
+                var spray = board.GetComponent<MountainSnowSpray>();
+                Assert.That(spray.enabled, Is.True, "The owned particle material must be included.");
                 float furthest = body.position.z;
                 float maximumLaneOffset = 0f;
                 float laneX = MountainCourse.LaneX(line);
@@ -83,6 +86,8 @@ namespace EchoMountain.Tests
                         InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = Vector2.right * steer });
                     }
                     yield return null;
+                    sawSpray |= spray.ParticleCount > 0;
+                    Assert.That(spray.ParticleCount, Is.LessThanOrEqualTo(MountainSnowSpray.ParticleLimit));
                     furthest = Mathf.Max(furthest, body.position.z);
                     landings = Mathf.Max(landings, rider.LandingCount);
                     maximumLaneOffset = Mathf.Max(maximumLaneOffset, Mathf.Abs(body.position.x - laneX));
@@ -94,6 +99,7 @@ namespace EchoMountain.Tests
                 if (line == MountainLine.Summit) Assert.That(landings, Is.GreaterThan(0), "Summit must include a natural landing.");
                 Assert.That(run.Progress, Is.EqualTo(1f));
                 Assert.That(body.isKinematic, Is.True);
+                Assert.That(sawSpray, Is.True, "Supported riding should emit cosmetic snow.");
 
                 var saved = new LocalRunStore(recordPath);
                 Assert.That(saved.Record(line, false).finishes, Is.EqualTo(1));
@@ -130,8 +136,15 @@ namespace EchoMountain.Tests
                 Assert.That(run.Replay.Cursor, Is.LessThan(midpoint + 0.05f));
                 run.Replay.SetPlaying(false);
                 run.Replay.Scrub(run.Replay.Clip.Duration);
-                run.EndReplay();
+                if (pad != null)
+                {
+                    InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.East));
+                    yield return null;
+                    yield return null;
+                }
+                else run.EndReplay();
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Results));
+                Assert.That(spray.ParticleCount, Is.Zero, "Results and replay must clear cosmetic effects.");
                 Assert.That(Vector3.Distance(body.position, finishedPosition), Is.LessThan(0.001f));
                 Assert.That(board.GetComponent<Collider>().enabled, Is.True);
                 Assert.That(body.isKinematic, Is.True);

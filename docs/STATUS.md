@@ -1,12 +1,14 @@
 # Status
 
-## Current resume — 2026-11-09 20:30 EST (saves and replay verified in Unity)
+## Current resume — 2026-11-09 20:35 EST (Windows verification in progress)
 
 The current repository is `C:\Users\diego\EchoMountainGame`, branch `main`, resumed clean at `5ee28f3`. This section supersedes the historical location and process information below. No editor or player was running at resume; no lock was forced. Unity 6000.3.28f1, URP 17.3.0, Input System 1.20.1 and the existing scene GUIDs were retained.
 
 Reproduced the stable baseline in the actual closed project: 22/22 PlayMode tests passed; `Logs/Resume-20261109/baseline.xml` and `baseline.log` contain the evidence, including Unity's test-run exit code 0. This machine is Ryzen 5 5600X / RTX 3060 / approximately 32 GiB RAM, different from the prior recorded laptop. Ignored caches and earlier Builds are absent in this workspace; do not claim the older executable was relaunched.
 
-Local records/settings checkpoint is `7be5d0a` (28/28 tests). The new snapshot replay passed 30/30, process exit 0 (`replay.xml`, `replay.log`). It captures 20 Hz board/visual state plus discrete score/landing events, course/rules/assist/build/stance metadata; storage is capped at 180 seconds / 3602 frames. Replay provides pause, seeking, speed, HUD hiding and return to results. Both full routes verified collision/riding disabled during playback, exact sampled position, paused cursor, half-speed advance, restored result position, unchanged score/record and fresh recording on retry. Replay is memory-only for the current completed attempt; restart persistence/ghosts are M4 work. No Unity process remains. Next: basic bounded snow spray, then regression and a fresh Windows build with cold-launch/save/replay/retry verification. Standalone persistence, physical input, listening, and remaining M1/M2 review remain open; no milestone gate was silently marked complete.
+Local records/settings checkpoint is `7be5d0a` (28/28 tests), snapshot replay is `375e1fe` (30/30). Basic bounded contact/landing snow spray and the owned URP material now also passed the complete 30/30 suite, process exit 0 (`slice-final.xml`, `slice-final.log`). Summit's virtual gamepad replay exit stayed on Results, and both routes emitted <=160 cosmetic particles with cleanup outside Riding. Replay is memory-only for the current attempt, capped at 180 seconds / 3602 frames; audio/particles are suppressed in playback.
+
+Unity batch PID 28200 is building the fresh Windows player via `LabBuild.BuildWindowsMountain`; inspect actual process and `Logs/Resume-20261109/windows-build.log` before another Unity launch. Output is `Builds/GlacierPass-Replay/EchoMountain.exe`, preserving earlier build paths. Import/build caused unrelated template/URP settings serialization; compare against the clean starting tree and restore only these generated changes after the process exits. Next: check build exit/artifacts, launch and verify actual save/replay/retry/restart, update evidence and checkpoint. Physical hardware, listening, persistent replay/ghosts and remaining M1/M2 review remain open; no milestone gate was silently marked complete.
 
 Checkpoint: 2026-11-06 19:29 EST (partial foundation).
 
