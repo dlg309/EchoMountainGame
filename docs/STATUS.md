@@ -1,5 +1,19 @@
 # Status
 
+## Current integrated checkpoint, 2026-11-11
+
+The remote branch added local route records, bounded in-memory replay, and snow spray. This checkout added continuous-grab, finish-after-landing, and retryable-build fixes, plus the snowboard research blueprint. The combined source passed 32/32 Unity 6000.3.28f1 PlayMode tests in the isolated QA project. A fresh Windows x64 build succeeded and its player launched responsively with Direct3D 11 and Input System initialization and no inspected startup errors. The current build is `Builds/GlacierPass-Integrated/EchoMountain.exe`; the complete ZIP is in the Codex task `outputs` folder. See `docs/QA.md` and `agent-context/01-GAME-IDEAS.md`. Physical controller input, listening, save/restart in the standalone player, and a visual replay playtest remain open.
+
+## Current resume — 2026-11-09 20:35 EST (Windows verification in progress)
+
+The current repository is `C:\Users\diego\EchoMountainGame`, branch `main`, resumed clean at `5ee28f3`. This section supersedes the historical location and process information below. No editor or player was running at resume; no lock was forced. Unity 6000.3.28f1, URP 17.3.0, Input System 1.20.1 and the existing scene GUIDs were retained.
+
+Reproduced the stable baseline in the actual closed project: 22/22 PlayMode tests passed; `Logs/Resume-20261109/baseline.xml` and `baseline.log` contain the evidence, including Unity's test-run exit code 0. This machine is Ryzen 5 5600X / RTX 3060 / approximately 32 GiB RAM, different from the prior recorded laptop. Ignored caches and earlier Builds are absent in this workspace; do not claim the older executable was relaunched.
+
+Local records/settings checkpoint is `7be5d0a` (28/28 tests), snapshot replay is `375e1fe` (30/30). Basic bounded contact/landing snow spray and the owned URP material now also passed the complete 30/30 suite, process exit 0 (`slice-final.xml`, `slice-final.log`). Summit's virtual gamepad replay exit stayed on Results, and both routes emitted <=160 cosmetic particles with cleanup outside Riding. Replay is memory-only for the current attempt, capped at 180 seconds / 3602 frames; audio/particles are suppressed in playback.
+
+Unity batch PID 28200 is building the fresh Windows player via `LabBuild.BuildWindowsMountain`; inspect actual process and `Logs/Resume-20261109/windows-build.log` before another Unity launch. Output is `Builds/GlacierPass-Replay/EchoMountain.exe`, preserving earlier build paths. Import/build caused unrelated template/URP settings serialization; compare against the clean starting tree and restore only these generated changes after the process exits. Next: check build exit/artifacts, launch and verify actual save/replay/retry/restart, update evidence and checkpoint. Physical hardware, listening, persistent replay/ghosts and remaining M1/M2 review remain open; no milestone gate was silently marked complete.
+
 ## 2026-11-11 checkpoint
 
 The latest debugged Glacier Pass source has a continuous grab-hold rule and finishes only after the board lands. Unity 6000.3.28f1 passed 24/24 PlayMode tests in an isolated copy. The failed-build retry path was reproduced and repaired, and the rebuilt Windows player launched without inspected startup errors. `Builds/GlacierPass-Debugged` contains the current player; the complete ZIP is in the Codex task `outputs` folder. Research and a terrain-response implementation blueprint are in `agent-context/01-GAME-IDEAS.md`. ICM toolkit tests pass 13/13. Manual physical input, sound, terrain feel, persistent records, ghost, and replay remain open.

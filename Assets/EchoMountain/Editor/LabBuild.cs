@@ -21,7 +21,7 @@ namespace EchoMountain.EditorTools
 
         [MenuItem("Echo Mountain/Build Windows Glacier Pass")]
         public static void BuildWindowsMountain() =>
-            BuildPlayer(MountainBuilder.ScenePath, "Builds/GlacierPass-Tricks/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
+            BuildPlayer(MountainBuilder.ScenePath, "Builds/GlacierPass-Replay/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
 
         private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName)
         {

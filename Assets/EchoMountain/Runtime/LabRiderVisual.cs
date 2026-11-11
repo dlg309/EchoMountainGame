@@ -22,18 +22,40 @@ namespace EchoMountain.Riding
         private float lean;
         private float tuck;
         private readonly float[] grabBlend = new float[2];
+        private bool replaying;
+        private float replayEdge;
+
+        public RiderVisualPose CapturePose() => new()
+        {
+            edge = replaying ? replayEdge : rider.SteerInput, hipHeight = hipHeight,
+            lean = lean, tuck = tuck, indy = grabBlend[0], melon = grabBlend[1]
+        };
+
+        public void ApplyReplayPose(RiderVisualPose pose)
+        {
+            replaying = true;
+            replayEdge = pose.edge;
+            hipHeight = pose.hipHeight;
+            lean = pose.lean;
+            tuck = pose.tuck;
+            grabBlend[0] = pose.indy;
+            grabBlend[1] = pose.melon;
+            if (rig) Pose(0f);
+        }
+
+        public void ClearReplayPose() => replaying = false;
 
         public void SetPalette(Material source) => paletteSource = source;
 
         private void Awake()
         {
+            rider = GetComponent<LabRider>();
             if (!paletteSource)
             {
                 enabled = false;
                 return;
             }
 
-            rider = GetComponent<LabRider>();
             rig = new GameObject("Segmented rider").transform;
             rig.SetParent(transform.parent, false);
             trousers = MakeMaterial("Slate trousers", new Color(0.10f, 0.19f, 0.25f));
@@ -68,6 +90,7 @@ namespace EchoMountain.Riding
 
         private void LateUpdate()
         {
+            if (replaying) { Pose(0f); return; }
             float blend = lastReset != rider.ResetCount ? 1f : 1f - Mathf.Exp(-12f * Time.deltaTime);
             lastReset = rider.ResetCount;
             Pose(blend);
@@ -76,7 +99,7 @@ namespace EchoMountain.Riding
         private void Pose(float blend)
         {
             rig.SetPositionAndRotation(transform.position, transform.rotation);
-            float edge = rider.SteerInput;
+            float edge = replaying ? replayEdge : rider.SteerInput;
             float targetHeight = rider.IsRecovering ? 0.59f : rider.IsGrounded ? 0.91f - 0.12f * Mathf.Abs(edge) : 0.76f;
             if (rider.ActiveGrab != BoardGrab.None) targetHeight = Mathf.Min(targetHeight, 0.58f);
             hipHeight = Mathf.Lerp(hipHeight, targetHeight, blend);

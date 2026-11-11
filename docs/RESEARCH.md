@@ -38,6 +38,12 @@ Unity's Brotli advisory, updated November 7, lists 6000.3.27f2 as the first fixe
 
 - Unity 6.3 documents `Time.captureFramerate` as the reciprocal of `Time.captureDeltaTime`. The lab test uses it to vary the frame time supplied to the engine while keeping physics at 60 Hz. This experiment measures simulation behavior across update cadences. Standalone frame times require separate measurement. https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/time/captureframerate
 
+## 2026-11-09 — Resume references
+
+- Rechecked https://unity.com/security, https://unity.com/security/unity-emudhra-compromise and https://gw-prd.hexagon.unity.com/security/unity-brotli-decoder-vulnerability. Both October 2026 advisory tables list 6000.3.27f2 as the first patched 6.3 LTS editor. The project's installed 6000.3.28f1 is later; retaining it is an advisory-specific inference, not a general security certification. No release-stream or package upgrade is needed for these findings.
+- https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/application/persistentdatapath documents the Windows persistent location under LocalLow/company/product. Keep the product identity stable across player builds; isolate automated-test files from player records.
+- https://docs.unity.com/en-us/engine/6000.3/script-reference/unityengine/jsonutility/fromjson documents construction/default behavior and missing JSON fields. Proposed save implementation explicitly validates schema, metadata, required objects, collection bounds and numeric ranges after deserialization; successful parsing alone will not establish validity. Actual save tests remain pending at this entry.
+
 ## 2026-11-09 — Grab pose reference
 
 - Snowboard Addiction identifies Indy as the rear hand on the toe edge between the bindings and Melon as the front hand on the heel edge. The segmented rig uses those hand and edge combinations. The current pose is an approximation with board-mounted boots. https://snowboardaddiction.com/blogs/training-education/basic-grabs-on-a-snowboard

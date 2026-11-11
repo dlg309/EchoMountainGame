@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections;
+using System;
+using System.IO;
 using EchoMountain.Riding;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
@@ -16,6 +18,7 @@ namespace EchoMountain.Tests
         private static readonly MountainLine[] Lines = { MountainLine.Pine, MountainLine.Summit };
 
         private Scene loaded;
+        private string recordDirectory;
 
         [UnityTearDown]
         public IEnumerator UnloadCourse()
@@ -23,6 +26,8 @@ namespace EchoMountain.Tests
             if (loaded.IsValid() && loaded.isLoaded)
                 yield return SceneManager.UnloadSceneAsync(loaded);
             loaded = default;
+            if (recordDirectory != null && Directory.Exists(recordDirectory)) Directory.Delete(recordDirectory, true);
+            recordDirectory = null;
         }
 
         [UnityTest]
@@ -53,6 +58,9 @@ namespace EchoMountain.Tests
                 var run = board.GetComponent<MountainRun>();
                 var rider = board.GetComponent<LabRider>();
                 var body = board.GetComponent<Rigidbody>();
+                recordDirectory = Path.Combine(Path.GetTempPath(), "EchoMountain-SceneRecords-" + Guid.NewGuid().ToString("N"));
+                string recordPath = Path.Combine(recordDirectory, "runs.json");
+                run.UseRecords(new LocalRunStore(recordPath));
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Ready));
                 Assert.That(body.isKinematic, Is.True);
 
@@ -60,6 +68,9 @@ namespace EchoMountain.Tests
                 run.StartRun();
                 uint resets = rider.ResetCount;
                 int landings = 0;
+                bool sawSpray = false;
+                var spray = board.GetComponent<MountainSnowSpray>();
+                Assert.That(spray.enabled, Is.True, "The owned particle material must be included.");
                 float furthest = body.position.z;
                 float maximumLaneOffset = 0f;
                 float laneX = MountainCourse.LaneX(line);
@@ -75,6 +86,8 @@ namespace EchoMountain.Tests
                         InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = Vector2.right * steer });
                     }
                     yield return null;
+                    sawSpray |= spray.ParticleCount > 0;
+                    Assert.That(spray.ParticleCount, Is.LessThanOrEqualTo(MountainSnowSpray.ParticleLimit));
                     furthest = Mathf.Max(furthest, body.position.z);
                     landings = Mathf.Max(landings, rider.LandingCount);
                     maximumLaneOffset = Mathf.Max(maximumLaneOffset, Mathf.Abs(body.position.x - laneX));
@@ -86,6 +99,59 @@ namespace EchoMountain.Tests
                 if (line == MountainLine.Summit) Assert.That(landings, Is.GreaterThan(0), "Summit must include a natural landing.");
                 Assert.That(run.Progress, Is.EqualTo(1f));
                 Assert.That(body.isKinematic, Is.True);
+                Assert.That(sawSpray, Is.True, "Supported riding should emit cosmetic snow.");
+
+                var saved = new LocalRunStore(recordPath);
+                Assert.That(saved.Record(line, false).finishes, Is.EqualTo(1));
+                Assert.That(saved.Record(line, false).previous.seconds, Is.EqualTo(run.Elapsed).Within(0.001f));
+                for (int frame = 0; frame < 3; frame++) yield return null;
+                Assert.That(new LocalRunStore(recordPath).Record(line, false).finishes, Is.EqualTo(1),
+                    "Results must not bank a completed run more than once.");
+
+                Vector3 finishedPosition = body.position;
+                float finishedTime = run.Elapsed;
+                int finishedScore = run.Tricks.Points;
+                Assert.That(run.Replay.Clip.CanReplay, Is.True);
+                Assert.That(run.Replay.Clip.Duration, Is.EqualTo(run.Elapsed).Within(0.001f));
+                Assert.That(run.Replay.Clip.Count, Is.LessThanOrEqualTo(RunRecording.MaximumFrames));
+                run.StartReplay();
+                Assert.That(run.Phase, Is.EqualTo(MountainPhase.Replay));
+                Assert.That(rider.enabled, Is.False);
+                Assert.That(board.GetComponent<Collider>().enabled, Is.False);
+                run.Replay.SetPlaying(false);
+                run.Replay.Scrub(0f);
+                Assert.That(body.position.z, Is.EqualTo(MountainCourse.Start).Within(0.01f));
+                float midpoint = run.Replay.Clip.Duration * 0.5f;
+                run.Replay.Scrub(midpoint);
+                Vector3 recordedPosition = run.Replay.Clip.Sample(midpoint).position;
+                Assert.That(Vector3.Distance(body.position, recordedPosition), Is.LessThan(0.001f));
+                yield return null;
+                yield return null;
+                Assert.That(run.Replay.Cursor, Is.EqualTo(midpoint).Within(0.001f), "Paused replay must not advance.");
+                run.Replay.SetSpeed(0.5f);
+                run.Replay.SetPlaying(true);
+                yield return null;
+                yield return null;
+                Assert.That(run.Replay.Cursor, Is.GreaterThan(midpoint));
+                Assert.That(run.Replay.Cursor, Is.LessThan(midpoint + 0.05f));
+                run.Replay.SetPlaying(false);
+                run.Replay.Scrub(run.Replay.Clip.Duration);
+                if (pad != null)
+                {
+                    InputSystem.QueueStateEvent(pad, new GamepadState().WithButton(GamepadButton.East));
+                    yield return null;
+                    yield return null;
+                }
+                else run.EndReplay();
+                Assert.That(run.Phase, Is.EqualTo(MountainPhase.Results));
+                Assert.That(spray.ParticleCount, Is.Zero, "Results and replay must clear cosmetic effects.");
+                Assert.That(Vector3.Distance(body.position, finishedPosition), Is.LessThan(0.001f));
+                Assert.That(board.GetComponent<Collider>().enabled, Is.True);
+                Assert.That(body.isKinematic, Is.True);
+                Assert.That(run.Elapsed, Is.EqualTo(finishedTime));
+                Assert.That(run.Tricks.Points, Is.EqualTo(finishedScore));
+                Assert.That(new LocalRunStore(recordPath).Record(line, false).finishes, Is.EqualTo(1),
+                    "Playback must not resubmit records.");
 
                 run.StartRun();
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding));
@@ -94,6 +160,10 @@ namespace EchoMountain.Tests
                 Assert.That(run.PeakSpeed, Is.Zero);
                 Assert.That(body.position.z, Is.EqualTo(MountainCourse.Start).Within(0.01f));
                 Assert.That(body.position.x, Is.EqualTo(MountainCourse.LaneX(line)).Within(0.01f));
+                Assert.That(new LocalRunStore(recordPath).Record(line, false).finishes, Is.EqualTo(1),
+                    "Retry must leave the stored completed run intact.");
+                Assert.That(run.Replay.Clip.CanReplay, Is.False);
+                Assert.That(run.Replay.Clip.Count, Is.EqualTo(1), "Retry starts a fresh recording.");
             }
             finally
             {

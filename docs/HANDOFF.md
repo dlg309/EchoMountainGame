@@ -1,5 +1,15 @@
 # Handoff
 
+## Current integrated handoff, 2026-11-11
+
+This branch merges local records, in-memory replay, and snow spray with scoring, finish, and build-retry fixes. The combined Unity regression passed 32/32 in `%TEMP%/EchoMountain3D-Resume-b7aee1a6/merge-regression.xml`. `merge-build.log` records a successful Windows x64 build. Use `Builds/GlacierPass-Integrated/EchoMountain.exe` for the latest local player. `merge-player-smoke.log` records a responsive startup with Direct3D 11 and Input System, but manual save/restart and replay viewing remain unverified. The previous `Builds/GlacierPass-Debugged` player predates records and replay. See `agent-context/01-GAME-IDEAS.md` for the next surface-response feature blueprint. Preserve existing scenes and GUIDs.
+
+## Current resume — 2026-11-09 20:35 EST (Windows build in progress)
+
+Use `C:\Users\diego\EchoMountainGame`, branch `main`, stable base `5ee28f3`. The historical entries below are retained for provenance, not current instructions. The actual closed project reproduced 22/22 tests in `Logs/Resume-20261109/baseline.xml`; `baseline.log` records test exit 0. The installed editor is still 6000.3.28f1. Earlier ignored builds and QA snapshots are not present here.
+
+Local saves are `7be5d0a`; replay is `375e1fe`. Basic snow spray/material and virtual gamepad replay exit then passed the full 30/30 suite (`slice-final.xml`, `slice-final.log`, exit 0). Unity batch PID 28200 is building `Builds/GlacierPass-Replay/EchoMountain.exe`; inspect process and `windows-build.log` before another Unity launch. Never force locks. Next: check build exit/artifacts, observe actual save/replay/retry/restart, update QA and checkpoint. Inspect generated template/URP serialization changes separately; restore only changes caused by this clean-start import after build exits. Preserve scenes and GUIDs. Physical input, listening, persistent replay/ghosts and M1/M2 review remain pending.
+
 ## 2026-11-11 debug and research handoff
 
 Current Unity source and Windows build include the continuous-grab and finish-after-landing fixes. Read `agent-context/01-GAME-IDEAS.md` for the source-labeled snowboard survey, exact code mapping, and proposed surface-response slice. Use `Builds/GlacierPass-Debugged/EchoMountain.exe` for the current local player. QA evidence is `%TEMP%/EchoMountain3D-Resume-b7aee1a6/debug-game-after.xml`, `debug-build-staged-failure.log`, `debug-build-retry.log`, and `debug-player-smoke.log`; the QA-only failure injector was removed. All 24 PlayMode tests and 13 ICM toolkit tests passed. The failed-build staging folder in the isolated copy is retained as evidence. The next implementation slice is the pure surface classifier and physics regression, then visible authored zones and standalone inspection. Physical controls and listening remain unverified.
