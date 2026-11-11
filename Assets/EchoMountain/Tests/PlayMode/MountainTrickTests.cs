@@ -25,6 +25,75 @@ namespace EchoMountain.Tests
         }
 
         [Test]
+        public void GrabMustBeHeldContinuously()
+        {
+            var score = new TrickScore();
+            for (int tap = 0; tap < 5; tap++)
+            {
+                score.SampleAir(0f, BoardGrab.Indy, 0.04f);
+                score.SampleAir(0f, BoardGrab.None, 0.02f);
+            }
+            Assert.That(score.PendingPoints, Is.Zero);
+            score.Land(0f, LandingOutcome.Clean);
+            Assert.That(score.Points, Is.Zero);
+
+            score.SampleAir(0f, BoardGrab.Melon, 0.08f);
+            score.SampleAir(0f, BoardGrab.Melon, 0.08f);
+            score.SampleAir(0f, BoardGrab.None, 0.01f);
+            score.Land(0f, LandingOutcome.Clean);
+            Assert.That(score.Points, Is.EqualTo(90));
+        }
+
+        [UnityTest]
+        public IEnumerator FinishWaitsForThePendingLanding()
+        {
+            const string path = "Assets/EchoMountain/Scenes/GlacierPass.unity";
+            float oldCapture = Time.captureDeltaTime;
+            var oldBackground = InputSystem.settings.backgroundBehavior;
+            var oldRouting = InputSystem.settings.editorInputBehaviorInPlayMode;
+            Time.captureDeltaTime = 1f / 60f;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                yield return EditorSceneManager.LoadSceneAsyncInPlayMode(path, new LoadSceneParameters(LoadSceneMode.Additive));
+                loaded = SceneManager.GetSceneByPath(path);
+                yield return null;
+                var board = GameObject.Find("Diagnostic board");
+                var run = board.GetComponent<MountainRun>();
+                var rider = board.GetComponent<LabRider>();
+                var body = board.GetComponent<Rigidbody>();
+                run.StartPractice();
+                for (int frame = 0; frame < 65; frame++) yield return null;
+                Assert.That(rider.IsGrounded, Is.True);
+
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Space, Key.Q));
+                for (int frame = 0; frame < 21; frame++) yield return null;
+                Assert.That(run.Tricks.IsAirborne, Is.True);
+                Assert.That(run.Tricks.PendingPoints, Is.EqualTo(80));
+                float x = MountainCourse.LaneX(MountainLine.Summit);
+                body.position = MountainCourse.Point(x, MountainRun.PracticeFinish + 0.2f, 0.8f);
+                body.rotation = MountainCourse.Heading(x, MountainRun.PracticeFinish);
+                body.linearVelocity = Vector3.forward * 4f;
+                yield return null;
+                Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding), "Keep the run active for the pending landing.");
+                Assert.That(run.Tricks.Points, Is.Zero);
+
+                for (int frame = 0; frame < 100 && run.Phase == MountainPhase.Riding; frame++) yield return null;
+                Assert.That(run.Phase, Is.EqualTo(MountainPhase.Results));
+                Assert.That(run.Tricks.Points, Is.EqualTo(80), "Bank the final grab before showing results.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                InputSystem.settings.backgroundBehavior = oldBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = oldRouting;
+                Time.captureDeltaTime = oldCapture;
+            }
+        }
+
+        [Test]
         public void ScoreUsesMeasuredRotationQualityAndVariety()
         {
             var score = new TrickScore();

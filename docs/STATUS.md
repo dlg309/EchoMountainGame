@@ -1,5 +1,9 @@
 # Status
 
+## 2026-11-11 checkpoint
+
+The latest debugged Glacier Pass source has a continuous grab-hold rule and finishes only after the board lands. Unity 6000.3.28f1 passed 24/24 PlayMode tests in an isolated copy. The failed-build retry path was reproduced and repaired, and the rebuilt Windows player launched without inspected startup errors. `Builds/GlacierPass-Debugged` contains the current player; the complete ZIP is in the Codex task `outputs` folder. Research and a terrain-response implementation blueprint are in `agent-context/01-GAME-IDEAS.md`. ICM toolkit tests pass 13/13. Manual physical input, sound, terrain feel, persistent records, ghost, and replay remain open.
+
 Checkpoint: 2026-11-06 19:29 EST (partial foundation).
 
 - Repository: `C:\Users\diego\OneDrive\Documents\EchoMountainGame`, branch `main`, base commit `fcb144a` (brief was committed externally during initial inspection). Origin is `dlg309/EchoMountainGame`.

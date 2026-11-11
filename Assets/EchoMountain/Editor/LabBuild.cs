@@ -25,27 +25,49 @@ namespace EchoMountain.EditorTools
 
         private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName)
         {
-            if (!File.Exists(scene)) throw new InvalidOperationException("Create and verify the physics lab scene first.");
-            if (Directory.Exists(Path.GetDirectoryName(output))) throw new InvalidOperationException("Build output directory already exists; archive it before building.");
-            Directory.CreateDirectory(Path.GetDirectoryName(output));
+            if (!File.Exists(scene)) throw new InvalidOperationException("Create and verify the scene first.");
+            output = ResolveOutput(output);
+            string destination = Path.GetDirectoryName(output);
+            if (Directory.Exists(destination) || File.Exists(destination))
+                throw new InvalidOperationException("Build output already exists. Choose a fresh folder.");
+
+            string staging = destination + ".building-" + Guid.NewGuid().ToString("N");
+            Directory.CreateDirectory(staging);
+            string stagedPlayer = Path.Combine(staging, Path.GetFileName(output));
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { scene },
-                locationPathName = output,
+                locationPathName = stagedPlayer,
                 target = BuildTarget.StandaloneWindows64,
                 options = buildOptions
             };
             string previousProductName = PlayerSettings.productName;
-            BuildReport report;
             try
             {
                 PlayerSettings.productName = productName;
-                report = BuildPipeline.BuildPlayer(options);
+                BuildReport report = BuildPipeline.BuildPlayer(options);
+                if (report.summary.result != BuildResult.Succeeded || !File.Exists(stagedPlayer))
+                    throw new InvalidOperationException("Windows build did not produce a player: " + report.summary.result);
+                Directory.Move(staging, destination);
+                Debug.Log("Physics lab build succeeded: " + output);
             }
-            finally { PlayerSettings.productName = previousProductName; }
-            if (report.summary.result != BuildResult.Succeeded)
-                throw new InvalidOperationException("Physics lab build failed: " + report.summary.result);
-            Debug.Log("Physics lab build succeeded: " + output);
+            finally
+            {
+                PlayerSettings.productName = previousProductName;
+                if (Directory.Exists(staging))
+                    Debug.LogWarning("Partial build retained at " + staging);
+            }
+        }
+
+        private static string ResolveOutput(string defaultOutput)
+        {
+            string[] arguments = Environment.GetCommandLineArgs();
+            int index = Array.IndexOf(arguments, "-echoBuildOutput");
+            if (index < 0) return Path.GetFullPath(defaultOutput);
+            if (index + 1 >= arguments.Length ||
+                !arguments[index + 1].EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("-echoBuildOutput requires a Windows executable path.");
+            return Path.GetFullPath(arguments[index + 1]);
         }
     }
 }

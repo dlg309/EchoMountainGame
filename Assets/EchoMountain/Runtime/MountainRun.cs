@@ -5,6 +5,8 @@ namespace EchoMountain.Riding
 {
     public enum MountainPhase { Ready, Riding, Results }
 
+    // Read the landing and any awarded trick after the rider's physics update.
+    [DefaultExecutionOrder(100)]
     [RequireComponent(typeof(LabRider), typeof(LabHud))]
     public sealed class MountainRun : MonoBehaviour
     {
@@ -126,7 +128,7 @@ namespace EchoMountain.Riding
 
             Elapsed += Time.fixedDeltaTime;
             PeakSpeed = Mathf.Max(PeakSpeed, rider.SpeedKmh);
-            if (position.z >= FinishZ)
+            if (position.z >= FinishZ && rider.IsGrounded && !rider.IsRecovering)
             {
                 Tricks.CancelAir();
                 Phase = MountainPhase.Results;

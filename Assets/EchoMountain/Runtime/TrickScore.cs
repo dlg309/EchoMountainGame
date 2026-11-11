@@ -10,7 +10,7 @@ namespace EchoMountain.Riding
         private const float ChainWindow = 8f;
         private float previousHeading;
         private float rotation;
-        private float indyHold, melonHold;
+        private float currentHold, indyHold, melonHold;
         private int previousSpin;
         private BoardGrab previousGrab;
 
@@ -42,9 +42,13 @@ namespace EchoMountain.Riding
             }
 
             TrackHeading(heading);
+            if (grab != CurrentGrab) currentHold = 0f;
             CurrentGrab = grab;
-            if (grab == BoardGrab.Indy) indyHold += seconds;
-            if (grab == BoardGrab.Melon) melonHold += seconds;
+            if (grab == BoardGrab.None) return;
+
+            currentHold += seconds;
+            if (grab == BoardGrab.Indy) indyHold = Mathf.Max(indyHold, currentHold);
+            if (grab == BoardGrab.Melon) melonHold = Mathf.Max(melonHold, currentHold);
         }
 
         public void Land(float heading, LandingOutcome outcome)
@@ -87,7 +91,7 @@ namespace EchoMountain.Riding
         {
             IsAirborne = false;
             CurrentGrab = BoardGrab.None;
-            rotation = indyHold = melonHold = 0f;
+            rotation = currentHold = indyHold = melonHold = 0f;
         }
 
         public void Reset()
