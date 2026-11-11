@@ -104,6 +104,19 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(report.returncode, 1, report.stdout)
         self.assertIn("keep-out.txt", report.stdout)
 
+    def test_graph_links_encode_special_note_paths(self):
+        self.write("note.md", "# Note\n\n[Next](<other note.md>) and [Percent](a%25b.md).")
+        self.write("other note.md", "# Other note")
+        self.write("a%b.md", "# Percent")
+        graph = self.root / "graph.jsonl"
+        self.assertEqual(self.run_tool("links.py", self.root, "--graph", graph).returncode, 0)
+        report = self.run_tool("viz.py", graph)
+        self.assertEqual(report.returncode, 0, report.stderr)
+        page = (self.root / "viz.html").read_text(encoding="utf-8")
+        data = json.loads(page.split("window.BUNDLE = ", 1)[1].split(";\n", 1)[0])
+        self.assertIn("[Next](/other%20note.md)", data["bodies"]["note"])
+        self.assertIn("[Percent](/a%25b.md)", data["bodies"]["note"])
+
     def test_graph_title_and_note_cannot_close_the_data_script(self):
         title = "Workspace </script> __DATA__"
         self.write("AGENTS.md", f"# {title}\n")

@@ -103,7 +103,7 @@ def main():
                 return m.group(0)
             path = (file.parent / urllib.parse.unquote(raw.split("#")[0])).resolve()
             if path in ids:
-                return f"[{label}](/{ids[path]}.md)"
+                return f"[{label}](/{urllib.parse.quote(ids[path])}.md)"
             if path.exists():
                 return f"[{label}]({urllib.parse.quote(Path(os.path.relpath(path, out.parent)).as_posix())})"
             return m.group(0)
@@ -498,7 +498,7 @@ window.BUNDLE = __DATA__;
     resourceEl.innerHTML = "";
     if (data.resource) {
       const a = document.createElement("a");
-      a.href = data.resource;
+      a.href = data.resource.split("/").map(encodeURIComponent).join("/");
       a.textContent = data.resource;
       a.target = "_blank";
       a.rel = "noopener";
@@ -562,7 +562,12 @@ window.BUNDLE = __DATA__;
       const href = a.getAttribute("href");
       if (!href) return;
       if (href.startsWith("/") && href.endsWith(".md")) {
-        const target = href.slice(1, -3);
+        let target;
+        try {
+          target = decodeURIComponent(href.slice(1, -3));
+        } catch (_) {
+          return;
+        }
         if (nodeIndex[target]) {
           a.className = "internal";
           a.setAttribute("href", "#");
