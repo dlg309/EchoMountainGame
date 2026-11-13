@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace EchoMountain.Riding
 {
@@ -34,6 +35,7 @@ namespace EchoMountain.Riding
         private PhysicsMaterial boardMaterial;
         public bool IsGrounded => contact;
         public float BrakeInput => brake;
+        public bool UsingGamepad => controls?.LastGamepad != null && controls.LastGamepad.added && controls.LastGamepad.enabled;
         public float SpeedKmh => body ? body.linearVelocity.magnitude * 3.6f : 0f;
         public Vector3 ContactNormal => normal;
         public float LateralSlip => slip;
@@ -77,9 +79,41 @@ namespace EchoMountain.Riding
             lastContact = float.NegativeInfinity;
         }
 
-        private void OnEnable() => controls.Enable();
+        private void OnEnable()
+        {
+            controls.Enable();
+            InputSystem.onDeviceChange += OnDeviceChange;
+        }
 
-        private void OnDisable() => controls.Disable();
+        private void OnDisable()
+        {
+            InputSystem.onDeviceChange -= OnDeviceChange;
+            controls.Disable();
+        }
+
+        private void OnDeviceChange(InputDevice device, InputDeviceChange change)
+        {
+            if (device != controls.LastGamepad || !hud.isActiveAndEnabled) return;
+            if (change != InputDeviceChange.Disconnected && change != InputDeviceChange.Removed &&
+                change != InputDeviceChange.Disabled) return;
+            ClearInputs();
+            hud.PauseForInputLoss("Controller disconnected. Reconnect or use the keyboard, then resume.");
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused && isActiveAndEnabled && hud && hud.isActiveAndEnabled)
+            {
+                ClearInputs();
+                hud.PauseForInputLoss("Window unfocused. Resume when you are ready.");
+            }
+        }
+
+        private void ClearInputs()
+        {
+            steer = brake = bufferedJump = spinInput = 0f;
+            grabInput = BoardGrab.None;
+        }
 
         private void Update()
         {
@@ -87,8 +121,7 @@ namespace EchoMountain.Riding
             if (toggledPause) hud.SetPaused(!hud.IsPaused);
             if (toggledPause || hud.IsPaused)
             {
-                steer = brake = bufferedJump = spinInput = 0f;
-                grabInput = BoardGrab.None;
+                ClearInputs();
                 return;
             }
 

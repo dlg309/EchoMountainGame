@@ -15,6 +15,7 @@ namespace EchoMountain.Riding
         private readonly Color orange = new Color(1f, 0.57f, 0.20f, 1f);
 
         private float resumeTimeScale;
+        private string pauseReason = "";
         internal bool IsPaused { get; private set; }
         internal bool ShowDiagnostics { get; set; } = true;
         internal bool ShowTricks { get; set; }
@@ -23,10 +24,17 @@ namespace EchoMountain.Riding
 
         private void OnDisable() => SetPaused(false);
 
+        internal void PauseForInputLoss(string reason)
+        {
+            SetPaused(true);
+            if (IsPaused) pauseReason = reason;
+        }
+
         internal void SetPaused(bool paused)
         {
             if (paused == IsPaused || (paused && Time.timeScale <= 0f)) return;
             IsPaused = paused;
+            pauseReason = "";
             if (paused)
             {
                 resumeTimeScale = Time.timeScale;
@@ -45,6 +53,7 @@ namespace EchoMountain.Riding
             text = NewStyle(16, FontStyle.Normal, ink);
             large = NewStyle(34, FontStyle.Bold, ink);
             small = NewStyle(12, FontStyle.Normal, muted);
+            small.wordWrap = true;
         }
 
         private static GUIStyle NewStyle(int size, FontStyle weight, Color color)
@@ -69,15 +78,16 @@ namespace EchoMountain.Riding
             float controlTop = height - 176f - trickOffset;
             DrawPanel(new Rect(18f, controlTop, 275f, 158f + trickOffset));
             GUI.Label(new Rect(34f, controlTop + 9f, 240f, 22f), "RIDE CONTROLS", title);
-            GUI.Label(new Rect(34f, controlTop + 34f, 240f, 24f), "A / D     Steer", text);
-            GUI.Label(new Rect(34f, controlTop + 57f, 240f, 24f), "S             Brake", text);
-            GUI.Label(new Rect(34f, controlTop + 80f, 240f, 24f), "SPACE   Pop", text);
-            GUI.Label(new Rect(34f, controlTop + 103f, 240f, 24f), "R             Reset", text);
-            GUI.Label(new Rect(34f, controlTop + 126f, 240f, 24f), "ESC         Pause", text);
+            bool pad = rider.UsingGamepad;
+            GUI.Label(new Rect(34f, controlTop + 34f, 240f, 24f), pad ? "LEFT STICK    Steer" : "A / D     Steer", text);
+            GUI.Label(new Rect(34f, controlTop + 57f, 240f, 24f), pad ? "LEFT TRIGGER    Brake" : "S             Brake", text);
+            GUI.Label(new Rect(34f, controlTop + 80f, 240f, 24f), pad ? "SOUTH / A    Pop" : "SPACE   Pop", text);
+            GUI.Label(new Rect(34f, controlTop + 103f, 240f, 24f), pad ? "EAST / B    Reset" : "R             Reset", text);
+            GUI.Label(new Rect(34f, controlTop + 126f, 240f, 24f), pad ? "START    Pause" : "ESC         Pause", text);
             if (ShowTricks)
             {
-                GUI.Label(new Rect(34f, controlTop + 149f, 240f, 24f), "Z / C       Spin in the air", text);
-                GUI.Label(new Rect(34f, controlTop + 172f, 240f, 24f), "Q / E      Indy / Melon", text);
+                GUI.Label(new Rect(34f, controlTop + 149f, 240f, 24f), pad ? "RIGHT STICK    Air spin" : "Z / C       Spin in the air", text);
+                GUI.Label(new Rect(34f, controlTop + 172f, 240f, 24f), pad ? "RB / LB    Indy / Melon" : "Q / E      Indy / Melon", text);
             }
 
             if (ShowDiagnostics)
@@ -112,13 +122,14 @@ namespace EchoMountain.Riding
 
             if (IsPaused)
             {
-                float x = (width - 280f) * 0.5f;
-                float y = (height - 152f) * 0.5f;
-                DrawPanel(new Rect(x, y, 280f, 152f));
-                GUI.Label(new Rect(x + 20f, y + 12f, 240f, 28f), "RIDE PAUSED", title);
-                if (GUI.Button(new Rect(x + 20f, y + 43f, 240f, 36f), "Resume"))
+                float x = (width - 440f) * 0.5f;
+                float y = (height - 204f) * 0.5f;
+                DrawPanel(new Rect(x, y, 440f, 204f));
+                GUI.Label(new Rect(x + 20f, y + 12f, 400f, 28f), "RIDE PAUSED", title);
+                GUI.Label(new Rect(x + 20f, y + 43f, 400f, 40f), pauseReason, small);
+                if (GUI.Button(new Rect(x + 20f, y + 91f, 400f, 36f), "Resume"))
                     SetPaused(false);
-                if (GUI.Button(new Rect(x + 20f, y + 91f, 240f, 36f), "Reset run"))
+                if (GUI.Button(new Rect(x + 20f, y + 143f, 400f, 36f), "Reset run"))
                 {
                     rider.ResetRider();
                     SetPaused(false);

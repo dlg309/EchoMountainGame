@@ -19,7 +19,7 @@ Run `Builds/GlacierPass-Integrated/EchoMountain.exe` from its full build folder.
 | Reset | R | East button |
 | Pause or resume | Escape | Start |
 
-The on-screen Pause button freezes the run and trick timer. Sound can be switched off from the menu or ride display. Gamepad actions have been tested with a virtual device.
+The on-screen Pause button freezes the run and trick timer. Sound can be switched off from the menu or ride display. Gamepad actions have been tested with a virtual device. Current source pauses when the active controller disconnects or the window loses focus; reconnecting does not resume automatically. Ride prompts follow keyboard/gamepad use. Camera obstruction handling keeps the view in front of solid obstacles; heavily enclosed spawn points still need manual review.
 
 ### Scoring
 

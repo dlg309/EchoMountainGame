@@ -167,6 +167,11 @@ namespace EchoMountain.Tests
             }
             finally
             {
+                // Removing the active virtual pad now deliberately pauses a ride.
+                // End the test scene before device removal and global time restoration,
+                // so its later HUD teardown cannot restore the accelerated test scale.
+                if (loaded.IsValid() && loaded.isLoaded)
+                    foreach (var root in loaded.GetRootGameObjects()) root.SetActive(false);
                 if (pad != null) InputSystem.RemoveDevice(pad);
                 InputSystem.settings.backgroundBehavior = background;
                 InputSystem.settings.editorInputBehaviorInPlayMode = routing;

@@ -16,6 +16,7 @@ namespace EchoMountain.Riding
         public InputAction Pop { get; }
         public InputAction Reset { get; }
         public InputAction Pause { get; }
+        public Gamepad LastGamepad { get; private set; }
 
         public LabRideControls()
         {
@@ -39,6 +40,14 @@ namespace EchoMountain.Riding
             spinStick = actions.AddAction("Air spin stick", InputActionType.Value, "<Gamepad>/rightStick");
             indy = AddButton("Indy", "<Keyboard>/q", "<Gamepad>/rightShoulder");
             melon = AddButton("Melon", "<Keyboard>/e", "<Gamepad>/leftShoulder");
+            actions.actionTriggered += RememberDevice;
+        }
+
+        private void RememberDevice(InputAction.CallbackContext context)
+        {
+            if (!context.performed) return;
+            if (context.control.device is Gamepad pad) LastGamepad = pad;
+            else if (context.control.device is Keyboard) LastGamepad = null;
         }
 
         public float Steer => Mathf.Clamp(keyboardSteer.ReadValue<float>() + stick.ReadValue<Vector2>().x, -1f, 1f);
@@ -48,7 +57,11 @@ namespace EchoMountain.Riding
             indy.IsPressed() ? BoardGrab.Indy : BoardGrab.Melon;
         public void Enable() => actions.Enable();
         public void Disable() => actions.Disable();
-        public void Dispose() => actions.Dispose();
+        public void Dispose()
+        {
+            actions.actionTriggered -= RememberDevice;
+            actions.Dispose();
+        }
 
         private InputAction AddButton(string name, string keyboard, string gamepad)
         {

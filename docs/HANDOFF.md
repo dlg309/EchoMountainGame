@@ -1,5 +1,17 @@
 # Handoff
 
+## Current checkpoint, 2026-11-12 ? camera and input continuity
+
+Workspace: `C:/Users/diego/OneDrive/Documents/EchoMountainGame`, `main`, resumed clean at `61e49ee`. Unity 6000.3.28f1 / URP 17.3.0, i9-13900H / Iris Xe / 15.6 GiB RAM. Main project lock and all existing scenes/GUIDs preserved; no editor was running at discovery. Complete master brief and BUILD_BRIEF have identical hashes. No nested instructions.
+
+Reproduced 32/32 baseline tests in `%TEMP%/EchoMountain3D-Resume-20261112`. Two new tests reproduced the old camera passing behind a thin wall. The revised camera constrains its volume after damping, ignores rider/trigger colliders, pulls in immediately and eases back out. Riding pauses when the active gamepad disappears or the window loses focus; explicit resume is required. HUD controls reflect keyboard/gamepad use. Virtual device and focus callbacks passed, not physical hardware.
+
+Full `foundation-final.xml` / `.log`: exit 0, 36 passed, 0 failed. Corrected two test-fixture timing/cleanup problems without changing landing expectations; details in QA. No new art/assets other than test metadata. M1/M2 remain partial for hardware review and remaining settings; M3 standalone replay/save/restart acceptance and later milestones remain incomplete.
+
+Windows build is in progress in the isolated copy (`foundation-build.log`, output `Builds/GlacierPass-Foundation/EchoMountain.exe`, batch PID 19488 at start). Check actual process/result before launching another Unity. Next: verify build output, copy into a new repository build folder and inspect it. Old integrated menu rendered, but helper click/Enter and Alt+F4 did not produce observed input; only that task-launched player was stopped. Preserve this limitation and continue independent work if it recurs.
+
+User reinforced the research site: current snowboard page proposes authored surface response; its browser/account specification is historical. Continue the source-labeled surface experiment after the foundation checks, using routine UI/data updates directly and deeper reasoning for architecture/debugging/verification.
+
 ## Current integrated handoff, 2026-11-11
 
 This branch merges local records, in-memory replay, and snow spray with scoring, finish, and build-retry fixes. The combined Unity regression passed 32/32 in `%TEMP%/EchoMountain3D-Resume-b7aee1a6/merge-regression.xml`. `merge-build.log` records a successful Windows x64 build. Use `Builds/GlacierPass-Integrated/EchoMountain.exe` for the latest local player. `merge-player-smoke.log` records a responsive startup with Direct3D 11 and Input System, but manual save/restart and replay viewing remain unverified. The previous `Builds/GlacierPass-Debugged` player predates records and replay. See `agent-context/01-GAME-IDEAS.md` for the next surface-response feature blueprint. Preserve existing scenes and GUIDs.
