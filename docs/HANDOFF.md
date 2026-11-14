@@ -1,16 +1,12 @@
 # Handoff
 
-## Current checkpoint, 2026-11-12 ? camera and input continuity
+## Current checkpoint, 2026-11-13
 
-Workspace: `C:/Users/diego/OneDrive/Documents/EchoMountainGame`, `main`, resumed clean at `61e49ee`. Unity 6000.3.28f1 / URP 17.3.0, i9-13900H / Iris Xe / 15.6 GiB RAM. Main project lock and all existing scenes/GUIDs preserved; no editor was running at discovery. Complete master brief and BUILD_BRIEF have identical hashes. No nested instructions.
+Repository: `C:/Users/diego/OneDrive/Documents/EchoMountainGame`, branch `main`. Foundation checkpoint `96efc3d` passed 36/36 tests and produced `Builds/GlacierPass-Foundation/EchoMountain.exe`. Its runtime DLL matches the QA build; startup and menu rendering were observed. The task-launched player PID 20164 may remain open. Automated UI click/Enter had no observed effect; physical playtest feedback is pending. No editor lock or existing scene/GUID was modified.
 
-Reproduced 32/32 baseline tests in `%TEMP%/EchoMountain3D-Resume-20261112`. Two new tests reproduced the old camera passing behind a thin wall. The revised camera constrains its volume after damping, ignores rider/trigger colliders, pulls in immediately and eases back out. Riding pauses when the active gamepad disappears or the window loses focus; explicit resume is required. HUD controls reflect keyboard/gamepad use. Virtual device and focus callbacks passed, not physical hardware.
+The opt-in surface response now passed the full 38/38 suite (`surface.xml`) plus the updated 2/2 focused surface/braking suite (`surface-braking.xml`), exit 0 for both. The isolated QA project remains `%TEMP%/EchoMountain3D-Resume-20261112`. Packed preserves the current behavior; powder/ice alter grip, rolling and braking only while supported. Reset clears the surface display; flight ignores surface forces. These are prototype ratios. Existing scenes are unchanged and have NO powder/ice zones enabled.
 
-Full `foundation-final.xml` / `.log`: exit 0, 36 passed, 0 failed. Corrected two test-fixture timing/cleanup problems without changing landing expectations; details in QA. No new art/assets other than test metadata. M1/M2 remain partial for hardware review and remaining settings; M3 standalone replay/save/restart acceptance and later milestones remain incomplete.
-
-Windows build is in progress in the isolated copy (`foundation-build.log`, output `Builds/GlacierPass-Foundation/EchoMountain.exe`, batch PID 19488 at start). Check actual process/result before launching another Unity. Next: verify build output, copy into a new repository build folder and inspect it. Old integrated menu rendered, but helper click/Enter and Alt+F4 did not produce observed input; only that task-launched player was stopped. Preserve this limitation and continue independent work if it recurs.
-
-User reinforced the research site: current snowboard page proposes authored surface response; its browser/account specification is historical. Continue the source-labeled surface experiment after the foundation checks, using routine UI/data updates directly and deeper reasoning for architecture/debugging/verification.
+A fresh final Windows build is running (`verified-build.log`, PID 14552 at launch), output `<QA>/Builds/GlacierPass-20261113/EchoMountain.exe`. Inspect actual process/result before another Unity launch. Next: verify/copy/launch that build, update README and checkpoint. Then continue the earliest incomplete M1/M2 standalone/hardware and settings gates; next independent surface work is visible authored zones, boundary-flight tests, and versioned record comparability before changing the course. Ghosts/session markers, rails/pipe, final art and performance acceptance remain incomplete. Do not claim the game is finished.
 
 ## Current integrated handoff, 2026-11-11
 

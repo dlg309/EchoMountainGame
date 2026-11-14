@@ -5,3 +5,6 @@
 - 2026-11-06: Keep browser prototype and research repository separate; use them as design inputs, not as 3D physics implementations.
 
 - 2026-11-06: User confirmed that EchoMountainGame in Documents is the intended location, without an existing project path. The repository root is now the chosen Unity project root. Seeded only missing `Assets`, `Packages`, and `ProjectSettings` from the locally installed 6000.3.28f1 Unity 3D cross-platform URP template; existing repository files were not overwritten. This is an initialization in the requested location, not a nested project.
+
+
+2026-11-13: Surface ratios stay opt-in through an explicitly assigned serialized map. This preserves baseline lab/course physics and saved record comparability until matching course visuals and a new course/rules identity are authored. Priority and half-open world X/Z bounds provide predictable selection; invalid zones fall back to packed snow.

@@ -18,6 +18,9 @@ namespace EchoMountain.Riding
         [SerializeField] private float jumpBufferSeconds = 0.15f;
         [SerializeField] private float contactGraceSeconds = 0.07f;
         [SerializeField] private float resetBelow = -20f;
+        [SerializeField] private SnowSurfaceMap surfaceMap;
+        public SnowSurface? ActiveSurface { get; private set; }
+        public void SetSurfaceMap(SnowSurfaceMap value) => surfaceMap = value;
         private readonly Vector3[] probes = {
             new Vector3(-0.24f, 0f, -0.48f), new Vector3(0.24f, 0f, -0.48f),
             new Vector3(-0.24f, 0f, 0.48f), new Vector3(0.24f, 0f, 0.48f)
@@ -231,15 +234,18 @@ namespace EchoMountain.Riding
             gripForce = 0f;
             if (contact)
             {
+                SurfaceResponse surface = surfaceMap ? surfaceMap.Sample(body.position) : SurfaceRules.Response(SnowSurface.Packed);
+                ActiveSurface = surface.Kind;
                 Vector3 forward = Vector3.ProjectOnPlane(body.rotation * Vector3.forward, normal).normalized;
                 Vector3 side = Vector3.Cross(normal, forward).normalized;
                 float forwardSpeed = Vector3.Dot(body.linearVelocity, forward);
                 slip = Vector3.Dot(body.linearVelocity, side);
-                float desiredGrip = Mathf.Clamp(-slip * edgeGrip, -maxGripAcceleration, maxGripAcceleration);
+                float desiredGrip = Mathf.Clamp(-slip * edgeGrip * surface.Grip,
+                    -maxGripAcceleration * surface.Grip, maxGripAcceleration * surface.Grip);
                 gripForce = desiredGrip;
                 body.AddForce(side * desiredGrip, ForceMode.Acceleration);
                 float resistance = Mathf.Min(Mathf.Abs(forwardSpeed) / Time.fixedDeltaTime,
-                    rollingResistance + brake * braking);
+                    rollingResistance * surface.Roll + brake * braking * surface.Brake);
                 body.AddForce(-forward * Mathf.Sign(forwardSpeed) * resistance, ForceMode.Acceleration);
                 body.AddTorque(normal * (steer * turnAcceleration * Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 3f)), ForceMode.Acceleration);
                 Vector3 tilt = Vector3.Cross(body.rotation * Vector3.up, normal);
@@ -279,6 +285,7 @@ namespace EchoMountain.Riding
             recoveryRemaining = 0f;
             lastContact = float.NegativeInfinity;
             contact = wasContact = landingArmed = false;
+            ActiveSurface = null;
             supportedTime = 0f;
             normal = Vector3.up;
             landing = "--";

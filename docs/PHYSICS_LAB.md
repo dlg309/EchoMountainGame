@@ -31,3 +31,10 @@ Unity generated this scene from the editor tool in a separate project copy; it w
 ## First reported gameplay failure and repair
 
 A user observed a stationary board and nonworking Space/brake in the initial Windows build; reset worked. The isolated slope test reproduced essentially no movement before repair. An isolated candidate that sets board friction to zero while applying explicit script forces and filters self hits in probes passed flat support/reset, slope acceleration, and direct supported pop (3/3 PlayMode). This is not yet evidence that keyboard input, braking, camera readability, or gameplay works; the original player build predates the repair.
+
+
+## Surface experiment (2026-11-13, fixture-verified)
+
+`SnowSurfaceMap` is opt-in. Add the component to an owned lab object and assign it to the rider's serialized `surfaceMap` field. Its zone rectangles use world X/Z, minimum-inclusive/maximum-exclusive bounds; higher priority wins, first serialized zone breaks ties. Empty, invalid or unassigned maps use packed snow. Existing lab/course scenes remain unchanged.
+
+Prototype grip/roll/brake ratios: packed 1/1/1, powder 0.85/1.8/1.25, ice 0.55/0.45/0.5. Only supported ticks apply them. `ActiveSurface` retains the last display kind in flight and clears on reset. These are tuning assumptions from the research blueprint, not real material measurements. Before enabling zones on Glacier Pass, author matching visible patches, validate both routes, and version records so changed physics cannot compete with old course times. No surface art/audio or changed course records are delivered yet.

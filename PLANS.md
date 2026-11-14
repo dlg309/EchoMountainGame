@@ -24,3 +24,6 @@ Glacier Pass now includes spins, grabs, landing-based scoring, a short practice 
 
 
 2026-11-12: Reproduced 32/32 stable baseline; camera obstruction and active-controller/focus-loss pause plus dynamic ride prompts passed the expanded 36/36 suite. Windows build verification underway. No milestone checkbox advanced on simulated hardware evidence. Next foundation gaps: real standalone interaction/camera review, sensitivity/deadzone/stance settings; then the current research site's surface response experiment and Echo Sessions.
+
+
+2026-11-13: Opt-in surface classifier and supported grip/roll/braking integration passed 38/38 full tests, then 2/2 expanded focused tests. Existing course remains packed. Next surface gate: visible authored zones, transition tests and versioned comparable records; do not activate invisible zones.
