@@ -1,5 +1,12 @@
 # Handoff
 
+## Menu input correction in progress, 2026-11-13
+
+Found a concrete runtime-menu defect: `activeInputHandler: 1` enables only new input, while the current menus use IMGUI. Unity's Input System documentation states runtime OnGUI receives no input events in that configuration. Changed only this setting to Both (2), added a regression requiring both backends, and a build guard. Previous Windows menu click failures must not be attributed solely to automation. Keyboard injection/hardware response remains a separate unverified question.
+
+The pre-correction `verified-build.log` completed exit 0 but that executable retains the menu defect and is not the delivery candidate. Full 39-case `menu-regression.xml` / `.log` passed, exit 0. The corrected Windows build is running to `<QA>/Builds/GlacierPass-MenuFixed`, log `menu-build.log`. Check its result, copy without overwrite, and verify actual menu buttons/replay/retry/persistence. Task-owned old player PID 20164 has been stopped. No existing scene or user work was overwritten.
+
+
 ## Current checkpoint, 2026-11-13
 
 Repository: `C:/Users/diego/OneDrive/Documents/EchoMountainGame`, branch `main`. Foundation checkpoint `96efc3d` passed 36/36 tests and produced `Builds/GlacierPass-Foundation/EchoMountain.exe`. Its runtime DLL matches the QA build; startup and menu rendering were observed. The task-launched player PID 20164 may remain open. Automated UI click/Enter had no observed effect; physical playtest feedback is pending. No editor lock or existing scene/GUID was modified.

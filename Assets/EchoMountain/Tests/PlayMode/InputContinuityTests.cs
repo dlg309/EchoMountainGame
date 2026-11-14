@@ -10,6 +10,16 @@ namespace EchoMountain.Tests
 {
     public sealed class InputContinuityTests
     {
+        [Test]
+        public void RuntimeMenusAndRidingHaveBothRequiredInputBackends()
+        {
+#if ENABLE_INPUT_SYSTEM && ENABLE_LEGACY_INPUT_MANAGER
+            Assert.Pass();
+#else
+            Assert.Fail("Riding requires Input System and current OnGUI menus require legacy input. Set Active Input Handling to Both.");
+#endif
+        }
+
         [UnityTest]
         public IEnumerator ActiveControllerLossPausesUntilExplicitKeyboardResume()
         {

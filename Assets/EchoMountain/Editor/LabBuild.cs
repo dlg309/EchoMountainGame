@@ -25,6 +25,9 @@ namespace EchoMountain.EditorTools
 
         private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName)
         {
+#if !ENABLE_INPUT_SYSTEM || !ENABLE_LEGACY_INPUT_MANAGER
+            throw new InvalidOperationException("Current riding actions and OnGUI menus require Active Input Handling = Both. Restart Unity after changing it.");
+#endif
             if (!File.Exists(scene)) throw new InvalidOperationException("Create and verify the scene first.");
             output = ResolveOutput(output);
             string destination = Path.GetDirectoryName(output);
