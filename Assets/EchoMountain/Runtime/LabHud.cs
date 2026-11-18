@@ -7,9 +7,10 @@ namespace EchoMountain.Riding
     public sealed class LabHud : MonoBehaviour
     {
         private LabRider rider;
-        private GUIStyle title, text, large, small;
-        private readonly Color panel = new Color(0.04f, 0.09f, 0.14f, 0.90f);
-        private readonly Color accent = new Color(0.35f, 0.84f, 0.91f, 1f);
+        private MountainRun run;
+        private GUIStyle title, text, large, small, button;
+        private readonly Color panel = new Color(0.025f, 0.065f, 0.10f, 0.96f);
+        private readonly Color accent = new Color(0.40f, 0.87f, 0.93f, 1f);
         private readonly Color ink = new Color(0.90f, 0.96f, 0.98f, 1f);
         private readonly Color muted = new Color(0.67f, 0.78f, 0.82f, 1f);
         private readonly Color orange = new Color(1f, 0.57f, 0.20f, 1f);
@@ -20,7 +21,11 @@ namespace EchoMountain.Riding
         internal bool ShowDiagnostics { get; set; } = true;
         internal bool ShowTricks { get; set; }
 
-        private void Awake() => rider = GetComponent<LabRider>();
+        private void Awake()
+        {
+            rider = GetComponent<LabRider>();
+            TryGetComponent(out run);
+        }
 
         private void OnDisable() => SetPaused(false);
 
@@ -54,6 +59,7 @@ namespace EchoMountain.Riding
             large = NewStyle(34, FontStyle.Bold, ink);
             small = NewStyle(12, FontStyle.Normal, muted);
             small.wordWrap = true;
+            button = new GUIStyle(GUI.skin.button) { fontSize = 17, fontStyle = FontStyle.Bold };
         }
 
         private static GUIStyle NewStyle(int size, FontStyle weight, Color color)
@@ -123,16 +129,23 @@ namespace EchoMountain.Riding
             if (IsPaused)
             {
                 float x = (width - 440f) * 0.5f;
-                float y = (height - 204f) * 0.5f;
-                DrawPanel(new Rect(x, y, 440f, 204f));
-                GUI.Label(new Rect(x + 20f, y + 12f, 400f, 28f), "RIDE PAUSED", title);
+                float panelHeight = run ? 256f : 204f;
+                float y = (height - panelHeight) * 0.5f;
+                DrawPanel(new Rect(x, y, 440f, panelHeight));
+                GUI.Label(new Rect(x + 20f, y + 12f, 400f, 28f), "ECHO MOUNTAIN   /   PAUSED", title);
                 GUI.Label(new Rect(x + 20f, y + 43f, 400f, 40f), pauseReason, small);
-                if (GUI.Button(new Rect(x + 20f, y + 91f, 400f, 36f), "Resume"))
+                if (GUI.Button(new Rect(x + 20f, y + 91f, 400f, 36f), "Resume", button))
                     SetPaused(false);
-                if (GUI.Button(new Rect(x + 20f, y + 143f, 400f, 36f), "Reset run"))
+                if (GUI.Button(new Rect(x + 20f, y + 137f, 400f, 36f), run ? "Restart Run" : "Reset run", button))
                 {
-                    rider.ResetRider();
                     SetPaused(false);
+                    if (run) run.RestartRun();
+                    else rider.ResetRider();
+                }
+                if (run && GUI.Button(new Rect(x + 20f, y + 183f, 400f, 36f), "Return to Main Menu", button))
+                {
+                    SetPaused(false);
+                    run.ShowStart();
                 }
             }
 

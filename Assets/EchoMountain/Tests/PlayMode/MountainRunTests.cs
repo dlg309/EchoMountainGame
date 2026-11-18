@@ -33,7 +33,7 @@ namespace EchoMountain.Tests
         [UnityTest]
         public IEnumerator EachLineFinishesAndCanRetry([ValueSource(nameof(Lines))] MountainLine line)
         {
-            const string path = "Assets/EchoMountain/Scenes/GlacierPass.unity";
+            const string path = "Assets/EchoMountain/Scenes/GlacierPassPolished.unity";
             float oldScale = Time.timeScale;
             float oldCapture = Time.captureDeltaTime;
             var background = InputSystem.settings.backgroundBehavior;
@@ -164,6 +164,18 @@ namespace EchoMountain.Tests
                     "Retry must leave the stored completed run intact.");
                 Assert.That(run.Replay.Clip.CanReplay, Is.False);
                 Assert.That(run.Replay.Clip.Count, Is.EqualTo(1), "Retry starts a fresh recording.");
+                for (int tick = 0; tick < 10; tick++) yield return new WaitForFixedUpdate();
+                Assert.That(run.Elapsed, Is.GreaterThan(0f));
+                run.RestartRun();
+                Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding));
+                Assert.That(run.Elapsed, Is.Zero);
+                Assert.That(run.Tricks.Points, Is.Zero);
+                Assert.That(run.Replay.Clip.Count, Is.EqualTo(1));
+                run.ShowStart();
+                Assert.That(run.Phase, Is.EqualTo(MountainPhase.Ready));
+                Assert.That(run.Elapsed, Is.Zero);
+                Assert.That(body.isKinematic, Is.True);
+                Assert.That(run.Tricks.Points, Is.Zero);
             }
             finally
             {

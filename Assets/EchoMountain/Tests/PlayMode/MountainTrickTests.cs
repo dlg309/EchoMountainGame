@@ -47,7 +47,7 @@ namespace EchoMountain.Tests
         [UnityTest]
         public IEnumerator FinishWaitsForThePendingLanding()
         {
-            const string path = "Assets/EchoMountain/Scenes/GlacierPass.unity";
+            const string path = "Assets/EchoMountain/Scenes/GlacierPassPolished.unity";
             float oldCapture = Time.captureDeltaTime;
             var oldBackground = InputSystem.settings.backgroundBehavior;
             var oldRouting = InputSystem.settings.editorInputBehaviorInPlayMode;
@@ -132,6 +132,18 @@ namespace EchoMountain.Tests
         {
             for (int step = 0; step <= 4; step++)
                 score.SampleAir(Mathf.Repeat(350f + degrees * step / 4f, 360f), grab, 0.05f);
+        }
+
+        [Test]
+        public void RecoverableSpinAndGrabBanksReducedPointsOnce()
+        {
+            var score = new TrickScore();
+            Rotate(score, 180, BoardGrab.Indy);
+            score.Land(170f, LandingOutcome.Recover);
+            Assert.That(score.LastAward, Is.EqualTo(130));
+            Assert.That(score.Points, Is.EqualTo(130));
+            score.Land(170f, LandingOutcome.Recover);
+            Assert.That(score.Points, Is.EqualTo(130));
         }
 
         [UnityTest]

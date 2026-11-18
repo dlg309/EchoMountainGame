@@ -14,10 +14,10 @@ namespace EchoMountain.Riding
                 !IsFinite(impactSpeed) || !IsFinite(residualSpin) || supportingProbes < 1)
                 return LandingOutcome.Bail;
             float direction = tangentSpeed < 1f ? 1f : Mathf.Abs(travelAlignment);
-            if (supportingProbes >= 2 && uprightAlignment >= 0.9f && direction >= 0.8f &&
-                impactSpeed <= 5f && residualSpin <= 3f)
+            if (supportingProbes >= 2 && uprightAlignment >= 0.87f && direction >= 0.75f &&
+                impactSpeed <= 5.5f && residualSpin <= 4f)
                 return LandingOutcome.Clean;
-            if (uprightAlignment >= 0.65f && direction >= 0.35f && impactSpeed <= 9f && residualSpin <= 6f)
+            if (uprightAlignment >= 0.6f && direction >= 0.25f && impactSpeed <= 9f && residualSpin <= 10f)
                 return LandingOutcome.Recover;
             return LandingOutcome.Bail;
         }

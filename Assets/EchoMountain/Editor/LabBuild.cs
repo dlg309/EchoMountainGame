@@ -23,6 +23,10 @@ namespace EchoMountain.EditorTools
         public static void BuildWindowsMountain() =>
             BuildPlayer(MountainBuilder.ScenePath, "Builds/GlacierPass-Replay/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
 
+        [MenuItem("Echo Mountain/Build Windows Glacier Pass polished")]
+        public static void BuildWindowsMountainPolished() =>
+            BuildPlayer(MountainBuilder.PolishedScenePath, "Builds/GlacierPass-Polished/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
+
         private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName)
         {
 #if !ENABLE_INPUT_SYSTEM || !ENABLE_LEGACY_INPUT_MANAGER

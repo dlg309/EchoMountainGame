@@ -45,6 +45,22 @@ namespace EchoMountain.Tests
         }
 
         [Test]
+        public void NewRulesSaveSeparatelyWithoutChangingEarlierRecords()
+        {
+            string oldPath = Path.Combine(directory, "runs-v1.json");
+            string earlierRecords = "Existing rules and records stay here.";
+            File.WriteAllText(oldPath, earlierRecords);
+            File.WriteAllText(oldPath + ".bak", earlierRecords);
+            string newPath = Path.Combine(directory, LocalRunStore.FileName);
+            var store = new LocalRunStore(newPath);
+            Assert.That(store.Finish(MountainLine.Pine, false, 85f, 43f, 130, "test"), Is.True);
+            Assert.That(new LocalRunStore(newPath).Record(MountainLine.Pine, false).finishes, Is.EqualTo(1));
+            Assert.That(File.ReadAllText(oldPath), Is.EqualTo(earlierRecords));
+            Assert.That(File.ReadAllText(oldPath + ".bak"), Is.EqualTo(earlierRecords));
+            Assert.That(LocalRunStore.RulesVersion, Is.EqualTo(2));
+        }
+
+        [Test]
         public void CorruptPrimaryRecoversBackupAndPreservesItOnNextWrite()
         {
             var store = new LocalRunStore(path);

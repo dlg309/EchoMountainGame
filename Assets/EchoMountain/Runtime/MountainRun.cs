@@ -182,6 +182,13 @@ namespace EchoMountain.Riding
             Replay.BeginCapture();
         }
 
+        public void RestartRun()
+        {
+            if (Phase != MountainPhase.Riding) return;
+            Phase = MountainPhase.Ready;
+            StartRun();
+        }
+
         public void StartPractice()
         {
             if (Phase != MountainPhase.Ready) return;
@@ -192,7 +199,14 @@ namespace EchoMountain.Riding
 
         public void ShowStart()
         {
+            bool abandonedRide = Phase == MountainPhase.Riding;
             if (Phase == MountainPhase.Replay) EndReplay();
+            if (abandonedRide)
+            {
+                rider.ResetRider();
+                Elapsed = PeakSpeed = 0f;
+                resetCount = rider.ResetCount;
+            }
             IsPractice = false;
             Phase = MountainPhase.Ready;
             SetRiding(false);

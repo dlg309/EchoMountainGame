@@ -14,6 +14,7 @@ namespace EchoMountain.EditorTools
     {
         private const string AssetFolder = "Assets/EchoMountain/GlacierPass";
         public const string ScenePath = "Assets/EchoMountain/Scenes/GlacierPass.unity";
+        public const string PolishedScenePath = "Assets/EchoMountain/Scenes/GlacierPassPolished.unity";
         private const string Template = "Assets/EchoMountain/Scenes/PhysicsLabRider.unity";
 
         [MenuItem("Echo Mountain/Create Glacier Pass (once)")]
@@ -65,6 +66,64 @@ namespace EchoMountain.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
                 throw new InvalidOperationException("Could not save Glacier Pass.");
+            AssetDatabase.SaveAssets();
+        }
+
+        [MenuItem("Echo Mountain/Create Glacier Pass polish (once)")]
+        public static void CreatePolished()
+        {
+            if (!File.Exists(ScenePath)) throw new InvalidOperationException("Create Glacier Pass first.");
+            if (File.Exists(PolishedScenePath)) throw new InvalidOperationException("The polished scene already exists.");
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            if (!AssetDatabase.CopyAsset(ScenePath, PolishedScenePath))
+                throw new InvalidOperationException("Could not copy Glacier Pass without changing the original scene.");
+
+            var scene = EditorSceneManager.OpenScene(PolishedScenePath);
+            var root = GameObject.Find("Glacier Pass");
+            var camera = GameObject.Find("Lab Camera").GetComponent<Camera>();
+            camera.backgroundColor = new Color(0.57f, 0.73f, 0.83f);
+            RenderSettings.fog = true;
+            RenderSettings.fogColor = camera.backgroundColor;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogStartDistance = 175f;
+            RenderSettings.fogEndDistance = 720f;
+            RenderSettings.ambientMode = AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.67f, 0.77f, 0.87f);
+            RenderSettings.ambientEquatorColor = new Color(0.34f, 0.44f, 0.52f);
+            RenderSettings.ambientGroundColor = new Color(0.17f, 0.24f, 0.30f);
+
+            foreach (var light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+            {
+                if (light.type != LightType.Directional) continue;
+                light.transform.rotation = Quaternion.Euler(42f, -32f, 0f);
+                light.color = new Color(1f, 0.93f, 0.82f);
+                light.intensity = 1.25f;
+                RenderSettings.sun = light;
+                break;
+            }
+
+            // Small, non-colliding beacons reinforce the two route colors at speed.
+            var dressing = new GameObject("Course dressing").transform;
+            dressing.SetParent(root.transform, false);
+            Material blue = AssetDatabase.LoadAssetAtPath<Material>(AssetFolder + "/Pine blue.mat");
+            Material amber = AssetDatabase.LoadAssetAtPath<Material>(AssetFolder + "/Summit amber.mat");
+            Material stone = AssetDatabase.LoadAssetAtPath<Material>(AssetFolder + "/Blue granite.mat");
+            for (int z = 72; z < 840; z += 96)
+            {
+                foreach (int side in new[] { -1, 1 })
+                {
+                    float x = side * 18.5f;
+                    Material route = side < 0 ? blue : amber;
+                    Block(dressing, "Resort route beacon", MountainCourse.Point(x, z, 1.25f),
+                        new Vector3(0.25f, 2.5f, 0.25f), Quaternion.identity, stone);
+                    Block(dressing, "Resort route beacon cap", MountainCourse.Point(x, z, 2.65f),
+                        new Vector3(0.8f, 0.28f, 0.8f), Quaternion.identity, route);
+                }
+            }
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene, PolishedScenePath))
+                throw new InvalidOperationException("Could not save the polished scene.");
             AssetDatabase.SaveAssets();
         }
 

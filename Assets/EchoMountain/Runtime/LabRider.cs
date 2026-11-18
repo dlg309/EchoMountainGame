@@ -48,7 +48,7 @@ namespace EchoMountain.Riding
         public void RequestJump() => bufferedJump = jumpBufferSeconds;
         private Vector3 spawnPosition;
         private Quaternion spawnRotation;
-        private float steer, brake, bufferedJump, lastContact;
+        private float steer, smoothedSteer, brake, bufferedJump, lastContact;
         private bool contact, wasContact;
         private bool landingArmed;
         private float supportedTime;
@@ -247,12 +247,22 @@ namespace EchoMountain.Riding
                 float resistance = Mathf.Min(Mathf.Abs(forwardSpeed) / Time.fixedDeltaTime,
                     rollingResistance * surface.Roll + brake * braking * surface.Brake);
                 body.AddForce(-forward * Mathf.Sign(forwardSpeed) * resistance, ForceMode.Acceleration);
-                body.AddTorque(normal * (steer * turnAcceleration * Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 3f)), ForceMode.Acceleration);
+                // Ease digital steering and bleed off yaw when the edge is supported.
+                // Braking slightly reduces turn authority as forward speed falls.
+                smoothedSteer = Mathf.MoveTowards(smoothedSteer, steer, 4f * Time.fixedDeltaTime);
+                float yawRate = Vector3.Dot(body.angularVelocity, normal);
+                float turn = smoothedSteer * turnAcceleration * 0.72f
+                    * Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 3f) * (1f - 0.2f * brake);
+                body.AddTorque(normal * (turn - yawRate * 1.8f), ForceMode.Acceleration);
                 Vector3 tilt = Vector3.Cross(body.rotation * Vector3.up, normal);
                 Vector3 tiltRate = Vector3.ProjectOnPlane(body.angularVelocity, normal);
                 body.AddTorque(Vector3.ClampMagnitude(tilt * 12f - tiltRate * 4f, 12f), ForceMode.Acceleration);
             }
-            else slip = 0f;
+            else
+            {
+                slip = 0f;
+                smoothedSteer = 0f;
+            }
             if (bufferedJump > 0f && Time.fixedTime - lastContact <= contactGraceSeconds)
             {
                 body.AddForce(normal * popVelocity, ForceMode.VelocityChange);
@@ -293,7 +303,7 @@ namespace EchoMountain.Riding
             lastAirVelocity = lastAirSpin = Vector3.zero;
             LastLanding = null;
             LandingCount = 0;
-            steer = brake = slip = gripForce = spinInput = 0f;
+            steer = smoothedSteer = brake = slip = gripForce = spinInput = 0f;
             spinEngaged = false;
             grabInput = BoardGrab.None;
             tricks?.Reset();

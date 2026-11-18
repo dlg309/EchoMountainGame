@@ -211,6 +211,13 @@ namespace EchoMountain.Tests
                 for (int step = 0; step < 35; step++) yield return new WaitForFixedUpdate();
                 float yaw = Vector3.SignedAngle(Vector3.forward, Vector3.ProjectOnPlane(board.transform.forward, Vector3.up), Vector3.up);
                 Assert.That(yaw, Is.GreaterThan(5f), "D should turn a moving board to the right.");
+                Assert.That(yaw, Is.LessThan(30f), "A brief digital steering hold should not whip the board around.");
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                InputSystem.Update();
+                yield return null;
+                for (int step = 0; step < 30; step++) yield return new WaitForFixedUpdate();
+                Assert.That(Mathf.Abs(body.angularVelocity.y), Is.LessThan(0.6f),
+                    "Supported yaw should settle after steering is released.");
             }
             finally
             {
@@ -466,6 +473,9 @@ namespace EchoMountain.Tests
             Assert.That(LabLandingRules.Evaluate(0.98f, 0.95f, 8f, 2f, 0.5f, 3), Is.EqualTo(LandingOutcome.Clean));
             Assert.That(LabLandingRules.Evaluate(0.98f, -0.95f, 8f, 2f, 0.5f, 3), Is.EqualTo(LandingOutcome.Clean));
             Assert.That(LabLandingRules.Evaluate(0.8f, 0.5f, 8f, 6f, 4f, 2), Is.EqualTo(LandingOutcome.Recover));
+            Assert.That(LabLandingRules.Evaluate(0.75f, 0.55f, 8f, 5f, 8.5f, 2), Is.EqualTo(LandingOutcome.Recover),
+                "A supported spin and grab landing can recover without erasing the trick.");
+            Assert.That(LabLandingRules.Evaluate(0.45f, 0.1f, 8f, 5f, 8.5f, 2), Is.EqualTo(LandingOutcome.Bail));
             Assert.That(LabLandingRules.Evaluate(0.95f, 0.95f, 8f, 10f, 0.5f, 3), Is.EqualTo(LandingOutcome.Bail));
             Assert.That(LabLandingRules.Evaluate(0.95f, 0.95f, 8f, 2f, 0.5f, 0), Is.EqualTo(LandingOutcome.Bail));
             Assert.That(LabLandingRules.Evaluate(float.NaN, 0.95f, 8f, 2f, 0.5f, 3), Is.EqualTo(LandingOutcome.Bail));
