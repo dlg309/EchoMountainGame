@@ -1,5 +1,13 @@
 # Handoff
 
+## Baseline gate — 2026-11-17
+
+Fresh isolated QA project: `%TEMP%/EchoMountain3D-Baseline-20261117-d399011`, copied from current `Assets`, `Packages`, `ProjectSettings` with independent Library. Unity PlayMode XML `baseline.xml` passed 39/39; `baseline-build.log` reports a successful Windows x64 build at `<QA>/Builds/GlacierPass-Baseline-20261117/EchoMountain.exe`. The player launched and closed, but Windows Computer Use activation/capture failed, leaving actual menu/run/replay/save acceptance open. Existing `runs-v1.json` remained byte-identical (hash in QA). The selected project lock was not touched; no gameplay/scene changes. Read latest `docs/QA.md` and `docs/PLAN.md` record compatibility decision. Next: obtain a reliable physical or UI-assisted corrected-player check, then implement separate versioned save storage before enabling surface zones. NO-GO for zone activation at this checkpoint.
+
+## Planning review — 2026-11-17
+
+Use this repository root, `main` at `d399011` before documentation edits. Read `docs/PLAN.md` for the current MVP audit and proposed first surface-zone slice. Audit found no running Unity editor; preserved all gameplay assets and GUIDs. The corrected menu build exists at `Builds/GlacierPass-MenuFixed/EchoMountain.exe`, and `%TEMP%/EchoMountain3D-Resume-20261112/menu-build.log` reports success, but corrected standalone interaction remains unverified. No Unity test or gameplay was run during planning. User requested review before implementation; next action is the corrected build acceptance check, then visible zones only after plan review. Historical entries below describe earlier checkpoints.
+
 ## Menu input correction in progress, 2026-11-13
 
 Found a concrete runtime-menu defect: `activeInputHandler: 1` enables only new input, while the current menus use IMGUI. Unity's Input System documentation states runtime OnGUI receives no input events in that configuration. Changed only this setting to Both (2), added a regression requiring both backends, and a build guard. Previous Windows menu click failures must not be attributed solely to automation. Keyboard injection/hardware response remains a separate unverified question.

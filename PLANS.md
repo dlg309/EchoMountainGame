@@ -1,5 +1,7 @@
 # EchoMountain3D implementation plan
 
+The current MVP audit, risk-ranked slices, and proposed surface-zone implementation are in `docs/PLAN.md` (2026-11-17 review draft). This historical milestone log remains as provenance; no gameplay work is authorized by the review draft.
+
 The complete brief and acceptance gates are in `docs/BUILD_BRIEF.md`. The latest observed results are in the QA record.
 
 - [x] **M0 Foundation:** repository root selected; Unity 6000.3.28f1 / URP imported and compiled; recovery records, ignore rules, and a Windows lab build entry point exist. The isolated Windows development build succeeded and launched. See QA for caveats.

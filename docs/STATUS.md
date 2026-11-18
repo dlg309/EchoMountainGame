@@ -1,5 +1,13 @@
 # Status
 
+## Baseline gate — 2026-11-17
+
+On clean source `d399011` plus the existing documentation edits, a fresh isolated Unity 6000.3.28f1 copy passed 39/39 PlayMode tests (exit 0) and built a Windows x64 player (exit 0). The player launched, was responsive, and logged graphics/input initialization. Windows Computer Use failed to activate/capture the game window reliably, so corrected menus, physical movement, both routes, replay UI, and standalone record persistence remain manually unverified. The existing user `runs-v1.json` hash was unchanged. No gameplay script, scene or GUID changed. **NO-GO for enabling surface zones** until the corrected Windows interaction gate can be observed and separate record-version storage is implemented/tested. Exact commands/results: `docs/QA.md`; compatibility design: `docs/PLAN.md`. No editor or task player remains running.
+
+## Planning review — 2026-11-17
+
+Selected project is `C:/Users/diego/OneDrive/Documents/EchoMountainGame`, `main` at `d399011` (one local commit ahead of `origin/main` before this documentation edit). Working tree was clean at audit; no Unity editor process was observed. Project records 6000.3.28f1 and URP 17.3.0. `docs/PLAN.md` is the proposed MVP audit and prioritized slice plan for user review; gameplay code, scenes, and GUIDs were not changed. The previously pending corrected Windows build now has an existing local `Builds/GlacierPass-MenuFixed/EchoMountain.exe`; its isolated `menu-build.log` reports success/return code 0. No new Unity test/build/gameplay was run this turn. Next after review: verify corrected player UI, physical input, finish/retry and persistence; then implement visible surface zones with record-version isolation. See `docs/QA.md` for exact audit commands and limits.
+
 ## Menu input correction in progress, 2026-11-13
 
 Found a concrete runtime-menu defect: `activeInputHandler: 1` enables only new input, while the current menus use IMGUI. Unity's Input System documentation states runtime OnGUI receives no input events in that configuration. Changed only this setting to Both (2), added a regression requiring both backends, and a build guard. Previous Windows menu click failures must not be attributed solely to automation. Keyboard injection/hardware response remains a separate unverified question.
