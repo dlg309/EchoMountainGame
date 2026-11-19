@@ -1,5 +1,9 @@
 # Status
 
+## Player running — 2026-11-19 14:45 EST
+
+The current r3 Windows build, `Builds/GlacierPass-Carve-r3/EchoMountain.exe`, was launched windowed from `experiment/carve-brake-r3` at `fa9b608`. PID 26092 showed a responsive `Echo Mountain - Glacier Pass` window; graphics and input initialized in the startup log. It is left open for hands-on review. No new tests or build were run, and gameplay/record reopening remain unverified. The pre-existing untracked `Assets/Resources/GDKEditionAutoGen*` remains untouched. Next: play Pine and Summit and report handling, landing, UI, and saved-record reopen behavior; see QA and the r3 gate below.
+
 ## Isolated carving experiment r3 — 2026-11-18
 
 Review branch `experiment/carve-brake-r3` from `94b91e6`; work and Unity verification took place in `%TEMP%/EchoMountain3D-CarveBrake-20261118-94b91e6`. Unmodified R2 passed 41/41 PlayMode tests. The reference Windows executable ran and showed downhill motion, chase camera, terrain and spray; brief key taps did not establish controlled turning/braking/landing behavior. Its Unity 2020.2.1f1 assembly metadata suggested smoothing, edge friction and landing/camera helpers, used only as behavioral context. Echo R2's menu rendered, while Windows automation could not reliably start its run; prior Pine/Summit/control/score/replay passes remain user observations.

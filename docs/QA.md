@@ -1,5 +1,10 @@
 # QA evidence
 
+## Windows player launch — 2026-11-19 14:45 EST
+
+- On `experiment/carve-brake-r3` at `fa9b608`, launched `Builds/GlacierPass-Carve-r3/EchoMountain.exe` from its build directory with PowerShell `Start-Process -FilePath $game -WorkingDirectory (Split-Path $game) -ArgumentList @('-screen-fullscreen','0','-screen-width','1280','-screen-height','720','-logFile',"`"$log`"") -PassThru`, where `$game` resolves to that executable and `$log` is `%TEMP%/EchoMountain-r3-launch-20261119.log`. PID 26092 remained responsive and exposed the `Echo Mountain - Glacier Pass` window. Startup log reports Unity 6000.3.28f1, Direct3D 11 on Intel Iris Xe, and input initialized. No new Unity test or build ran.
+- The player was left open for hands-on play. This process/window/log check does not verify menu interaction, riding, controls, save persistence, audio, or frame rate. Existing untracked `Assets/Resources/GDKEditionAutoGen*` was left untouched.
+
 ## Carving and braking experiment gate — defined before gameplay edits, 2026-11-18
 
 - Isolated project copy: `%TEMP%/EchoMountain3D-CarveBrake-20261118-94b91e6` from `94b91e6`; the selected repository and R2 player remain intact. Compare against the unmodified R2 baseline with the same 60 Hz fixture and input sequence.

@@ -1,5 +1,9 @@
 # Handoff
 
+## Player launch — 2026-11-19 14:45 EST
+
+The r3 player is open from `Builds/GlacierPass-Carve-r3/EchoMountain.exe` (PID 26092 at launch) on `experiment/carve-brake-r3`, commit `fa9b608`. Its window was responsive and startup graphics/input initialization logged to `%TEMP%/EchoMountain-r3-launch-20261119.log`. No test/build or hands-on gameplay was performed in this launch. Leave the player available for the user's Pine/Summit handling and record-reopen check; consult the r3 section and QA for the acceptance gate. Untracked `Assets/Resources/GDKEditionAutoGen*` was not changed.
+
 ## Carving experiment r3 — 2026-11-18
 
 Continue on review branch `experiment/carve-brake-r3` in the selected project `C:/Users/diego/OneDrive/Documents/EchoMountainGame`; starting R2 HEAD was `94b91e6`. Tested QA copy/logs: `%TEMP%/EchoMountain3D-CarveBrake-20261118-94b91e6`. R2 baseline `r2-baseline.xml` 41/41; measured baseline `r2-handling.xml` 2/2; final `r3-final.xml` 43/43; `r3-build.log` exit 0. New Windows player: `Builds/GlacierPass-Carve-r3/EchoMountain.exe`; previous `Builds/GlacierPass-Polished-r2` remains intact. Changed source: `LabRider.cs` high-speed yaw trim, `LocalRunStore.cs` r3 record key, `LocalRunStoreTests.cs` r1/r2 preservation, new `HandlingExperimentTests.cs` and `.meta`; docs PLAN/QA/STATUS/HANDOFF. No scene or GUID change. The untracked `Assets/Resources/GDKEditionAutoGen*` belongs to the pre-existing workspace state and was preserved.
