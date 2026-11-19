@@ -51,13 +51,18 @@ namespace EchoMountain.Tests
             string earlierRecords = "Existing rules and records stay here.";
             File.WriteAllText(oldPath, earlierRecords);
             File.WriteAllText(oldPath + ".bak", earlierRecords);
+            string r2Path = Path.Combine(directory, "runs-glacier-pass-c1-r2.json");
+            File.WriteAllText(r2Path, earlierRecords);
+            File.WriteAllText(r2Path + ".bak", earlierRecords);
             string newPath = Path.Combine(directory, LocalRunStore.FileName);
             var store = new LocalRunStore(newPath);
             Assert.That(store.Finish(MountainLine.Pine, false, 85f, 43f, 130, "test"), Is.True);
             Assert.That(new LocalRunStore(newPath).Record(MountainLine.Pine, false).finishes, Is.EqualTo(1));
             Assert.That(File.ReadAllText(oldPath), Is.EqualTo(earlierRecords));
             Assert.That(File.ReadAllText(oldPath + ".bak"), Is.EqualTo(earlierRecords));
-            Assert.That(LocalRunStore.RulesVersion, Is.EqualTo(2));
+            Assert.That(File.ReadAllText(r2Path), Is.EqualTo(earlierRecords));
+            Assert.That(File.ReadAllText(r2Path + ".bak"), Is.EqualTo(earlierRecords));
+            Assert.That(LocalRunStore.RulesVersion, Is.EqualTo(3));
         }
 
         [Test]

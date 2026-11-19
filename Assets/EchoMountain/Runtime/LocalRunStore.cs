@@ -45,10 +45,10 @@ namespace EchoMountain.Riding
     {
         public const string Course = "glacier-pass";
         public const int CourseVersion = 1;
-        public const int RulesVersion = 2;
+        public const int RulesVersion = 3;
         public const string Assist = "balanced-lab-v1";
         public const int Schema = 1;
-        public const string FileName = "runs-glacier-pass-c1-r2.json";
+        public const string FileName = "runs-glacier-pass-c1-r3.json";
         private const int MaximumBytes = 65536;
         private readonly string path;
         private bool readOnly;
@@ -71,7 +71,8 @@ namespace EchoMountain.Riding
             if (Application.isBatchMode)
                 directory = Path.Combine(Application.temporaryCachePath, "EchoMountain-Batch", Guid.NewGuid().ToString("N"));
             string currentPath = Path.Combine(directory, FileName);
-            bool previousBook = File.Exists(Path.Combine(directory, "runs-v1.json"));
+            bool previousBook = File.Exists(Path.Combine(directory, "runs-v1.json")) ||
+                File.Exists(Path.Combine(directory, "runs-glacier-pass-c1-r2.json"));
             var store = new LocalRunStore(currentPath);
             if (previousBook && !File.Exists(currentPath))
                 store.Notice = "New handling rules: earlier records are kept separately.";

@@ -247,11 +247,13 @@ namespace EchoMountain.Riding
                 float resistance = Mathf.Min(Mathf.Abs(forwardSpeed) / Time.fixedDeltaTime,
                     rollingResistance * surface.Roll + brake * braking * surface.Brake);
                 body.AddForce(-forward * Mathf.Sign(forwardSpeed) * resistance, ForceMode.Acceleration);
-                // Ease digital steering and bleed off yaw when the edge is supported.
-                // Braking slightly reduces turn authority as forward speed falls.
+                // Ease digital steering and trim yaw at speed to avoid outrunning lateral grip.
+                // Braking also reduces turn authority while the edge is supported.
                 smoothedSteer = Mathf.MoveTowards(smoothedSteer, steer, 4f * Time.fixedDeltaTime);
                 float yawRate = Vector3.Dot(body.angularVelocity, normal);
-                float turn = smoothedSteer * turnAcceleration * 0.72f
+                float speedTrim = Mathf.Lerp(1f, 0.68f,
+                    Mathf.InverseLerp(8f, 16f, Mathf.Abs(forwardSpeed)));
+                float turn = smoothedSteer * turnAcceleration * 0.72f * speedTrim
                     * Mathf.Clamp01(Mathf.Abs(forwardSpeed) / 3f) * (1f - 0.2f * brake);
                 body.AddTorque(normal * (turn - yawRate * 1.8f), ForceMode.Acceleration);
                 Vector3 tilt = Vector3.Cross(body.rotation * Vector3.up, normal);
