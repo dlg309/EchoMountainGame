@@ -1,10 +1,10 @@
 # Echo Mountain
 
-Glacier Pass is an 860 m snowboarding course for Windows. Ride the smooth **Pine line**, take the marked rollers on the **Summit line**, or use **Jump practice** for a shorter Summit run with a 250-point target.
+Glacier Pass is an 860 m snowboarding course for Windows. A major Snowboard Starter-inspired redesign of its riding physics, rider animation, camera, terrain, graphics and UI is the active development target (2026-11-19). The current released build still has the existing Echo Mountain presentation; the redesign is not implemented or verified yet. Ride the smooth **Pine line**, take the marked rollers on the **Summit line**, or use **Jump practice** for a shorter Summit run with a 250-point target.
 
 ## Play Glacier Pass
 
-Run `Builds/GlacierPass-Integrated/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
+For the latest locally recorded R2 candidate, run `Builds/GlacierPass-Polished-r2/EchoMountain.exe` from its full build folder. The final R2 build passed automated tests/build but still needs manual visual and record-reopen checks; `Builds/GlacierPass-Integrated` is an older build. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
@@ -30,6 +30,10 @@ Completed runs also update local previous, fastest, and highest-score records fo
 A completed 180 earns 180 base points and a 360 earns 360. Continuously holding an Indy or Melon for 0.15 seconds adds 80 or 90 points. Release the spin input before touching down so the board can settle. The in-air display shows rotation and pending base points.
 
 A clean landing banks the points. A recovered landing earns half and ends the chain. A bail earns zero. Different clean tricks within eight seconds build a multiplier from ×1 to ×1.75. Consecutive repeats earn 60% of their usual value and restart the chain. For example, a clean 180 Indy starts at 260 points, followed by a clean 360 Melon for 562 points at ×1.25.
+
+## Redesign target and status
+
+The playable Snowboard Starter reference is local at `C:\Users\diego\Downloads\SnowboardStarter\20210215 Ver 0.4 Windows`. The user's menu and riding screenshots define a warm sunset, pale layered snow, low-poly firs, blue-gray distant mountains, dark-outlined rider/board, readable behind-rider camera, ramps/rails/signs and minimal HUD. The intended replacement includes acceleration, carve/skid, brake, jumps, air tricks, landings and bails; existing Pine/Summit, practice, scoring, pause/retry, records and replay must be adapted and verified. See `PLANS.md` for the active staged plan. The compiled reference does not include editable Unity scenes/prefabs/scripts. Keep extracted third-party assets out of the public repository.
 
 ## Edit, build, and test
 
