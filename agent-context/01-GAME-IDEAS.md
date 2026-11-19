@@ -1,6 +1,16 @@
 # Snowboard game research and Echo Mountain integration
 
-Status: research and implementation blueprint, 2026-11-11. This note covers representative snowboard game styles rather than every released title. `[Documented]` means an official game, developer, or Unity source states the cited fact, or the named Echo Mountain source file implements it. `[Proposed]` is an original design for Echo Mountain. `[Assumption]` needs local playtesting or tuning. Commercial games' internal physics code and numerical settings are unknown.
+Status: historical research and surface-response blueprint, 2026-11-11. The current 2026-11-19 Snowboard Starter redesign directive below takes priority. This note covers representative snowboard game styles rather than every released title. `[Documented]` means an official game, developer, or Unity source states the cited fact, or the named Echo Mountain source file implements it. `[Proposed]` is an original design for Echo Mountain. `[Assumption]` needs local playtesting or tuning. Commercial games' internal physics code and numerical settings are unknown.
+
+## Current user directive: Snowboard Starter redesign (2026-11-19)
+
+The current target is a major replacement of Echo Mountain's riding feel and visual presentation using the playable Snowboard Starter build at `C:\Users\diego\Downloads\SnowboardStarter\20210215 Ver 0.4 Windows` and the user's three reference screenshots (menu and two riding views). This directive supersedes older surface-zone priorities and any instruction to preserve `LabRider` handling or the present art style. Keep the existing Unity repository and recorded Unity 6.3 LTS/URP version; do not import the Unity 2020 executable or DLLs as source or start a second project.
+
+Treat the starter as a measured reference. Inspect its compiled gameplay assembly and packaged scene/assets data, play both games in matched situations, and document observed behavior separately from inferred implementation. Replace the current controller and presentation where needed: downhill acceleration, edge grip, carving/skid, brake, pop, air spin/grab, landing/bail/rail behavior; rig/board/animation, camera, terrain/trees/ramps/rails, snow materials, warm sunset lighting, outlines, trails/spray, menu, HUD, and audio. The screenshots specify pale beige layered snow, a golden horizon, muted blue-gray distant mountains, tiered snow-covered firs, high-contrast dark rider/board outlines, and a behind-rider camera with a readable line. Aim for close visual and feel parity, but report differences honestly; a compiled build is not an editable Unity project.
+
+Preserve the player-facing Pine/Summit and Jump practice workflows, score banking, pause/retry, records, and replay by adapting them to the replacement rider. Old behavior-specific tests may be rewritten to assert the new target; keep regression coverage of those workflows. Record physical/visual comparisons and actual Unity tests/Windows builds in `docs/QA.md`. Change record/rules identity if movement or scoring makes earlier runs incomparable, and verify persistence after closing and reopening the standalone player. The November 18 R2 status is the baseline; older milestone prose is historical.
+
+Work in a reversible branch or isolated copy, checkpoint current changes, and deliver complete playable slices: reference specification, movement/physics, character/animation/camera, environment/rendering, menu/HUD/audio, integration and manual acceptance. After the replacement passes its tests and Windows play checks, audit scene/prefab GUIDs, Build Settings, Resources loading, tests, and runtime references; remove confirmed unused legacy files in a separate cleanup commit, then rerun regression and build. This is a private project. Keep extracted third-party assets out of the public repository; check the asset's license before incorporating source assets.
 
 ## Target game teardown summary
 
@@ -64,7 +74,7 @@ Ready ── drop-in ──> Riding grounded ── pop/lip ──> Riding airbo
 
 [Documented] URP and Unity 6000.3.28f1 are the project baseline, with a 1/60 s fixed step. [Documented] The course is currently one authored height-function mesh with two lines and normal-based contact. [Proposed] Keep the first surface slice coordinate-authored; it requires no terrain system or mesh rebuild. The main architectural concern is keeping a surface lookup out of landing evaluation and scoring so those rules remain deterministic and independently testable.
 
-## Implementation blueprint
+## Deferred implementation blueprint: surface response
 
 [Proposed] Add a pure `SurfaceRules` utility in `Assets/EchoMountain/Runtime/SurfaceRules.cs`. Initial code for the classifier and coefficients follows. Coordinates and multipliers are provisional assumptions. Later, replace literals with serialized zones owned by the scene without changing `LabRider`'s force call sites.
 
