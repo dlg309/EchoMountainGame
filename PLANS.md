@@ -1,8 +1,23 @@
 # EchoMountain3D implementation plan
 
-The current MVP audit, risk-ranked slices, and proposed surface-zone implementation are in `docs/PLAN.md` (2026-11-17 review draft). This historical milestone log remains as provenance; no gameplay work is authorized by the review draft.
+The active user-approved Snowboard Starter redesign plan is below. `docs/PLAN.md` is an older MVP/surface-zone review draft and does not set the current priority.
 
-The complete brief and acceptance gates are in `docs/BUILD_BRIEF.md`. The latest observed results are in the QA record.
+The original brief is in `docs/BUILD_BRIEF.md`; this user directive updates its visual and physics target. The latest observed results are in `docs/QA.md` and `docs/STATUS.md`.
+
+## Active redesign plan (2026-11-19)
+
+**Goal:** Make Echo Mountain's movement, physics, animations, camera, rider/board, mountain art, menu and HUD closely match the user's Snowboard Starter reference screenshots and playable Windows build, while retaining Echo Mountain's name and functional Pine/Summit, Jump practice, scoring, pause/retry, records and replay. The user dislikes the existing rider movement and explicitly authorizes replacing its implementation and art direction. This plan supersedes the surface-zone next step and the historical milestone sequence below. Keep Unity 6000.3.28f1 and URP unless a separately verified patch is necessary. The starter is a compiled Unity 2020.2.1 build, not editable source.
+
+- [ ] **R0 Baseline and reference:** checkpoint current Git/editor state; read latest QA/status; record the R2 manual checks and unresolved reopen persistence. Play starter and Echo Mountain with matched input/slope/camera cases; inventory assembly classes, scene/assets, and current dependencies. Make a visual/behavior specification with the three screenshots, measurements, observed/inferred labels, and acceptance thresholds.
+- [ ] **R1 Movement replacement:** implement a new supported rider controller/physics with measured acceleration, edge/carve/skid, braking, pop, air control, landing/bail and rail behavior. Replace old `LabRider` assumptions as needed. Validate in a dedicated lab and both authored routes with focused PlayMode and manual Windows checks.
+- [ ] **R2 Character and camera:** rebuild the rider silhouette, board attachment, animation states, grabs/bails and dynamic behind-rider camera. Compare matched turns, jumps and obstacle approaches in motion; check visibility and camera obstruction.
+- [ ] **R3 World and visuals:** rebuild terrain presentation, snow, tiered firs, distant blue-gray mountains, golden sky, sunset lighting, outlines, ramps/rails/signs, shadow, trail/spray. Compare the menu and downhill screenshots at matching views and quality settings.
+- [ ] **R4 UI/audio/integration:** redesign character/course preview menu, GO/navigation/quality controls, minimal readable HUD and ride sounds; reconnect Pine/Summit, Jump practice, score, pause/retry, records and replay to the new rider. Version records if motion/scoring rules change. Verify saves across a real standalone restart.
+- [ ] **R5 Acceptance and cleanup:** full Unity regression, fresh Windows build and manual side-by-side play. Log remaining differences and performance. Only after acceptance, audit scene/prefab GUIDs, Build Settings, Resources and runtime references; remove unused legacy code/assets/scenes in a separate commit and rerun the same gates.
+
+**Acceptance:** The player can select either line or practice, steer/carve/brake/pop/spin/grab/land/bail/ride a rail, finish and retry; scores and replay remain isolated and records survive restart. Matched reference captures demonstrate the specified look and camera, and manual play compares handling. Compilation or automated tests alone do not prove visual or feel parity. Do not label an unrun check passed. Keep reference files local and extracted third-party assets out of the public repository.
+
+## Historical milestone log
 
 - [x] **M0 Foundation:** repository root selected; Unity 6000.3.28f1 / URP imported and compiled; recovery records, ignore rules, and a Windows lab build entry point exist. The isolated Windows development build succeeded and launched. See QA for caveats.
 - [ ] **M1 Physics lab** (after M0): construct an owned flat/slope/crest/jump/landing/reset test scene, rigidbody and multiple contact probes, force-limited edge and slip, braking, buffered pop, switch-aware landing and diagnostics. Verify support, acceleration, turning, braking, trajectory, landing and reset through Unity PlayMode tests and observed gameplay; record tolerances and results.
@@ -12,7 +27,7 @@ The complete brief and acceptance gates are in `docs/BUILD_BRIEF.md`. The latest
 - [ ] **M5 Expanded demo:** rails, physical halfpipe, surfaces, challenges, cosmetics, weather and authoring tools; validate each addition without regressing the slice.
 - [ ] **M6 Release candidate:** regression suite, Windows launch, reproducible build, gameplay performance and QA, known limitations and handoff.
 
-## Decisions and dependencies
+## Historical decisions and dependencies
 
 The Unity project is on 6000.3.28f1 with URP. The current physics step is 60 Hz. The standalone target remains 1080p at 60 FPS, pending gameplay measurement.
 
