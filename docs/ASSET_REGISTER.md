@@ -1,5 +1,7 @@
 ﻿# Asset register
 
+- 2026-11-23. Sunset Basin uses original Unity terrain, snow layers, fir meshes, distant peaks, riding features, a twin-tip deck, and a sunset shader. Editable sources are in Assets/EchoMountain/Editor/SunsetBasin*.cs and Assets/EchoMountain/Runtime/SunsetBasinSky.shader. The supplied images and local Starter Kit informed shapes, palette, feature spacing, and framing. The mode uses Echo Mountain's own pose and sound scripts.
+
 No game assets have been added or inspected. The original brief in the repository and its exact copy `docs/BUILD_BRIEF.md` are user-provided project documentation. Record creator, source, license, modifications, editable source and placeholder status for each future asset.
 
 - Unity 3D cross-platform template 17.0.14, supplied with locally installed Unity 6000.3.28f1: starter scene, render pipeline settings, sample input actions, tutorial assets and metadata. Creator/source: Unity Technologies, local editor installation. These are starter placeholders, not original Echo Mountain production art. Applicable Unity editor/template terms must be reviewed before external redistribution; no external art has been added.

@@ -30,16 +30,20 @@ namespace EchoMountain.Riding
         private LabRideControls controls;
         private LabHud hud;
         private TrickScore tricks;
+        private FreeRoamRailRide railRide;
         private float spinInput;
         private bool spinEngaged;
         private BoardGrab grabInput;
         public BoardGrab ActiveGrab => tricks?.CurrentGrab ?? BoardGrab.None;
         internal void EnableTricks(TrickScore score) => tricks = score;
+        internal void EnableFreeRoam(FreeRoamMap map) => railRide = new FreeRoamRailRide(map, body);
         private PhysicsMaterial boardMaterial;
         public bool IsGrounded => contact;
         public float BrakeInput => brake;
         public bool UsingGamepad => controls?.LastGamepad != null && controls.LastGamepad.added && controls.LastGamepad.enabled;
-        public float SpeedKmh => body ? body.linearVelocity.magnitude * 3.6f : 0f;
+        public bool IsGrinding => railRide?.IsGrinding == true;
+        internal Vector3 TravelVelocity => IsGrinding ? railRide.Velocity : body.linearVelocity;
+        public float SpeedKmh => body ? TravelVelocity.magnitude * 3.6f : 0f;
         public Vector3 ContactNormal => normal;
         public float LateralSlip => slip;
         public float SteerInput => steer;
@@ -90,6 +94,7 @@ namespace EchoMountain.Riding
 
         private void OnDisable()
         {
+            railRide?.Reset();
             InputSystem.onDeviceChange -= OnDeviceChange;
             controls.Disable();
         }
@@ -146,6 +151,18 @@ namespace EchoMountain.Riding
             {
                 recoveryRemaining -= Time.fixedDeltaTime;
                 if (recoveryRemaining <= 0f) ResetRider();
+                return;
+            }
+            if (railRide != null && railRide.Step(!contact && airborneTime >= 0.07f,
+                bufferedJump > 0f, popVelocity, tricks))
+            {
+                contact = wasContact = false;
+                bufferedJump = 0f;
+                lastContact = float.NegativeInfinity;
+                landingArmed = true;
+                airborneTime = Mathf.Max(airborneTime, 0.12f);
+                supportedTime = 0f;
+                spinEngaged = false;
                 return;
             }
             if (quadraticDrag > 0f)
@@ -289,6 +306,7 @@ namespace EchoMountain.Riding
 
         public void ResetRider()
         {
+            railRide?.Reset();
             body.position = spawnPosition;
             body.rotation = spawnRotation;
             body.linearVelocity = Vector3.zero;
@@ -308,7 +326,7 @@ namespace EchoMountain.Riding
             steer = smoothedSteer = brake = slip = gripForce = spinInput = 0f;
             spinEngaged = false;
             grabInput = BoardGrab.None;
-            tricks?.Reset();
+            tricks?.Reset(preservePoints: railRide != null);
             ResetCount++;
         }
 

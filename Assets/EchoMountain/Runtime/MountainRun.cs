@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace EchoMountain.Riding
 {
@@ -18,6 +19,10 @@ namespace EchoMountain.Riding
         public const float PracticeFinish = 285f;
         public const int PracticeGoal = 250;
         public bool IsPractice { get; private set; }
+        [SerializeField] private FreeRoamMap freeRoam;
+        public bool IsFreeRoam => freeRoam;
+        public int DropInCount => IsFreeRoam ? freeRoam.DropInCount : 0;
+        public string DropInName(int index) => freeRoam.DropIn(index).name;
         public bool SoundEnabled { get; private set; } = true;
         public LocalRunStore Records { get; private set; }
         public MountainReplay Replay { get; private set; }
@@ -31,7 +36,9 @@ namespace EchoMountain.Riding
         private LabHud hud;
         private uint resetCount;
         private int replayEndedFrame = -1;
-        private InputAction advance, choose, left, right, practice, watch;
+        private InputAction advance, choose, left, right, practice, watch, sandbox;
+        private int dropIn;
+        private bool changingScene;
         private GUIStyle headline, copy, eyebrow, button;
         private readonly Color ink = new(0.92f, 0.96f, 1f);
         private readonly Color ice = new(0.40f, 0.87f, 0.93f);
@@ -49,6 +56,7 @@ namespace EchoMountain.Riding
             right = Button("Summit line", "<Keyboard>/rightArrow", "<Gamepad>/dpad/right");
             practice = Button("Practice jumps", "<Keyboard>/p", "<Gamepad>/buttonNorth");
             watch = Button("Watch run replay", "<Keyboard>/v", "<Gamepad>/buttonWest");
+            sandbox = Button("Free Roam", "<Keyboard>/f", "<Gamepad>/rightShoulder");
         }
 
         private void OnEnable()
@@ -59,6 +67,7 @@ namespace EchoMountain.Riding
             right.Enable();
             practice.Enable();
             watch.Enable();
+            sandbox.Enable();
         }
 
         private void Start()
@@ -71,8 +80,15 @@ namespace EchoMountain.Riding
             body.maxAngularVelocity = Mathf.Max(body.maxAngularVelocity, 10f);
             rider.EnableTricks(Tricks);
             gameObject.AddComponent<MountainRideAudio>();
-            Replay = gameObject.AddComponent<MountainReplay>();
             gameObject.AddComponent<MountainSnowSpray>();
+            if (IsFreeRoam)
+            {
+                Phase = MountainPhase.Riding;
+                rider.EnableFreeRoam(freeRoam);
+                MoveToDropIn(0);
+                return;
+            }
+            Replay = gameObject.AddComponent<MountainReplay>();
             ShowStart();
         }
 
@@ -84,6 +100,7 @@ namespace EchoMountain.Riding
             right.Disable();
             practice.Disable();
             watch.Disable();
+            sandbox.Disable();
         }
 
         private void OnDestroy()
@@ -94,6 +111,7 @@ namespace EchoMountain.Riding
             right.Dispose();
             practice.Dispose();
             watch.Dispose();
+            sandbox.Dispose();
         }
 
         private static InputAction Button(string name, string keyboard, string gamepad)
@@ -111,6 +129,11 @@ namespace EchoMountain.Riding
             if (Phase == MountainPhase.Results && watch.WasPressedThisFrame()) { StartReplay(); return; }
             if (Phase == MountainPhase.Ready)
             {
+                if (sandbox.WasPressedThisFrame() && Application.CanStreamedLevelBeLoaded(FreeRoamMap.ScenePath))
+                {
+                    StartFreeRoam();
+                    return;
+                }
                 if (left.WasPressedThisFrame()) SelectLine(MountainLine.Pine);
                 if (right.WasPressedThisFrame()) SelectLine(MountainLine.Summit);
                 if (practice.WasPressedThisFrame())
@@ -128,6 +151,11 @@ namespace EchoMountain.Riding
         private void FixedUpdate()
         {
             if (Phase != MountainPhase.Riding) return;
+            if (IsFreeRoam)
+            {
+                if (freeRoam.NeedsRecovery(body)) rider.ResetRider();
+                return;
+            }
 
             Vector3 position = body.position;
             if (Mathf.Abs(position.x) > MountainCourse.HalfWidth - 0.25f || position.z < StartZ - 11f || position.y < 4f)
@@ -185,6 +213,11 @@ namespace EchoMountain.Riding
         public void RestartRun()
         {
             if (Phase != MountainPhase.Riding) return;
+            if (IsFreeRoam)
+            {
+                MoveToDropIn(dropIn);
+                return;
+            }
             Phase = MountainPhase.Ready;
             StartRun();
         }
@@ -199,6 +232,14 @@ namespace EchoMountain.Riding
 
         public void ShowStart()
         {
+            if (IsFreeRoam)
+            {
+                string scene = FreeRoamMap.ReturnScene;
+                if (string.IsNullOrEmpty(scene) || !Application.CanStreamedLevelBeLoaded(scene))
+                    scene = FreeRoamMap.MainMenuPath;
+                if (Application.CanStreamedLevelBeLoaded(scene)) LoadScene(scene);
+                return;
+            }
             bool abandonedRide = Phase == MountainPhase.Riding;
             if (Phase == MountainPhase.Replay) EndReplay();
             if (abandonedRide)
@@ -211,6 +252,29 @@ namespace EchoMountain.Riding
             Phase = MountainPhase.Ready;
             SetRiding(false);
             SelectLine(Line);
+        }
+
+        public void StartFreeRoam()
+        {
+            if (Phase != MountainPhase.Ready || IsFreeRoam || changingScene ||
+                !Application.CanStreamedLevelBeLoaded(FreeRoamMap.ScenePath)) return;
+            FreeRoamMap.ReturnScene = gameObject.scene.path;
+            LoadScene(FreeRoamMap.ScenePath);
+        }
+
+        private void LoadScene(string path)
+        {
+            if (changingScene) return;
+            changingScene = true;
+            SceneManager.LoadSceneAsync(path, LoadSceneMode.Single);
+        }
+
+        public void MoveToDropIn(int index)
+        {
+            if (!IsFreeRoam || index < 0 || index >= DropInCount) return;
+            dropIn = index;
+            var start = freeRoam.DropIn(index);
+            rider.SetSpawn(start.position, start.rotation);
         }
 
         public void StartReplay()
@@ -238,7 +302,7 @@ namespace EchoMountain.Riding
         public void ToggleSound()
         {
             SoundEnabled = !SoundEnabled;
-            Records?.SetPreferences(SoundEnabled, Line);
+            if (!IsFreeRoam) Records?.SetPreferences(SoundEnabled, Line);
         }
 
         private void SetRiding(bool active)
@@ -277,24 +341,37 @@ namespace EchoMountain.Riding
 
             if (Phase == MountainPhase.Riding)
             {
-                Panel(new Rect(18f, 18f, 326f, 107f), LineColor);
-                GUI.Label(new Rect(36f, 28f, 293f, 25f), IsPractice ? "SUMMIT   /   JUMP PRACTICE" : $"GLACIER PASS   /   {LineName}", eyebrow);
-                GUI.Label(new Rect(36f, 52f, 293f, 31f), $"{TimeText(Elapsed)}        {Progress:P0} complete", copy);
-                Fill(new Rect(38f, 98f, 286f, 5f), new Color(0.18f, 0.26f, 0.32f));
-                Fill(new Rect(38f, 98f, 286f * Progress, 5f), LineColor);
+                if (IsFreeRoam)
+                {
+                    Panel(new Rect(18f, 18f, 326f, 74f), orange);
+                    GUI.Label(new Rect(36f, 28f, 293f, 25f), "SUNSET BASIN   /   FREE ROAM", eyebrow);
+                    GUI.Label(new Rect(36f, 52f, 293f, 27f),
+                        rider.IsRecovering ? "Recovering…" : DropInName(dropIn), copy);
+                }
+                else
+                {
+                    Panel(new Rect(18f, 18f, 326f, 107f), LineColor);
+                    GUI.Label(new Rect(36f, 28f, 293f, 25f), IsPractice ? "SUMMIT   /   JUMP PRACTICE" : $"GLACIER PASS   /   {LineName}", eyebrow);
+                    GUI.Label(new Rect(36f, 52f, 293f, 31f), $"{TimeText(Elapsed)}        {Progress:P0} complete", copy);
+                    Fill(new Rect(38f, 98f, 286f, 5f), new Color(0.18f, 0.26f, 0.32f));
+                    Fill(new Rect(38f, 98f, 286f * Progress, 5f), LineColor);
+                }
                 DrawScore(new Rect(width - 344f, 18f, 326f, 148f));
             }
             else
             {
                 float x = (width - 644f) * 0.5f;
-                float y = (height - 436f) * 0.5f;
-                Panel(new Rect(x, y, 644f, 436f), LineColor);
+                bool showSandbox = Phase == MountainPhase.Ready && Application.CanStreamedLevelBeLoaded(FreeRoamMap.ScenePath);
+                float panelHeight = showSandbox ? 496f : 436f;
+                float y = (height - panelHeight) * 0.5f;
+                Panel(new Rect(x, y, 644f, panelHeight), LineColor);
                 GUI.Label(new Rect(x + 29f, y + 20f, 580f, 27f), "ECHO MOUNTAIN    /    COURSE 01", eyebrow);
                 GUI.Label(new Rect(x + 27f, y + 48f, 590f, 70f),
                     Phase == MountainPhase.Ready ? "Glacier Pass" : IsPractice ? "Practice complete" : "Descent complete", headline);
                 if (Phase == MountainPhase.Ready)
                 {
-                    GUI.Label(new Rect(x + 29f, y + 125f, 580f, 30f), "Two lines. One finish. Choose your drop-in.", copy);
+                    GUI.Label(new Rect(x + 29f, y + 125f, 580f, 30f), showSandbox
+                        ? "Choose a line or explore Sunset Basin." : "Two lines. One finish. Choose your drop-in.", copy);
                     DrawChoice(new Rect(x + 29f, y + 178f, 281f, 54f), MountainLine.Pine, "PINE LINE   /   Smooth");
                     DrawChoice(new Rect(x + 334f, y + 178f, 281f, 54f), MountainLine.Summit, "SUMMIT LINE   /   Jumps");
                     GUI.Label(new Rect(x + 29f, y + 246f, 440f, 30f), "Land your spins and grabs to bank points.", copy);
@@ -302,6 +379,8 @@ namespace EchoMountain.Riding
                     if (GUI.Button(new Rect(x + 29f, y + 299f, 198f, 44f), "Drop in  [Enter / A]", button)) StartRun();
                     if (GUI.Button(new Rect(x + 243f, y + 299f, 254f, 44f), "Jump practice  [P / Y]", button)) StartPractice();
                     if (GUI.Button(new Rect(x + 513f, y + 299f, 102f, 44f), "Quit", button)) Application.Quit();
+                    if (showSandbox && GUI.Button(new Rect(x + 29f, y + 354f, 586f, 44f),
+                        "Free Roam  /  Sunset Basin  [F / RB]", button)) StartFreeRoam();
                 }
                 else
                 {
@@ -315,7 +394,7 @@ namespace EchoMountain.Riding
                     if (GUI.Button(new Rect(x + 29f, y + 299f, 281f, 44f), "Retry  [Enter / A]", button)) StartRun();
                     if (GUI.Button(new Rect(x + 334f, y + 299f, 281f, 44f), "Choose line  [Esc / B]", button)) ShowStart();
                 }
-                DrawRecords(x + 29f, y + 353f);
+                DrawRecords(x + 29f, y + (showSandbox ? 413f : 353f));
             }
 
             GUI.color = color;
@@ -324,7 +403,7 @@ namespace EchoMountain.Riding
 
         private void DrawScore(Rect rect)
         {
-            Panel(rect, LineColor);
+            Panel(rect, IsFreeRoam ? orange : LineColor);
             GUI.Label(new Rect(rect.x + 17f, rect.y + 10f, 175f, 24f), "TRICK SCORE", eyebrow);
             if (GUI.Button(new Rect(rect.x + 223f, rect.y + 11f, 86f, 29f), hud.IsPaused ? "Resume" : "Pause"))
                 hud.SetPaused(!hud.IsPaused);
@@ -333,7 +412,11 @@ namespace EchoMountain.Riding
             GUI.Label(new Rect(rect.x + 17f, rect.y + 39f, 291f, 30f), $"{Tricks.Points:N0}{target} pts{chain}", copy);
 
             string feedback;
-            if (Tricks.IsAirborne && (Tricks.CurrentGrab != BoardGrab.None || Mathf.Abs(Tricks.Rotation) >= 15f))
+            if (rider.IsGrinding)
+            {
+                feedback = "Grinding   /   Pop to exit";
+            }
+            else if (Tricks.IsAirborne && (Tricks.PendingPoints > 0 || Tricks.CurrentGrab != BoardGrab.None || Mathf.Abs(Tricks.Rotation) >= 15f))
             {
                 string grab = Tricks.CurrentGrab == BoardGrab.None ? "" : $" {Tricks.CurrentGrab}";
                 feedback = $"{Mathf.Abs(Tricks.Rotation):F0}°{grab}   /   {Tricks.PendingPoints} pending";

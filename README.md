@@ -2,9 +2,24 @@
 
 Glacier Pass is an 860 m snowboarding course for Windows. Ride the smooth **Pine line**, take the marked rollers on the **Summit line**, or use **Jump practice** for a shorter Summit run with a 250-point target.
 
+## Free Roam in Sunset Basin
+
+Open `Assets/EchoMountain/Scenes/GlacierPassPolished.unity` and enter Play mode. Choose **Free Roam / Sunset Basin** with **F**, the right bumper, or the menu button. For a standalone build, use **Echo Mountain → Build Windows with Free Roam**.
+
+The **High Traverse** has open snow and rolling jumps. **West Ridge** has longer approaches and steeper landings. **Switchyard** has a wide box, two narrower rails, and side jumps. All three drop-ins lead into the same mountain. Pick a new drop-in from the pause menu, or press **R** / gamepad **B** to reset to the current one. Crashes also return you to that drop-in. Banked points stay with you until you return to the main menu.
+
+At a rail, follow the teal markers, pop onto the riding surface, and land with the board roughly in line with the rail. Ride off the end or pop out. Grind points bank after the snow landing. The sandbox has no race clock or finish line.
+
+### Play mode checks
+
+- **High Traverse and West Ridge** — build speed, take the marked jumps with and without a pop, and check that the camera shows the landing early.
+- **Switchyard** — try the wide box first, then the longer rails. Approach from the side once to check that the board passes without snapping on. Try riding off, popping out, and linking two features.
+- **Recovery** — compare aligned, sideways, and switch landings. Bail or press **R/B** and confirm the rider returns upright with banked points and a clear camera.
+- **Visibility and performance** — watch the board and limbs against the sunset and in the fir shadows. Use the Unity Profiler to compare CPU/GPU frame times at the summit, through a grove, and across the park.
+
 ## Play Glacier Pass
 
-Run `Builds/GlacierPass-Integrated/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
+Run `Builds/SunsetBasin/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
@@ -33,6 +48,6 @@ A clean landing banks the points. A recovered landing earns half and ends the ch
 
 ## Edit, build, and test
 
-Open the repository with Unity **6000.3.28f1** and load `Assets/EchoMountain/Scenes/GlacierPass.unity`. The Unity menu build targets `Builds/GlacierPass-Replay` if that folder is free. For a fresh automated output, pass `-echoBuildOutput <path-to-EchoMountain.exe>` to Unity batch mode; failed builds keep partial output in a sibling staging folder so the requested path remains retryable.
+Open the repository with Unity **6000.3.28f1** and load `Assets/EchoMountain/Scenes/GlacierPassPolished.unity`. The Free Roam build targets `Builds/SunsetBasin` if that folder is free. For a fresh automated output, pass `-echoBuildOutput <path-to-EchoMountain.exe>` to Unity batch mode; failed builds keep partial output in a sibling staging folder so the requested path remains retryable.
 
 The rider lab remains at `Assets/EchoMountain/Scenes/PhysicsLabRider.unity`. Run **Window → General → Test Runner → PlayMode → Run All** in Unity. See the [QA record](docs/QA.md), [milestones](PLANS.md), and [snowboard research blueprint](agent-context/01-GAME-IDEAS.md).

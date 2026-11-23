@@ -1,5 +1,9 @@
 # Status
 
+## Sunset Basin Free Roam — 2026-11-23
+
+On `experiment/carve-brake-r3` at starting commit `3b55431`, the selected project now contains the Sunset Basin scene, terrain, three drop-ins, marked jumps and rails, and a Free Roam main-menu entry. Unity 6000.3.28f1 generated the assets in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Focused PlayMode tests passed 4/4. The full graphical run passed 48/48, including both existing routes and the capture fixture. The Windows x64 build succeeded and initialized graphics, physics, and input from `Builds/SunsetBasin/EchoMountain.exe`. Hands-on traversal and profiling remain open. The older rider redesign worktree is separate.
+
 ## Player running — 2026-11-19 14:45 EST
 
 The current r3 Windows build, `Builds/GlacierPass-Carve-r3/EchoMountain.exe`, was launched windowed from `experiment/carve-brake-r3` at `fa9b608`. PID 26092 showed a responsive `Echo Mountain - Glacier Pass` window; graphics and input initialized in the startup log. It is left open for hands-on review. No new tests or build were run, and gameplay/record reopening remain unverified. The pre-existing untracked `Assets/Resources/GDKEditionAutoGen*` remains untouched. Next: play Pine and Summit and report handling, landing, UI, and saved-record reopen behavior; see QA and the r3 gate below.

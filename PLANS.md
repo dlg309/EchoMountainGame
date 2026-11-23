@@ -31,3 +31,5 @@ Glacier Pass now includes spins, grabs, landing-based scoring, a short practice 
 2026-11-13: Opt-in surface classifier and supported grip/roll/braking integration passed 38/38 full tests, then 2/2 expanded focused tests. Existing course remains packed. Next surface gate: visible authored zones, transition tests and versioned comparable records; do not activate invisible zones.
 
 2026-11-18: The user prioritized controls, bail logic, an in-game menu, and visual polish before surface zones. An isolated Unity copy passed 41/41 PlayMode tests, and a fresh polished Windows r2 build succeeded. Steering/landing tuning, a pause return-to-menu flow, and an independent polished scene are implemented. Manual feel, visual and pause-button review remain open; user-reported record persistence after reopen remains unresolved. Surface zones are still disabled. See `docs/QA.md` and `docs/STATUS.md`.
+
+2026-11-23. Sunset Basin adds a 600 × 980 m Free Roam map, three drop-ins, and landing-based rail scoring within M5. The expanded demo milestone still includes separate halfpipe, surface, and challenge work. The sandbox riding and frame-time checklist is in `README.md`.

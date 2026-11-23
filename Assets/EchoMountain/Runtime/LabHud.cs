@@ -129,14 +129,16 @@ namespace EchoMountain.Riding
             if (IsPaused)
             {
                 float x = (width - 440f) * 0.5f;
-                float panelHeight = run ? 256f : 204f;
+                bool isFreeRoam = run && run.IsFreeRoam;
+                float panelHeight = isFreeRoam ? 283f + 40f * run.DropInCount : run ? 256f : 204f;
                 float y = (height - panelHeight) * 0.5f;
                 DrawPanel(new Rect(x, y, 440f, panelHeight));
                 GUI.Label(new Rect(x + 20f, y + 12f, 400f, 28f), "ECHO MOUNTAIN   /   PAUSED", title);
                 GUI.Label(new Rect(x + 20f, y + 43f, 400f, 40f), pauseReason, small);
                 if (GUI.Button(new Rect(x + 20f, y + 91f, 400f, 36f), "Resume", button))
                     SetPaused(false);
-                if (GUI.Button(new Rect(x + 20f, y + 137f, 400f, 36f), run ? "Restart Run" : "Reset run", button))
+                if (GUI.Button(new Rect(x + 20f, y + 137f, 400f, 36f),
+                    isFreeRoam ? "Reset to Drop-in" : run ? "Restart Run" : "Reset run", button))
                 {
                     SetPaused(false);
                     if (run) run.RestartRun();
@@ -146,6 +148,17 @@ namespace EchoMountain.Riding
                 {
                     SetPaused(false);
                     run.ShowStart();
+                }
+                if (isFreeRoam)
+                {
+                    GUI.Label(new Rect(x + 20f, y + 227f, 400f, 22f), "CHANGE DROP-IN", title);
+                    for (int i = 0; i < run.DropInCount; i++)
+                    {
+                        if (!GUI.Button(new Rect(x + 20f, y + 253f + 40f * i, 400f, 34f), run.DropInName(i), button))
+                            continue;
+                        run.MoveToDropIn(i);
+                        SetPaused(false);
+                    }
                 }
             }
 

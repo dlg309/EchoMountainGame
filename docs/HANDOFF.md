@@ -1,5 +1,11 @@
 # Handoff
 
+## Sunset Basin Free Roam — 2026-11-23
+
+Use the selected EchoMountainGame repository on `experiment/carve-brake-r3`. Open `GlacierPassPolished.unity`, enter Play mode, and use the Free Roam menu entry. `EchoMountain.EditorTools.SunsetBasinBuilder.Create` is for generating a fresh copy. The scene and its assets are already in the project. The focused and full graphical tests passed in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. See QA and README for verification and riding checks.
+
+The tested Windows player is at `Builds/SunsetBasin/EchoMountain.exe`. Use `EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam` for a fresh build. The current notes and graphical captures are in `Logs/SunsetBasin-QA`.
+
 ## Player launch — 2026-11-19 14:45 EST
 
 The r3 player is open from `Builds/GlacierPass-Carve-r3/EchoMountain.exe` (PID 26092 at launch) on `experiment/carve-brake-r3`, commit `fa9b608`. Its window was responsive and startup graphics/input initialization logged to `%TEMP%/EchoMountain-r3-launch-20261119.log`. No test/build or hands-on gameplay was performed in this launch. Leave the player available for the user's Pine/Summit handling and record-reopen check; consult the r3 section and QA for the acceptance gate. Untracked `Assets/Resources/GDKEditionAutoGen*` was not changed.

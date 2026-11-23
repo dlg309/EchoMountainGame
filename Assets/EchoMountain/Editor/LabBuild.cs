@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using EchoMountain.Riding;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -21,18 +22,26 @@ namespace EchoMountain.EditorTools
 
         [MenuItem("Echo Mountain/Build Windows Glacier Pass")]
         public static void BuildWindowsMountain() =>
-            BuildPlayer(MountainBuilder.ScenePath, "Builds/GlacierPass-Replay/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
+            BuildPlayer(MountainBuilder.ScenePath, "Builds/GlacierPass-Replay/EchoMountain.exe",
+                BuildOptions.None, "Echo Mountain - Glacier Pass", FreeRoamMap.ScenePath);
 
         [MenuItem("Echo Mountain/Build Windows Glacier Pass polished")]
         public static void BuildWindowsMountainPolished() =>
-            BuildPlayer(MountainBuilder.PolishedScenePath, "Builds/GlacierPass-Polished/EchoMountain.exe", BuildOptions.None, "Echo Mountain - Glacier Pass");
+            BuildPlayer(MountainBuilder.PolishedScenePath, "Builds/GlacierPass-Polished/EchoMountain.exe",
+                BuildOptions.None, "Echo Mountain - Glacier Pass", FreeRoamMap.ScenePath);
 
-        private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName)
+        [MenuItem("Echo Mountain/Build Windows with Free Roam")]
+        public static void BuildWindowsFreeRoam() =>
+            BuildPlayer(FreeRoamMap.MainMenuPath, "Builds/SunsetBasin/EchoMountain.exe",
+                BuildOptions.None, "Echo Mountain - Glacier Pass", FreeRoamMap.ScenePath);
+
+        private static void BuildPlayer(string scene, string output, BuildOptions buildOptions, string productName, string secondScene = null)
         {
 #if !ENABLE_INPUT_SYSTEM || !ENABLE_LEGACY_INPUT_MANAGER
             throw new InvalidOperationException("Current riding actions and OnGUI menus require Active Input Handling = Both. Restart Unity after changing it.");
 #endif
-            if (!File.Exists(scene)) throw new InvalidOperationException("Create and verify the scene first.");
+            if (!File.Exists(scene) || (secondScene != null && !File.Exists(secondScene)))
+                throw new InvalidOperationException("Create and verify the build scenes first.");
             output = ResolveOutput(output);
             string destination = Path.GetDirectoryName(output);
             if (Directory.Exists(destination) || File.Exists(destination))
@@ -43,7 +52,7 @@ namespace EchoMountain.EditorTools
             string stagedPlayer = Path.Combine(staging, Path.GetFileName(output));
             var options = new BuildPlayerOptions
             {
-                scenes = new[] { scene },
+                scenes = secondScene == null ? new[] { scene } : new[] { scene, secondScene },
                 locationPathName = stagedPlayer,
                 target = BuildTarget.StandaloneWindows64,
                 options = buildOptions

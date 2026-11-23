@@ -1,5 +1,26 @@
 # QA evidence
 
+## Sunset Basin Free Roam — 2026-11-23
+
+The selected project is on `experiment/carve-brake-r3`, starting at `3b55431`. Testing used `%TEMP%/EchoMountain-SunsetBasin-QA-20261123` with Unity 6.3 LTS 6000.3.28f1, URP 17.3.0, and a Core i9-13900H with Intel Iris Xe / Direct3D 11 for the graphical run. The Unity version stayed at the recorded patch for this local test with the project's bundled fonts. Unity 6000.3.27f2 covered its October Brotli and eMudhra advisories. Unity 6000.3.29f1 fixes a separate malformed variable-font issue. [October Unity advisories](https://discussions.unity.com/t/unity-protection-addressing-the-emudra-and-brotli-security-vulnerabilities/1740774) [6000.3.29f1 release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)
+
+Commands below use the installed `Unity.exe` and the isolated project path as `<QA>`. Log and artifact paths are relative to that snapshot.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.SunsetBasinBuilder.Create -logFile <QA>/generate.log -quit
+Unity.exe -batchmode -nographics -projectPath <QA> -runTests -testPlatform PlayMode -testFilter EchoMountain.Tests.FreeRoamTests -testResults <QA>/focused.xml -logFile <QA>/focused.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/regression.xml -logFile <QA>/regression.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.BasinAppearanceInspectionFix.Apply -logFile <QA>/appearance.log -quit
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/final.xml -logFile <QA>/final.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/SunsetBasin/EchoMountain.exe -logFile <QA>/windows-build.log -quit
+```
+
+- Editor generation exited 0. The focused test pass was 4/4. Both full graphical runs passed 48/48, including 47 repository PlayMode tests and one temporary capture fixture. The final run exited 0. Pine and Summit reached Results in 84.49 s and 85.34 s, respectively. Existing practice and replay checks also passed.
+- In Free Roam, all three drop-ins moved downhill without reset in the first five seconds, reaching 29.6, 22.9, and 40.6 km/h, respectively. Out-of-bounds and inverted snow-level recovery returned to the active drop-in. A pop on High Traverse reached 3.34 m above the snow and produced a Recover landing. The Switchyard test popped from a standing-start descent onto the box, rode off, and banked grind points once it landed. The crosswise approach missed the rail. Reset kept banked points and cleared pending points. The menu test opened the map and returned to Glacier Pass without using the sandbox as a timed run.
+- Three 1280 × 720 URP captures were inspected, one at each drop-in. The initial capture exposed strong sun glare on the snow. The final build sources use rougher snow and adjusted haze. The one-off QA appearance updater changed those assets in place and is excluded from the project and player. The final capture fixture was also local to the QA snapshot. The Starter Kit reference window did not activate during this session, so visual work drew on the supplied stills and the prior Starter Kit playtest observations recorded below.
+- Windows x64 build exited 0 and was copied to `Builds/SunsetBasin/EchoMountain.exe` with both scene files and matching player, runtime DLL, and scene hashes. Launched `EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile "<repo>/Logs/SunsetBasin-QA/windows-player.log"` with the build directory as the working directory. The smoke process was responsive (PID 35352) and initialized Direct3D 11, PhysX, and input with no inspected startup exceptions. This background smoke check did not exercise standalone menus or controls. Evidence is in `Logs/SunsetBasin-QA`.
+- Hands-on rail timing, the longer rails and linked tricks, the steeper drops at different speeds, rider readability through trees and in the air, hardware input/audio, and traversal frame times remain manual checks. See the play mode checklist in README.
+
 ## Windows player launch — 2026-11-19 14:45 EST
 
 - On `experiment/carve-brake-r3` at `fa9b608`, launched `Builds/GlacierPass-Carve-r3/EchoMountain.exe` from its build directory with PowerShell `Start-Process -FilePath $game -WorkingDirectory (Split-Path $game) -ArgumentList @('-screen-fullscreen','0','-screen-width','1280','-screen-height','720','-logFile',"`"$log`"") -PassThru`, where `$game` resolves to that executable and `$log` is `%TEMP%/EchoMountain-r3-launch-20261119.log`. PID 26092 remained responsive and exposed the `Echo Mountain - Glacier Pass` window. Startup log reports Unity 6000.3.28f1, Direct3D 11 on Intel Iris Xe, and input initialized. No new Unity test or build ran.

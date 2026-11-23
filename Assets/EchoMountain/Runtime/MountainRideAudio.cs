@@ -47,8 +47,9 @@ namespace EchoMountain.Riding
             float skid = Mathf.InverseLerp(0.35f, 6f, Mathf.Abs(rider.LateralSlip));
             float blend = 1f - Mathf.Exp(-9f * Time.unscaledDeltaTime);
             wind.volume = Mathf.Lerp(wind.volume, 0.025f + speed * 0.25f, blend);
-            snow.volume = Mathf.Lerp(snow.volume, rider.IsGrounded ? speed * (0.19f + skid * 0.22f) : 0f, blend);
-            snow.pitch = 0.80f + speed * 0.42f;
+            float contactVolume = rider.IsGrinding ? speed * 0.24f : rider.IsGrounded ? speed * (0.19f + skid * 0.22f) : 0f;
+            snow.volume = Mathf.Lerp(snow.volume, contactVolume, blend);
+            snow.pitch = (rider.IsGrinding ? 1.45f : 0.80f) + speed * 0.42f;
             if (newLanding)
             {
                 touchdown.volume = rider.LastLanding == LandingOutcome.Clean ? 0.23f : 0.36f;

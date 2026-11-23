@@ -6,6 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/EchoMountain/Scenes/GlacierPassPolished.unity
+    guid: 3efb8988f5d4c2c4e88c5fc898ae64ee
+  - enabled: 1
+    path: Assets/EchoMountain/Scenes/SunsetBasin.unity
+    guid: e060224c478b7154880e500c52f7ac05
+  - enabled: 1
+    path: Assets/EchoMountain/Scenes/GlacierPass.unity
+    guid: ab60290a884f23f42adafff182a07818
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
