@@ -11,6 +11,7 @@ namespace EchoMountain.Riding
         private readonly InputAction brake;
         private readonly InputAction spinKeys;
         private readonly InputAction spinStick;
+        private readonly InputAction flipKeys;
         private readonly InputAction indy;
         private readonly InputAction melon;
         public InputAction Pop { get; }
@@ -38,6 +39,10 @@ namespace EchoMountain.Riding
                 .With("Negative", "<Keyboard>/z")
                 .With("Positive", "<Keyboard>/c");
             spinStick = actions.AddAction("Air spin stick", InputActionType.Value, "<Gamepad>/rightStick");
+            flipKeys = actions.AddAction("Air flip keys", InputActionType.Value);
+            flipKeys.AddCompositeBinding("1DAxis")
+                .With("Positive", "<Keyboard>/w")
+                .With("Negative", "<Keyboard>/x");
             indy = AddButton("Indy", "<Keyboard>/q", "<Gamepad>/rightShoulder");
             melon = AddButton("Melon", "<Keyboard>/e", "<Gamepad>/leftShoulder");
             actions.actionTriggered += RememberDevice;
@@ -52,7 +57,9 @@ namespace EchoMountain.Riding
 
         public float Steer => Mathf.Clamp(keyboardSteer.ReadValue<float>() + stick.ReadValue<Vector2>().x, -1f, 1f);
         public float Brake => brake.ReadValue<float>();
-        public float Spin => Mathf.Clamp(spinKeys.ReadValue<float>() + spinStick.ReadValue<Vector2>().x, -1f, 1f);
+        private Vector2 AirStick => spinStick.ReadValue<Vector2>();
+        public float Spin => Mathf.Clamp(spinKeys.ReadValue<float>() + AirStick.x, -1f, 1f);
+        public float Flip => Mathf.Clamp(flipKeys.ReadValue<float>() + AirStick.y, -1f, 1f);
         public BoardGrab Grab => indy.IsPressed() == melon.IsPressed() ? BoardGrab.None :
             indy.IsPressed() ? BoardGrab.Indy : BoardGrab.Melon;
         public void Enable() => actions.Enable();

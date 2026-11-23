@@ -33,3 +33,12 @@ Glacier Pass now includes spins, grabs, landing-based scoring, a short practice 
 2026-11-18: The user prioritized controls, bail logic, an in-game menu, and visual polish before surface zones. An isolated Unity copy passed 41/41 PlayMode tests, and a fresh polished Windows r2 build succeeded. Steering/landing tuning, a pause return-to-menu flow, and an independent polished scene are implemented. Manual feel, visual and pause-button review remain open; user-reported record persistence after reopen remains unresolved. Surface zones are still disabled. See `docs/QA.md` and `docs/STATUS.md`.
 
 2026-11-23. Sunset Basin adds a 600 × 980 m Free Roam map, three drop-ins, and landing-based rail scoring within M5. The expanded demo milestone still includes separate halfpipe, surface, and challenge work. The sandbox riding and frame-time checklist is in `README.md`.
+
+## Riding and park update
+
+- Grounded deck and boots should follow the actual support plane. Check flat snow, slopes, edge changes, and a jump release so the board separates naturally.
+- Use the playable Snowboard Starter Kit to judge turn onset and edge changes. Measure Echo Mountain's first turn and travel direction at low and high speeds against the previous Echo tuning. Keep grip bounded and brake, jump, and landing behavior usable.
+- Add keyboard and controller inputs for frontflips and backflips in the air. Track the rotation the board actually completes and award completed flips on valid landings.
+- Give the Sunset Basin box and rails solid colliders on their visible surfaces. Check a top-down entry, a missed approach, a ride-off and a pop-off, and score only after landing on snow.
+- Remove opaque riding HUD backplates and use high-contrast text that stays readable over snow and sky. Keep menu and pause controls readable.
+- Run PlayMode checks in Unity 6.3 LTS and verify Pine, Summit, Jump Practice, and Free Roam. Record reference observations, measured results, and any manual checks still open in `docs/QA.md`.

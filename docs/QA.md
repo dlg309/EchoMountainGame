@@ -1,5 +1,30 @@
 # QA evidence
 
+## Riding and park update (r4) — 2026-11-23
+
+Unity 6.3 LTS 6000.3.28f1, URP 17.3.0, fixed physics at 60 Hz. PlayMode used Direct3D 11 on Intel Iris Xe in the existing isolated snapshot `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. All scene and mesh references retained their GUIDs. The reference Starter Kit was launched and exposed a window. The first window had higher Windows integrity than the input helper. Activation also failed for the second launch. The qualitative reference comes from the earlier Starter Kit playtest notes. A matched speed comparison could only be measured against Echo Mountain r3.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.SunsetBasinBuilder.UpdateRidingGeometry -logFile <QA>/ride-r4-geometry-final.log -quit
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/ride-r4-first.xml -logFile <QA>/ride-r4-first.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/ride-r4-final.xml -logFile <QA>/ride-r4-final.log
+```
+
+- Geometry update exited 0 after fixing an editor namespace import. The first test run passed 52/53 and exited 2. A thin-wall chase camera check missed its threshold by 3.8 mm. Expanding the camera sweep radius by 1 cm resolved it. The final run passed **53/53**, exit 0. Pine and Summit completed in 84.49 s and 85.27 s. Jump Practice, replay, Free Roam menu and drop-ins also passed.
+- The visible deck's measured underside gap was 0.000 m to three decimal places on the flat and open slope. A High Traverse pop cleared 3.34 m of snow at the peak and produced a recoverable landing. The asset mesh and binding positions now use the same board base.
+- The turn test began at 6 m/s and 16 m/s on packed snow. After the first 0.6 s the board turned 23.79° and 13.14°, up from 10.77° and 7.35° in r3 using the same fixture. Actual travel turned 15.97° and 8.84°. The board remained supported for 144/144 fixed steps per set, and settled to 0.095 and 0.056 rad/s after input release. Braking through the S-turns covered 13.20 m over the measured window, within the prior distance budget.
+- W and a virtual gamepad right-stick down produced +364.6° and −364.6°. Both landed cleanly and awarded 300 points after touchdown. A late frontflip reached 77.3°, bailed, and awarded zero. Spins, grabs, and practice score banking passed the existing tests.
+- The box supported a standing-start pop approach and a ride-off. A transverse approach missed the grind. Both narrow rail tops matched the authored contact points within 1 cm and supported dynamic grinds. The rider popped off both, remained under gravity, and banked the grind after landing in snow. Score reset and recovery checks passed.
+- Windows x64 build exited 0 and is at `Builds/SunsetBasin-Riding/EchoMountain.exe`. The executable, runtime DLL, and both level files match the isolated output. The capture build used a temporary in-game helper that loaded Free Roam and captured a frozen frame with and without the HUD. Its first hidden-window attempt returned black frames. The visible retry captured two 1280 × 720 frames and exited cleanly. Four sampled interiors in the former mode, score, controls, and speed panels were identical with and without the HUD. Visual review confirmed outlined labels over sky and snow. Evidence is in `Logs/RidingParkR4-QA`. The delivered build excludes the temporary helper.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/SunsetBasin-RidingHudQA/EchoMountain.exe -logFile <QA>/ride-r4-hud-build.log -quit
+<QA>/Builds/SunsetBasin-RidingHudQA/EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -echoHudEvidence -logFile <QA>/ride-r4-hud-visible.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/SunsetBasin-Riding/EchoMountain.exe -logFile <QA>/ride-r4-windows.log -quit
+```
+
+Manual comparisons with the Starter Kit and a human ride across the revised park remain open.
+
 ## Sunset Basin Free Roam — 2026-11-23
 
 The selected project is on `experiment/carve-brake-r3`, starting at `3b55431`. Testing used `%TEMP%/EchoMountain-SunsetBasin-QA-20261123` with Unity 6.3 LTS 6000.3.28f1, URP 17.3.0, and a Core i9-13900H with Intel Iris Xe / Direct3D 11 for the graphical run. The Unity version stayed at the recorded patch for this local test with the project's bundled fonts. Unity 6000.3.27f2 covered its October Brotli and eMudhra advisories. Unity 6000.3.29f1 fixes a separate malformed variable-font issue. [October Unity advisories](https://discussions.unity.com/t/unity-protection-addressing-the-emudra-and-brotli-security-vulnerabilities/1740774) [6000.3.29f1 release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)

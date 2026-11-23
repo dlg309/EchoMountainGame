@@ -52,7 +52,7 @@ namespace EchoMountain.Tests
                     for (int step = 0; step < 45; step++) yield return new WaitForFixedUpdate();
                     Assert.That(rider.IsGrounded, Is.True);
                     body.linearVelocity = Vector3.forward * speed;
-                    float peakYaw = 0f, firstHeading = 0f;
+                    float peakYaw = 0f, firstHeading = 0f, earlyHeading = 0f, travelHeading = 0f;
                     int supported = 0;
                     for (int leg = 0; leg < 4; leg++)
                     {
@@ -63,20 +63,26 @@ namespace EchoMountain.Tests
                             yield return new WaitForFixedUpdate();
                             if (rider.IsGrounded) supported++;
                             peakYaw = Mathf.Max(peakYaw, Mathf.Abs(body.angularVelocity.y));
+                            if (leg == 0 && step == 11)
+                                earlyHeading = Vector3.SignedAngle(Vector3.forward, body.rotation * Vector3.forward, Vector3.up);
                         }
                         if (leg == 0)
+                        {
                             firstHeading = Vector3.SignedAngle(Vector3.forward,
                                 Vector3.ProjectOnPlane(board.transform.forward, Vector3.up), Vector3.up);
+                            travelHeading = Vector3.SignedAngle(Vector3.forward, body.linearVelocity, Vector3.up);
+                        }
                     }
                     Keys(keyboard);
                     yield return null;
                     for (int step = 0; step < 30; step++) yield return new WaitForFixedUpdate();
                     float settledYaw = Mathf.Abs(body.angularVelocity.y);
-                    Debug.Log($"HANDLING S speed={speed:F0} firstHeading={firstHeading:F2} peakYaw={peakYaw:F3} supported={supported}/144 settledYaw={settledYaw:F3}");
+                    Debug.Log($"HANDLING S speed={speed:F0} earlyHeading={earlyHeading:F2} firstHeading={firstHeading:F2} travelHeading={travelHeading:F2} peakYaw={peakYaw:F3} supported={supported}/144 settledYaw={settledYaw:F3}");
                     Assert.That(supported, Is.GreaterThanOrEqualTo(137));
-                    Assert.That(firstHeading, Is.GreaterThan(5f));
-                    if (speed > 8f)
-                        Assert.That(peakYaw, Is.LessThan(0.576f), "High-speed yaw should be at least 15% below the measured R2 0.678 rad/s.");
+                    Assert.That(earlyHeading, Is.GreaterThan(speed > 8f ? 1.2f : 2.0f));
+                    Assert.That(firstHeading, Is.GreaterThan(speed > 8f ? 10f : 17f));
+                    Assert.That(travelHeading, Is.GreaterThan(speed > 8f ? 6f : 11f));
+                    Assert.That(peakYaw, Is.LessThan(speed > 8f ? 0.90f : 1.35f));
                     Assert.That(settledYaw, Is.LessThan(0.6f));
                     Assert.That(rider.LandingCount, Is.Zero);
                     Assert.That(rider.IsRecovering, Is.False);

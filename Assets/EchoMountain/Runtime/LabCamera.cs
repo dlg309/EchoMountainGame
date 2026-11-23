@@ -15,7 +15,7 @@ namespace EchoMountain.Riding
         private Vector3 recordedVelocity;
         private readonly RaycastHit[] obstructionHits = new RaycastHit[32];
         private readonly Collider[] overlaps = new Collider[32];
-        private const float CameraRadius = 0.32f;
+        private const float CameraRadius = 0.33f;
 
         public void SnapNextFrame() => forceSnap = true;
         public void SetReplayTravel(Vector3 velocity) { replayTravel = true; recordedVelocity = velocity; }
@@ -48,9 +48,7 @@ namespace EchoMountain.Riding
             snap |= (trackingPosition - lastTargetPosition).sqrMagnitude > 32f * 32f;
             lastTargetPosition = trackingPosition;
 
-            Vector3 travel = replayTravel ? Vector3.ProjectOnPlane(recordedVelocity, Vector3.up) : rider && rider.IsGrinding
-                ? Vector3.ProjectOnPlane(rider.TravelVelocity, Vector3.up)
-                : targetBody && !targetBody.isKinematic
+            Vector3 travel = replayTravel ? Vector3.ProjectOnPlane(recordedVelocity, Vector3.up) : targetBody && !targetBody.isKinematic
                 ? Vector3.ProjectOnPlane(targetBody.linearVelocity, Vector3.up)
                 : Vector3.zero;
             float speed = travel.magnitude;

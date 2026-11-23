@@ -14,7 +14,7 @@ namespace EchoMountain.Riding
         {
             public Vector3 start;
             public Vector3 end;
-            public float halfWidth;
+            public BoxCollider surface;
         }
 
         [SerializeField] private Terrain terrain;
@@ -31,6 +31,21 @@ namespace EchoMountain.Riding
             terrain = ground;
             dropIns = starts;
             rails = features;
+        }
+
+        internal bool TryGetRail(Collider collider, out Rail rail)
+        {
+            if (collider)
+            {
+                foreach (var feature in rails)
+                {
+                    if (feature.surface != collider) continue;
+                    rail = feature;
+                    return true;
+                }
+            }
+            rail = default;
+            return false;
         }
 
         internal bool NeedsRecovery(Rigidbody body)

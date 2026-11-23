@@ -15,6 +15,7 @@ namespace EchoMountain.Tests
     {
         private Scene loaded;
         private static readonly int[] Spins = { 180, 360 };
+        private static readonly string[] Flips = { "Frontflip", "Backflip", "Late flip" };
 
         [UnityTearDown]
         public IEnumerator UnloadCourse()
@@ -132,6 +133,80 @@ namespace EchoMountain.Tests
         {
             for (int step = 0; step <= 4; step++)
                 score.SampleAir(Mathf.Repeat(350f + degrees * step / 4f, 360f), grab, 0.05f);
+        }
+
+        [UnityTest]
+        public IEnumerator PopFlipAndLand([ValueSource(nameof(Flips))] string trick)
+        {
+            const string path = "Assets/EchoMountain/Scenes/GlacierPass.unity";
+            float oldCapture = Time.captureDeltaTime;
+            var oldBackground = InputSystem.settings.backgroundBehavior;
+            var oldRouting = InputSystem.settings.editorInputBehaviorInPlayMode;
+            Time.captureDeltaTime = 1f / 60f;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            var pad = InputSystem.AddDevice<Gamepad>();
+            var flat = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            flat.transform.SetPositionAndRotation(new Vector3(9f, 160f, 185f), Quaternion.identity);
+            flat.transform.localScale = new Vector3(20f, 1f, 40f);
+            try
+            {
+                yield return EditorSceneManager.LoadSceneAsyncInPlayMode(path, new LoadSceneParameters(LoadSceneMode.Additive));
+                loaded = SceneManager.GetSceneByPath(path);
+                yield return null;
+                var board = GameObject.Find("Diagnostic board");
+                var rider = board.GetComponent<LabRider>();
+                var run = board.GetComponent<MountainRun>();
+                var body = board.GetComponent<Rigidbody>();
+                run.StartPractice();
+                rider.SetSpawn(new Vector3(9f, 160.63f, 180f), Quaternion.identity);
+                for (int frame = 0; frame < 42; frame++) yield return null;
+                Assert.That(rider.IsGrounded, Is.True);
+                body.linearVelocity = Vector3.forward * 4f;
+
+                bool late = trick == "Late flip";
+                bool back = trick == "Backflip";
+                if (back)
+                    InputSystem.QueueStateEvent(pad, new GamepadState { rightStick = Vector2.down }.WithButton(GamepadButton.South));
+                else
+                    InputSystem.QueueStateEvent(keyboard, late ? new KeyboardState(Key.Space) : new KeyboardState(Key.Space, Key.W));
+
+                float rotation = 0f;
+                for (int frame = 0; frame < 110 && rider.LandingCount == 0; frame++)
+                {
+                    if (late && frame == 33) InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+                    yield return null;
+                    if (rider.LandingCount != 0) break;
+                    Assert.That(run.Tricks.Points, Is.Zero);
+                    float measured = run.Tricks.FlipRotation;
+                    if (Mathf.Abs(measured) > Mathf.Abs(rotation)) rotation = measured;
+                }
+                Debug.Log($"PlayMode {trick}: measured pitch={rotation:F1}°, landing={rider.LastLanding}, score={run.Tricks.Points}");
+                Assert.That(rider.LandingCount, Is.EqualTo(1));
+                if (late)
+                {
+                    Assert.That(rotation, Is.InRange(60f, 320f));
+                    Assert.That(rider.LastLanding, Is.EqualTo(LandingOutcome.Bail));
+                    Assert.That(run.Tricks.Points, Is.Zero);
+                }
+                else
+                {
+                    Assert.That(rotation * (back ? -1f : 1f), Is.InRange(335f, 375f));
+                    Assert.That(rider.LastLanding, Is.EqualTo(LandingOutcome.Clean));
+                    Assert.That(run.Tricks.Points, Is.EqualTo(300));
+                    Assert.That(run.Tricks.Feedback, Does.Contain(trick));
+                }
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                InputSystem.RemoveDevice(pad);
+                InputSystem.settings.backgroundBehavior = oldBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = oldRouting;
+                Time.captureDeltaTime = oldCapture;
+                Object.Destroy(flat);
+            }
         }
 
         [Test]

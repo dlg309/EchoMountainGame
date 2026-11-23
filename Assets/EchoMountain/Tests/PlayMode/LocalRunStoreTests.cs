@@ -54,6 +54,8 @@ namespace EchoMountain.Tests
             string r2Path = Path.Combine(directory, "runs-glacier-pass-c1-r2.json");
             File.WriteAllText(r2Path, earlierRecords);
             File.WriteAllText(r2Path + ".bak", earlierRecords);
+            string r3Path = Path.Combine(directory, "runs-glacier-pass-c1-r3.json");
+            File.WriteAllText(r3Path, earlierRecords);
             string newPath = Path.Combine(directory, LocalRunStore.FileName);
             var store = new LocalRunStore(newPath);
             Assert.That(store.Finish(MountainLine.Pine, false, 85f, 43f, 130, "test"), Is.True);
@@ -62,7 +64,8 @@ namespace EchoMountain.Tests
             Assert.That(File.ReadAllText(oldPath + ".bak"), Is.EqualTo(earlierRecords));
             Assert.That(File.ReadAllText(r2Path), Is.EqualTo(earlierRecords));
             Assert.That(File.ReadAllText(r2Path + ".bak"), Is.EqualTo(earlierRecords));
-            Assert.That(LocalRunStore.RulesVersion, Is.EqualTo(3));
+            Assert.That(File.ReadAllText(r3Path), Is.EqualTo(earlierRecords));
+            Assert.That(LocalRunStore.RulesVersion, Is.EqualTo(4));
         }
 
         [Test]

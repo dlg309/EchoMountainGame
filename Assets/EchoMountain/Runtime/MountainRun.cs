@@ -77,7 +77,7 @@ namespace EchoMountain.Riding
             Line = Records.Data.selectedLine;
             hud.ShowDiagnostics = false;
             hud.ShowTricks = true;
-            body.maxAngularVelocity = Mathf.Max(body.maxAngularVelocity, 10f);
+            body.maxAngularVelocity = Mathf.Max(body.maxAngularVelocity, 18f);
             rider.EnableTricks(Tricks);
             gameObject.AddComponent<MountainRideAudio>();
             gameObject.AddComponent<MountainSnowSpray>();
@@ -343,16 +343,14 @@ namespace EchoMountain.Riding
             {
                 if (IsFreeRoam)
                 {
-                    Panel(new Rect(18f, 18f, 326f, 74f), orange);
-                    GUI.Label(new Rect(36f, 28f, 293f, 25f), "SUNSET BASIN   /   FREE ROAM", eyebrow);
-                    GUI.Label(new Rect(36f, 52f, 293f, 27f),
+                    LabHud.RideLabel(new Rect(36f, 28f, 293f, 25f), "SUNSET BASIN   /   FREE ROAM", eyebrow);
+                    LabHud.RideLabel(new Rect(36f, 52f, 293f, 27f),
                         rider.IsRecovering ? "Recovering…" : DropInName(dropIn), copy);
                 }
                 else
                 {
-                    Panel(new Rect(18f, 18f, 326f, 107f), LineColor);
-                    GUI.Label(new Rect(36f, 28f, 293f, 25f), IsPractice ? "SUMMIT   /   JUMP PRACTICE" : $"GLACIER PASS   /   {LineName}", eyebrow);
-                    GUI.Label(new Rect(36f, 52f, 293f, 31f), $"{TimeText(Elapsed)}        {Progress:P0} complete", copy);
+                    LabHud.RideLabel(new Rect(36f, 28f, 293f, 25f), IsPractice ? "SUMMIT   /   JUMP PRACTICE" : $"GLACIER PASS   /   {LineName}", eyebrow);
+                    LabHud.RideLabel(new Rect(36f, 52f, 293f, 31f), $"{TimeText(Elapsed)}        {Progress:P0} complete", copy);
                     Fill(new Rect(38f, 98f, 286f, 5f), new Color(0.18f, 0.26f, 0.32f));
                     Fill(new Rect(38f, 98f, 286f * Progress, 5f), LineColor);
                 }
@@ -403,29 +401,30 @@ namespace EchoMountain.Riding
 
         private void DrawScore(Rect rect)
         {
-            Panel(rect, IsFreeRoam ? orange : LineColor);
-            GUI.Label(new Rect(rect.x + 17f, rect.y + 10f, 175f, 24f), "TRICK SCORE", eyebrow);
+            LabHud.RideLabel(new Rect(rect.x + 17f, rect.y + 10f, 175f, 24f), "TRICK SCORE", eyebrow);
             if (GUI.Button(new Rect(rect.x + 223f, rect.y + 11f, 86f, 29f), hud.IsPaused ? "Resume" : "Pause"))
                 hud.SetPaused(!hud.IsPaused);
             string chain = Tricks.Chain > 0 ? $"      ×{Tricks.Multiplier:0.00}  {Tricks.ChainTime:0.0}s" : "";
             string target = IsPractice ? $" / {PracticeGoal:N0}" : "";
-            GUI.Label(new Rect(rect.x + 17f, rect.y + 39f, 291f, 30f), $"{Tricks.Points:N0}{target} pts{chain}", copy);
+            LabHud.RideLabel(new Rect(rect.x + 17f, rect.y + 39f, 291f, 30f), $"{Tricks.Points:N0}{target} pts{chain}", copy);
 
             string feedback;
             if (rider.IsGrinding)
             {
                 feedback = "Grinding   /   Pop to exit";
             }
-            else if (Tricks.IsAirborne && (Tricks.PendingPoints > 0 || Tricks.CurrentGrab != BoardGrab.None || Mathf.Abs(Tricks.Rotation) >= 15f))
+            else if (Tricks.IsAirborne && (Tricks.PendingPoints > 0 || Tricks.CurrentGrab != BoardGrab.None || Mathf.Abs(Tricks.Rotation) >= 15f || Mathf.Abs(Tricks.FlipRotation) >= 15f))
             {
                 string grab = Tricks.CurrentGrab == BoardGrab.None ? "" : $" {Tricks.CurrentGrab}";
-                feedback = $"{Mathf.Abs(Tricks.Rotation):F0}°{grab}   /   {Tricks.PendingPoints} pending";
+                string move = Mathf.Abs(Tricks.FlipRotation) < 15f ? $"{Mathf.Abs(Tricks.Rotation):F0}°"
+                    : Tricks.FlipRotation > 0f ? "Frontflip" : "Backflip";
+                feedback = $"{move}{grab}   /   {Tricks.PendingPoints} pending";
             }
             else
             {
-                feedback = Tricks.FeedbackTime > 0f ? Tricks.Feedback : "Spin or grab, then land.";
+                feedback = Tricks.FeedbackTime > 0f ? Tricks.Feedback : "Land a trick to bank points.";
             }
-            GUI.Label(new Rect(rect.x + 17f, rect.y + 78f, 295f, 32f), feedback, copy);
+            LabHud.RideLabel(new Rect(rect.x + 17f, rect.y + 78f, 295f, 32f), feedback, copy);
             SoundButton(new Rect(rect.x + 215f, rect.y + 110f, 94f, 27f));
         }
 

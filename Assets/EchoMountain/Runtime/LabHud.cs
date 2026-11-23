@@ -80,39 +80,37 @@ namespace EchoMountain.Riding
             float width = Screen.width / scale;
             float height = Screen.height / scale;
 
-            float trickOffset = ShowTricks ? 47f : 0f;
+            float trickOffset = ShowTricks ? 70f : 0f;
             float controlTop = height - 176f - trickOffset;
-            DrawPanel(new Rect(18f, controlTop, 275f, 158f + trickOffset));
-            GUI.Label(new Rect(34f, controlTop + 9f, 240f, 22f), "RIDE CONTROLS", title);
+            RideLabel(new Rect(34f, controlTop + 9f, 240f, 22f), "RIDE CONTROLS", title);
             bool pad = rider.UsingGamepad;
-            GUI.Label(new Rect(34f, controlTop + 34f, 240f, 24f), pad ? "LEFT STICK    Steer" : "A / D     Steer", text);
-            GUI.Label(new Rect(34f, controlTop + 57f, 240f, 24f), pad ? "LEFT TRIGGER    Brake" : "S             Brake", text);
-            GUI.Label(new Rect(34f, controlTop + 80f, 240f, 24f), pad ? "SOUTH / A    Pop" : "SPACE   Pop", text);
-            GUI.Label(new Rect(34f, controlTop + 103f, 240f, 24f), pad ? "EAST / B    Reset" : "R             Reset", text);
-            GUI.Label(new Rect(34f, controlTop + 126f, 240f, 24f), pad ? "START    Pause" : "ESC         Pause", text);
+            RideLabel(new Rect(34f, controlTop + 34f, 240f, 24f), pad ? "LEFT STICK    Steer" : "A / D     Steer", text);
+            RideLabel(new Rect(34f, controlTop + 57f, 240f, 24f), pad ? "LEFT TRIGGER    Brake" : "S             Brake", text);
+            RideLabel(new Rect(34f, controlTop + 80f, 240f, 24f), pad ? "SOUTH / A    Pop" : "SPACE   Pop", text);
+            RideLabel(new Rect(34f, controlTop + 103f, 240f, 24f), pad ? "EAST / B    Reset" : "R             Reset", text);
+            RideLabel(new Rect(34f, controlTop + 126f, 240f, 24f), pad ? "START    Pause" : "ESC         Pause", text);
             if (ShowTricks)
             {
-                GUI.Label(new Rect(34f, controlTop + 149f, 240f, 24f), pad ? "RIGHT STICK    Air spin" : "Z / C       Spin in the air", text);
-                GUI.Label(new Rect(34f, controlTop + 172f, 240f, 24f), pad ? "RB / LB    Indy / Melon" : "Q / E      Indy / Melon", text);
+                RideLabel(new Rect(34f, controlTop + 149f, 300f, 24f), pad ? "RIGHT STICK LEFT / RIGHT    Spin" : "Z / C       Spin in the air", text);
+                RideLabel(new Rect(34f, controlTop + 172f, 300f, 24f), pad ? "RIGHT STICK UP / DOWN    Flip" : "W / X      Frontflip / Backflip", text);
+                RideLabel(new Rect(34f, controlTop + 195f, 240f, 24f), pad ? "RB / LB    Indy / Melon" : "Q / E      Indy / Melon", text);
             }
 
             if (ShowDiagnostics)
             {
                 float right = width - 270f;
-                DrawPanel(new Rect(right, 18f, 252f, 188f));
-                GUI.Label(new Rect(right + 16f, 28f, 220f, 22f), "PHYSICS  /  LAB", title);
-                GUI.Label(new Rect(right + 16f, 53f, 220f, 22f), rider.IsRecovering ? "CONTACT    Recovering" : rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
-                GUI.Label(new Rect(right + 16f, 77f, 220f, 22f), $"SLIP             {rider.LateralSlip:F1} m/s", text);
-                GUI.Label(new Rect(right + 16f, 101f, 220f, 22f), $"EDGE           {rider.SteerInput:F2}", text);
-                GUI.Label(new Rect(right + 16f, 125f, 220f, 22f), $"GRIP             {rider.GripAcceleration:F1} m/s²", text);
-                GUI.Label(new Rect(right + 16f, 149f, 220f, 22f), $"NORMAL      {rider.ContactNormal.x:F1}, {rider.ContactNormal.y:F1}, {rider.ContactNormal.z:F1}", small);
-                GUI.Label(new Rect(right + 16f, 171f, 220f, 22f), $"LANDING     {rider.LandingText}", small);
+                RideLabel(new Rect(right + 16f, 28f, 220f, 22f), "PHYSICS  /  LAB", title);
+                RideLabel(new Rect(right + 16f, 53f, 220f, 22f), rider.IsRecovering ? "CONTACT    Recovering" : rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
+                RideLabel(new Rect(right + 16f, 77f, 220f, 22f), $"SLIP             {rider.LateralSlip:F1} m/s", text);
+                RideLabel(new Rect(right + 16f, 101f, 220f, 22f), $"EDGE           {rider.SteerInput:F2}", text);
+                RideLabel(new Rect(right + 16f, 125f, 220f, 22f), $"GRIP             {rider.GripAcceleration:F1} m/s²", text);
+                RideLabel(new Rect(right + 16f, 149f, 220f, 22f), $"NORMAL      {rider.ContactNormal.x:F1}, {rider.ContactNormal.y:F1}, {rider.ContactNormal.z:F1}", small);
+                RideLabel(new Rect(right + 16f, 171f, 220f, 22f), $"LANDING     {rider.LandingText}", small);
             }
 
             float gaugeX = width - 270f;
             float gaugeY = height - 184f;
-            DrawPanel(new Rect(gaugeX, gaugeY, 252f, 166f));
-            GUI.Label(new Rect(gaugeX + 16f, gaugeY + 9f, 220f, 20f), "SPEED", title);
+            RideLabel(new Rect(gaugeX + 16f, gaugeY + 9f, 220f, 20f), "SPEED", title);
             Vector2 centre = new Vector2(gaugeX + 126f, gaugeY + 114f);
             for (int i = 0; i <= 10; i++)
             {
@@ -123,8 +121,8 @@ namespace EchoMountain.Riding
             float needleAngle = Mathf.PI - Mathf.PI * Mathf.Clamp01(rider.SpeedKmh / 120f);
             var needleDirection = new Vector2(Mathf.Cos(needleAngle), -Mathf.Sin(needleAngle));
             DrawLine(centre, centre + needleDirection * 51f, 3f, orange);
-            GUI.Label(new Rect(gaugeX + 85f, gaugeY + 117f, 110f, 42f), $"{rider.SpeedKmh:F0}", large);
-            GUI.Label(new Rect(gaugeX + 154f, gaugeY + 133f, 55f, 20f), "km/h", small);
+            RideLabel(new Rect(gaugeX + 85f, gaugeY + 117f, 110f, 42f), $"{rider.SpeedKmh:F0}", large);
+            RideLabel(new Rect(gaugeX + 154f, gaugeY + 133f, 55f, 20f), "km/h", small);
 
             if (IsPaused)
             {
@@ -175,13 +173,30 @@ namespace EchoMountain.Riding
             GUI.color = Color.white;
         }
 
+        internal static void RideLabel(Rect rect, string value, GUIStyle style)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            Color previous = GUI.contentColor;
+            GUI.contentColor = Color.black;
+            for (int offset = -1; offset <= 1; offset += 2)
+            {
+                GUI.Label(new Rect(rect.x + offset, rect.y, rect.width, rect.height), value, style);
+                GUI.Label(new Rect(rect.x, rect.y + offset, rect.width, rect.height), value, style);
+            }
+            GUI.contentColor = previous;
+            GUI.Label(rect, value, style);
+        }
+
         private static void DrawLine(Vector2 start, Vector2 end, float thickness, Color color)
         {
             Matrix4x4 matrix = GUI.matrix;
             Color old = GUI.color;
             Vector2 direction = end - start;
-            GUI.color = color;
             GUIUtility.RotateAroundPivot(Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg, start);
+            GUI.color = Color.black;
+            GUI.DrawTexture(new Rect(start.x - 1f, start.y - thickness * 0.5f - 1f,
+                direction.magnitude + 2f, thickness + 2f), Texture2D.whiteTexture);
+            GUI.color = color;
             GUI.DrawTexture(new Rect(start.x, start.y - thickness * 0.5f, direction.magnitude, thickness), Texture2D.whiteTexture);
             GUI.matrix = matrix;
             GUI.color = old;

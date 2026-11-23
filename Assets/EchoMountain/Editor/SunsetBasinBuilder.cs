@@ -60,6 +60,27 @@ namespace EchoMountain.EditorTools
             AssetDatabase.SaveAssets();
         }
 
+        [MenuItem("Echo Mountain/Update Sunset Basin riding geometry")]
+        public static void UpdateRidingGeometry()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.GetSceneByPath(FreeRoamMap.ScenePath);
+            if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(FreeRoamMap.ScenePath);
+            var map = GameObject.Find("Sunset Basin").GetComponent<FreeRoamMap>();
+            var board = map.transform.Find("Diagnostic board");
+            var deck = AssetDatabase.LoadAssetAtPath<Mesh>(Folder + "/Twin-tip.asset");
+            Undo.RecordObjects(new Object[] { map, deck }, "Update Sunset Basin riding geometry");
+            var dropIns = new Transform[map.DropInCount];
+            for (int i = 0; i < dropIns.Length; i++) dropIns[i] = map.DropIn(i);
+            map.Configure(map.Terrain, dropIns, SunsetBasinScenery.UpdatePark(map));
+            BuildBoard(board, deck);
+            EditorUtility.SetDirty(deck);
+            EditorSceneManager.MarkSceneDirty(scene);
+            if (!EditorSceneManager.SaveScene(scene))
+                throw new InvalidOperationException("Could not update Sunset Basin riding geometry.");
+            AssetDatabase.SaveAssets();
+        }
+
         private static Terrain BuildTerrain(Transform root)
         {
             const int heightResolution = 513;
@@ -157,13 +178,13 @@ namespace EchoMountain.EditorTools
             return point;
         }
 
-        private static void BuildBoard(Transform board)
+        private static void BuildBoard(Transform board, Mesh existing = null)
         {
             const int slices = 32;
             var vertices = new Vector3[2 + slices * 2];
             var triangles = new int[slices * 12];
-            const float top = 0.55f;
-            const float bottom = 0.33f;
+            const float top = -0.28f;
+            const float bottom = -0.50f;
             vertices[0] = Vector3.up * top;
             vertices[1] = Vector3.up * bottom;
             for (int i = 0; i < slices; i++)
@@ -183,10 +204,16 @@ namespace EchoMountain.EditorTools
                 triangles[offset + 6] = a; triangles[offset + 7] = b; triangles[offset + 8] = a + 1;
                 triangles[offset + 9] = b; triangles[offset + 10] = b + 1; triangles[offset + 11] = a + 1;
             }
-            var mesh = new Mesh { name = "Basin twin-tip board", vertices = vertices, triangles = triangles };
+            var mesh = existing ? existing : new Mesh { name = "Basin twin-tip board" };
+            mesh.Clear();
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
             mesh.RecalculateNormals();
-            board.GetComponent<MeshFilter>().sharedMesh = Save(mesh, "Twin-tip.asset");
-            board.GetComponent<MeshRenderer>().sharedMaterial = Material("Graphite board", new Color(0.12f, 0.13f, 0.15f));
+            if (!existing)
+            {
+                board.GetComponent<MeshFilter>().sharedMesh = Save(mesh, "Twin-tip.asset");
+                board.GetComponent<MeshRenderer>().sharedMaterial = Material("Graphite board", new Color(0.12f, 0.13f, 0.15f));
+            }
         }
 
         private static void SetupLighting()

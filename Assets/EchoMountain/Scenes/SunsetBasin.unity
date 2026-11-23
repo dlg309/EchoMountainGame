@@ -1002,13 +1002,13 @@ MonoBehaviour:
   rails:
   - start: {x: 132, y: 143.89157, z: 300}
     end: {x: 132, y: 139.96388, z: 314}
-    halfWidth: 0.69
+    surface: {fileID: 918194346}
   - start: {x: 132, y: 124.87444, z: 383}
     end: {x: 132, y: 120.74812, z: 404}
-    halfWidth: 0.45999998
+    surface: {fileID: 2138655921}
   - start: {x: 132, y: 107.17994, z: 467}
     end: {x: 127, y: 101.416336, z: 487}
-    halfWidth: 0.45
+    surface: {fileID: 1764230675}
 --- !u!1 &70691617
 GameObject:
   m_ObjectHideFlags: 0
@@ -1020,6 +1020,7 @@ GameObject:
   - component: {fileID: 70691618}
   - component: {fileID: 70691620}
   - component: {fileID: 70691619}
+  - component: {fileID: 70691621}
   m_Layer: 0
   m_Name: Deck sides
   m_TagString: Untagged
@@ -1036,8 +1037,8 @@ Transform:
   m_GameObject: {fileID: 70691617}
   serializedVersion: 2
   m_LocalRotation: {x: 0.096857734, y: -0, z: -0, w: 0.99529827}
-  m_LocalPosition: {x: 132, y: 122.66128, z: 393.5}
-  m_LocalScale: {x: 0.76, y: 0.22, z: 21.401554}
+  m_LocalPosition: {x: 132, y: 122.69157, z: 393.47647}
+  m_LocalScale: {x: 0.225, y: 0.14, z: 21.401554}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 527073955}
@@ -1099,6 +1100,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 70691617}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &70691621
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 70691617}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.0000001, z: 1.0000001}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &86968941
 GameObject:
   m_ObjectHideFlags: 0
@@ -9552,6 +9574,7 @@ GameObject:
   - component: {fileID: 918194343}
   - component: {fileID: 918194345}
   - component: {fileID: 918194344}
+  - component: {fileID: 918194346}
   m_Layer: 0
   m_Name: Grind surface
   m_TagString: Untagged
@@ -9568,8 +9591,8 @@ Transform:
   m_GameObject: {fileID: 918194342}
   serializedVersion: 2
   m_LocalRotation: {x: 0.13633303, y: -0, z: -0, w: 0.99066305}
-  m_LocalPosition: {x: 132, y: 141.90173, z: 307}
-  m_LocalScale: {x: 1.255, y: 0.052, z: 14.540521}
+  m_LocalPosition: {x: 132, y: 141.9027, z: 306.99298}
+  m_LocalScale: {x: 1.25, y: 0.052, z: 14.540521}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1904413783}
@@ -9631,6 +9654,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 918194342}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &918194346
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918194342}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 0.99999994}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &921710295
 GameObject:
   m_ObjectHideFlags: 0
@@ -11143,6 +11187,7 @@ GameObject:
   - component: {fileID: 1118586078}
   - component: {fileID: 1118586080}
   - component: {fileID: 1118586079}
+  - component: {fileID: 1118586081}
   m_Layer: 0
   m_Name: Deck sides
   m_TagString: Untagged
@@ -11159,8 +11204,8 @@ Transform:
   m_GameObject: {fileID: 1118586077}
   serializedVersion: 2
   m_LocalRotation: {x: 0.13633303, y: -0, z: -0, w: 0.99066305}
-  m_LocalPosition: {x: 132, y: 141.77774, z: 307}
-  m_LocalScale: {x: 1.22, y: 0.22, z: 14.540521}
+  m_LocalPosition: {x: 132, y: 141.6177, z: 306.91302}
+  m_LocalScale: {x: 1.225, y: 0.54, z: 14.540521}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1904413783}
@@ -11222,6 +11267,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1118586077}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1118586081
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1118586077}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.0000005, z: 0.99999994}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1121074727
 GameObject:
   m_ObjectHideFlags: 0
@@ -12223,6 +12289,7 @@ GameObject:
   - component: {fileID: 1170586008}
   - component: {fileID: 1170586010}
   - component: {fileID: 1170586009}
+  - component: {fileID: 1170586011}
   m_Layer: 0
   m_Name: Deck sides
   m_TagString: Untagged
@@ -12239,8 +12306,8 @@ Transform:
   m_GameObject: {fileID: 1170586007}
   serializedVersion: 2
   m_LocalRotation: {x: 0.13486785, y: -0.12104996, z: 0.016602993, w: 0.9833016}
-  m_LocalPosition: {x: 129.5, y: 104.14814, z: 477}
-  m_LocalScale: {x: 0.74, y: 0.22, z: 21.406054}
+  m_LocalPosition: {x: 129.50797, y: 104.18065, z: 476.96814}
+  m_LocalScale: {x: 0.225, y: 0.14, z: 21.406054}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 600275035}
@@ -12302,6 +12369,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1170586007}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1170586011
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1170586007}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000001, y: 1.0000039, z: 0.99999994}
+  m_Center: {x: 0, y: -0.00012207031, z: 0}
 --- !u!1 &1174521211
 GameObject:
   m_ObjectHideFlags: 0
@@ -18238,6 +18326,7 @@ GameObject:
   - component: {fileID: 1764230672}
   - component: {fileID: 1764230674}
   - component: {fileID: 1764230673}
+  - component: {fileID: 1764230675}
   m_Layer: 0
   m_Name: Grind surface
   m_TagString: Untagged
@@ -18254,8 +18343,8 @@ Transform:
   m_GameObject: {fileID: 1764230671}
   serializedVersion: 2
   m_LocalRotation: {x: 0.13486785, y: -0.12104996, z: 0.016602993, w: 0.9833016}
-  m_LocalPosition: {x: 129.5, y: 104.27214, z: 477}
-  m_LocalScale: {x: 0.77500004, y: 0.052, z: 21.406054}
+  m_LocalPosition: {x: 129.5017, y: 104.2731, z: 476.9932}
+  m_LocalScale: {x: 0.25, y: 0.052, z: 21.406054}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 600275035}
@@ -18317,6 +18406,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1764230671}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1764230675
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764230671}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000019, y: 1.0000076, z: 0.99999994}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1779888622
 GameObject:
   m_ObjectHideFlags: 0
@@ -22007,6 +22117,7 @@ GameObject:
   - component: {fileID: 2138655918}
   - component: {fileID: 2138655920}
   - component: {fileID: 2138655919}
+  - component: {fileID: 2138655921}
   m_Layer: 0
   m_Name: Grind surface
   m_TagString: Untagged
@@ -22023,8 +22134,8 @@ Transform:
   m_GameObject: {fileID: 2138655917}
   serializedVersion: 2
   m_LocalRotation: {x: 0.096857734, y: -0, z: -0, w: 0.99529827}
-  m_LocalPosition: {x: 132, y: 122.78528, z: 393.5}
-  m_LocalScale: {x: 0.795, y: 0.052, z: 21.401554}
+  m_LocalPosition: {x: 132, y: 122.78577, z: 393.495}
+  m_LocalScale: {x: 0.25, y: 0.052, z: 21.401554}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 527073955}
@@ -22086,6 +22197,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2138655917}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &2138655921
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2138655917}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.0000076, z: 1.0000001}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2138982989
 GameObject:
   m_ObjectHideFlags: 0

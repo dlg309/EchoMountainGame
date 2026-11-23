@@ -2,18 +2,17 @@ using UnityEngine;
 
 namespace EchoMountain.Riding
 {
-    // Only a descending, aligned board can enter. A rail controls travel until the board pops or rides off.
+    // The cap collider carries the board. Bounded edge and alignment forces assist a valid grind.
     internal sealed class FreeRoamRailRide
     {
-        private const float BoardClearance = 0.11f;
         private readonly FreeRoamMap map;
         private readonly Rigidbody body;
-        private Vector3 lastPosition, origin, direction;
-        private float distance, length, speed, duration;
-        private bool hasLastPosition, usedGravity;
+        private FreeRoamMap.Rail active, touched;
+        private float directionSign, stanceSign, duration, lastContact, entryBlockedUntil;
 
-        internal bool IsGrinding { get; private set; }
-        internal Vector3 Velocity => direction * speed;
+        internal bool IsGrinding => active.surface;
+        internal bool LeavingRail => Time.fixedTime < entryBlockedUntil;
+        internal bool TouchingParkTop { get; private set; }
 
         internal FreeRoamRailRide(FreeRoamMap map, Rigidbody body)
         {
@@ -21,97 +20,88 @@ namespace EchoMountain.Riding
             this.body = body;
         }
 
+        internal bool IsParkSurface(Collider collider) => map.TryGetRail(collider, out _);
+
+        internal void ObserveContact(Collision collision)
+        {
+            if (!map.TryGetRail(collision.collider, out var rail)) return;
+            Vector3 normal = rail.surface.transform.up;
+            for (int i = 0; i < collision.contactCount; i++)
+            {
+                if (Vector3.Dot(collision.GetContact(i).normal, normal) < 0.8f) continue;
+                touched = rail;
+                return;
+            }
+        }
+
         internal bool Step(bool canEnter, bool pop, float popVelocity, TrickScore tricks)
         {
-            Vector3 current = body.position;
+            var contact = touched;
+            touched = default;
+            TouchingParkTop = contact.surface;
             if (!IsGrinding)
             {
-                if (canEnter && hasLastPosition && body.linearVelocity.y < 0f)
-                    TryEnter(lastPosition, current, tricks);
-                lastPosition = current;
-                hasLastPosition = true;
-                return IsGrinding;
+                if (!canEnter || !contact.surface || Time.fixedTime < entryBlockedUntil ||
+                    !TryEnter(contact)) return false;
+                tricks.BeginGrind(body.rotation.eulerAngles.y);
             }
 
-            float step = Time.fixedDeltaTime;
-            duration += step;
-            speed = Mathf.Max(4f, speed + (-direction.y * 9.81f - 0.35f) * step);
-            distance = Mathf.Clamp(distance + speed * step, 0f, length);
-            Vector3 next = origin + direction * distance + Vector3.up * BoardClearance;
-            if (pop || distance >= length)
+            Transform surface = active.surface.transform;
+            if (contact.surface == active.surface) lastContact = Time.fixedTime;
+            Vector3 along = surface.forward * directionSign;
+            Vector3 normal = surface.up;
+            float speed = Vector3.Dot(body.linearVelocity, along);
+            bool supported = Time.fixedTime - lastContact <= 0.045f;
+            if (!supported || speed < 1.8f || pop)
             {
-                body.position = lastPosition = next;
-                Stop();
-                body.linearVelocity = direction * speed + Vector3.up * (pop ? popVelocity : 0f);
+                if (pop && supported) body.AddForce(normal * popVelocity, ForceMode.VelocityChange);
                 tricks.FinishGrind(body.rotation.eulerAngles.y, duration);
+                active = default;
+                entryBlockedUntil = Time.fixedTime + 0.15f;
+                return pop && supported;
             }
-            else body.MovePosition(next);
+
+            duration += Time.fixedDeltaTime;
+            Vector3 side = surface.right;
+            float offset = Vector3.Dot(body.position - surface.position, side);
+            float slip = Vector3.Dot(body.linearVelocity, side);
+            float lateral = Mathf.Clamp(-offset * 36f - slip * 10f, -14f, 14f);
+            body.AddForce(side * lateral - along * 0.35f, ForceMode.Acceleration);
+            Vector3 forward = Vector3.ProjectOnPlane(body.rotation * Vector3.forward, normal);
+            float yawError = Vector3.SignedAngle(forward, along * stanceSign, normal) * Mathf.Deg2Rad;
+            Vector3 tiltError = Vector3.Cross(body.rotation * Vector3.up, normal);
+            Vector3 correction = normal * (yawError * 28f) + tiltError * 26f - body.angularVelocity * 9f;
+            body.AddTorque(Vector3.ClampMagnitude(correction, 38f), ForceMode.Acceleration);
             return true;
         }
 
         internal void Reset()
         {
-            Stop();
-            hasLastPosition = false;
+            active = touched = default;
+            entryBlockedUntil = 0f;
+            TouchingParkTop = false;
         }
 
-        private void Stop()
+        private bool TryEnter(FreeRoamMap.Rail rail)
         {
-            if (!IsGrinding) return;
-            body.collisionDetectionMode = CollisionDetectionMode.Discrete;
-            body.isKinematic = false;
-            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-            body.useGravity = usedGravity;
-            IsGrinding = false;
-        }
+            Transform surface = rail.surface.transform;
+            Vector3 along = surface.forward;
+            Vector3 normal = surface.up;
+            Vector3 travel = Vector3.ProjectOnPlane(body.linearVelocity, normal);
+            float forwardSpeed = Vector3.Dot(travel, along);
+            Vector3 boardForward = body.rotation * Vector3.forward;
+            float lateral = Mathf.Abs(surface.InverseTransformPoint(body.position).x - rail.surface.center.x);
+            if (Mathf.Abs(forwardSpeed) < 3.3f || Mathf.Abs(forwardSpeed) < travel.magnitude * 0.80f ||
+                Mathf.Abs(Vector3.Dot(boardForward, along)) < 0.78f ||
+                Vector3.Dot(body.rotation * Vector3.up, normal) < 0.73f ||
+                lateral > rail.surface.size.x * 0.5f) return false;
 
-        private void TryEnter(Vector3 previous, Vector3 current, TrickScore tricks)
-        {
-            var velocity = body.linearVelocity;
-            foreach (var rail in map.Rails)
-            {
-                Vector3 span = rail.end - rail.start;
-                Vector3 flat = Vector3.ProjectOnPlane(span, Vector3.up);
-                float along = Vector3.Dot(current - rail.start, flat) / flat.sqrMagnitude;
-                if (along < 0f || along > 1f) continue;
-                Vector3 top = rail.start + along * span + Vector3.up * BoardClearance;
-                if ((current - top).sqrMagnitude > rail.halfWidth * rail.halfWidth + 0.36f) continue;
-                float oldAlong = Vector3.Dot(previous - rail.start, flat) / flat.sqrMagnitude;
-                float before = previous.y - (rail.start.y + oldAlong * span.y + BoardClearance);
-                float after = current.y - top.y;
-                if (before < 0f || after > 0f) continue;
-
-                Vector3 cross = Vector3.Lerp(previous, current, before / Mathf.Max(0.0001f, before - after));
-                float entry = Vector3.Dot(cross - rail.start, flat) / flat.sqrMagnitude;
-                Vector3 point = rail.start + span * entry + Vector3.up * BoardClearance;
-                if (entry < 0f || entry > 1f || Vector3.ProjectOnPlane(cross - point, Vector3.up).magnitude > rail.halfWidth)
-                    continue;
-
-                Vector3 axis = span.normalized;
-                float approach = Vector3.Dot(velocity, axis);
-                if (Mathf.Abs(approach) < 4f || Mathf.Abs(approach) < velocity.magnitude * 0.70f) continue;
-                Vector3 forward = body.rotation * Vector3.forward;
-                if (Vector3.Dot(body.rotation * Vector3.up, Vector3.up) < 0.65f ||
-                    Mathf.Abs(Vector3.Dot(forward, axis)) < 0.65f) continue;
-
-                direction = axis * Mathf.Sign(approach);
-                origin = approach > 0f ? rail.start : rail.end;
-                length = span.magnitude;
-                distance = Vector3.Dot(point - origin, direction);
-                speed = Mathf.Abs(approach);
-                duration = 0f;
-                body.position = point;
-                body.rotation = Quaternion.LookRotation(direction * Mathf.Sign(Vector3.Dot(forward, direction)), Vector3.up);
-                body.linearVelocity = Vector3.zero;
-                body.angularVelocity = Vector3.zero;
-                body.collisionDetectionMode = CollisionDetectionMode.Discrete;
-                body.isKinematic = true;
-                usedGravity = body.useGravity;
-                body.useGravity = false;
-                tricks.BeginGrind(body.rotation.eulerAngles.y);
-                IsGrinding = true;
-                return;
-            }
+            active = rail;
+            directionSign = Mathf.Sign(forwardSpeed);
+            stanceSign = Mathf.Sign(Vector3.Dot(boardForward, along) * directionSign);
+            duration = 0f;
+            lastContact = Time.fixedTime;
+            return true;
         }
     }
 }

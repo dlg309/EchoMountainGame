@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using EchoMountain.Riding;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
@@ -18,6 +19,18 @@ namespace EchoMountain.EditorTools
             return BuildPark(root, terrain);
         }
 
+        internal static FreeRoamMap.Rail[] UpdatePark(FreeRoamMap map)
+        {
+            var park = map.transform.Find("Switchyard features");
+            var features = new FreeRoamMap.Rail[map.Rails.Count];
+            for (int i = 0; i < features.Length; i++)
+            {
+                var rail = map.Rails[i];
+                features[i] = FitRail(park.GetChild(i), rail.start, rail.end, i == 0);
+            }
+            return features;
+        }
+
         private static FreeRoamMap.Rail[] BuildPark(Transform root, Terrain ground)
         {
             var park = Group(root, "Switchyard features");
@@ -28,9 +41,9 @@ namespace EchoMountain.EditorTools
             var teal = Material("Beacon teal", new Color(0.10f, 0.39f, 0.42f));
             var rails = new[]
             {
-                Rail(park, ground, "Low ride-on box", 132f, 300f, 132f, 314f, 0.57f, 0.61f, steel, cap),
-                Rail(park, ground, "Long flat rail", 132f, 383f, 132f, 404f, 0.83f, 0.38f, steel, cap),
-                Rail(park, ground, "Down rail", 132f, 467f, 127f, 487f, 0.94f, 0.37f, steel, cap)
+                Rail(park, ground, "Low ride-on box", 132f, 300f, 132f, 314f, 0.57f, true, steel, cap),
+                Rail(park, ground, "Long flat rail", 132f, 383f, 132f, 404f, 0.83f, false, steel, cap),
+                Rail(park, ground, "Down rail", 132f, 467f, 127f, 487f, 0.94f, false, steel, cap)
             };
 
             var markers = Group(root, "Approach markers");
@@ -57,7 +70,7 @@ namespace EchoMountain.EditorTools
         }
 
         private static FreeRoamMap.Rail Rail(Transform root, Terrain terrain, string name, float x, float z,
-            float endX, float endZ, float clearance, float halfWidth, Material steel, Material cap)
+            float endX, float endZ, float clearance, bool box, Material steel, Material cap)
         {
             var rail = Group(root, name);
             Vector3 start = Surface(terrain, x, z, clearance);
@@ -71,13 +84,8 @@ namespace EchoMountain.EditorTools
             }
             start.y += raise;
             end.y += raise;
-            Vector3 axis = end - start;
-            var rotation = Quaternion.LookRotation(axis);
-            Vector3 mid = (start + end) * 0.5f;
-            Block(rail, "Deck sides", mid - Vector3.up * 0.15f,
-                new Vector3(halfWidth * 2f, 0.22f, axis.magnitude), rotation, steel);
-            Block(rail, "Grind surface", mid - Vector3.up * 0.026f,
-                new Vector3(halfWidth * 2f + 0.035f, 0.052f, axis.magnitude), rotation, cap);
+            Block(rail, "Deck sides", Vector3.zero, Vector3.one, Quaternion.identity, steel);
+            Block(rail, "Grind surface", Vector3.zero, Vector3.one, Quaternion.identity, cap);
             for (int support = 0; support < 4; support++)
             {
                 Vector3 point = Vector3.Lerp(start, end, (support + 0.4f) / 3.8f);
@@ -85,7 +93,31 @@ namespace EchoMountain.EditorTools
                 Block(rail, "Rail support", new Vector3(point.x, (point.y + snow) * 0.5f, point.z),
                     new Vector3(0.16f, point.y - snow + 0.12f, 0.19f), Quaternion.identity, steel);
             }
-            return new FreeRoamMap.Rail { start = start, end = end, halfWidth = halfWidth + 0.08f };
+            return FitRail(rail, start, end, box);
+        }
+
+        private static FreeRoamMap.Rail FitRail(Transform rail, Vector3 start, Vector3 end, bool box)
+        {
+            const float capDepth = 0.052f;
+            Vector3 axis = end - start;
+            Quaternion rotation = Quaternion.LookRotation(axis);
+            Vector3 up = rotation * Vector3.up;
+            Vector3 top = (start + end) * 0.5f;
+            float width = box ? 1.25f : 0.25f;
+            float depth = box ? 0.54f : 0.14f;
+            var cap = rail.Find("Grind surface");
+            Undo.RecordObject(cap, "Fit grind surface");
+            cap.SetPositionAndRotation(top - up * (capDepth * 0.5f), rotation);
+            cap.localScale = new Vector3(width, capDepth, axis.magnitude);
+            if (!cap.TryGetComponent(out BoxCollider surface))
+                surface = Undo.AddComponent<BoxCollider>(cap.gameObject);
+
+            var deck = rail.Find("Deck sides");
+            Undo.RecordObject(deck, "Fit park feature body");
+            deck.SetPositionAndRotation(top - up * (capDepth + depth * 0.5f), rotation);
+            deck.localScale = new Vector3(width - 0.025f, depth, axis.magnitude);
+            if (!deck.TryGetComponent<BoxCollider>(out _)) Undo.AddComponent<BoxCollider>(deck.gameObject);
+            return new FreeRoamMap.Rail { start = start, end = end, surface = surface };
         }
 
         private static void BuildFirs(Transform root, Terrain terrain, Random random)

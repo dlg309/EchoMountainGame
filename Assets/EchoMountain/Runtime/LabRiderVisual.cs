@@ -107,7 +107,9 @@ namespace EchoMountain.Riding
 
         private void Pose(float blend)
         {
-            rig.SetPositionAndRotation(transform.position, transform.rotation);
+            // The basin deck sits at the bottom of its physics box. Keep the bindings and rider with it.
+            Vector3 deckOffset = sunsetOutfit ? -transform.up * 0.166f : Vector3.zero;
+            rig.SetPositionAndRotation(transform.position + deckOffset, transform.rotation);
             float edge = replaying ? replayEdge : rider.SteerInput;
             float targetHeight = rider.IsRecovering ? 0.59f : rider.IsGrinding ? 0.70f
                 : rider.IsGrounded ? 0.91f - 0.12f * Mathf.Abs(edge) : 0.76f;
@@ -140,7 +142,7 @@ namespace EchoMountain.Riding
                 Vector3 hand = elbow + new Vector3(0.15f + tuck * 0.08f, -0.15f + side * lean, side * 0.05f);
                 BoardGrab edgeGrab = i == 0 ? BoardGrab.Indy : BoardGrab.Melon;
                 grabBlend[i] = Mathf.Lerp(grabBlend[i], rider.ActiveGrab == edgeGrab ? 1f : 0f, blend);
-                Vector3 boardEdge = new(-side * 0.263f, 0.14f, side * -0.06f);
+                Vector3 boardEdge = new(-side * (sunsetOutfit ? 0.16f : 0.263f), 0.14f, side * -0.06f);
                 hand = Vector3.Lerp(hand, boardEdge, grabBlend[i]);
                 elbow = Vector3.Lerp(elbow, (upper + hand) * 0.5f + new Vector3(0.04f, 0f, side * 0.15f), grabBlend[i]);
                 SetSegment(sleeves[i], upper, elbow, 0.15f, 0.15f, 0.08f);

@@ -1,5 +1,9 @@
 # Status
 
+## Riding and park update — 2026-11-23
+
+The riding and park specs were updated before implementation. The new deck sits at the physics collider, the r4 carve and flip code is in place, and Sunset Basin has solid grind surfaces. The first Unity run passed 52/53. The thin-wall camera check missed its limit by 3.8 mm. The camera sweep radius increased by 1 cm. All 53 PlayMode tests then passed. The Windows build is at `Builds/SunsetBasin-Riding/EchoMountain.exe`. A visible Windows capture confirmed the transparent HUD. Direct comparison with the Starter Kit and hands-on riding remain open.
+
 ## Sunset Basin Free Roam — 2026-11-23
 
 On `experiment/carve-brake-r3` at starting commit `3b55431`, the selected project now contains the Sunset Basin scene, terrain, three drop-ins, marked jumps and rails, and a Free Roam main-menu entry. Unity 6000.3.28f1 generated the assets in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Focused PlayMode tests passed 4/4. The full graphical run passed 48/48, including both existing routes and the capture fixture. The Windows x64 build succeeded and initialized graphics, physics, and input from `Builds/SunsetBasin/EchoMountain.exe`. Hands-on traversal and profiling remain open. The older rider redesign worktree is separate.

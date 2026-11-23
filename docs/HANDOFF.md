@@ -1,5 +1,9 @@
 # Handoff
 
+## Riding and park update — 2026-11-23
+
+The r4 implementation is in the selected repository. The existing Sunset Basin scene and Twin-tip mesh use the same Unity GUIDs. Reapply authored geometry with EchoMountain.EditorTools.SunsetBasinBuilder.UpdateRidingGeometry. The isolated project is %TEMP%/EchoMountain-SunsetBasin-QA-20261123. All 53 PlayMode tests passed. Use `Builds/SunsetBasin-Riding/EchoMountain.exe` for the new Windows player. The final test log, Windows build log, and HUD images are in `Logs/RidingParkR4-QA`. See QA for verified scope and reference input limitations.
+
 ## Sunset Basin Free Roam — 2026-11-23
 
 Use the selected EchoMountainGame repository on `experiment/carve-brake-r3`. Open `GlacierPassPolished.unity`, enter Play mode, and use the Free Roam menu entry. `EchoMountain.EditorTools.SunsetBasinBuilder.Create` is for generating a fresh copy. The scene and its assets are already in the project. The focused and full graphical tests passed in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. See QA and README for verification and riding checks.

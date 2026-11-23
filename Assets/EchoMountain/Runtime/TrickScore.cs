@@ -12,11 +12,14 @@ namespace EchoMountain.Riding
         private float rotation;
         private float currentHold, indyHold, melonHold;
         private int previousSpin;
+        private int previousFlip;
+        private float flipRotation;
         private int railPoints, previousRail;
         private BoardGrab previousGrab;
 
         public bool IsAirborne { get; private set; }
         public float Rotation => rotation;
+        public float FlipRotation => flipRotation;
         public BoardGrab CurrentGrab { get; private set; }
         public int Points { get; private set; }
         public int Chain { get; private set; }
@@ -25,7 +28,9 @@ namespace EchoMountain.Riding
         public int LastAward { get; private set; }
         public string Feedback { get; private set; } = "";
         public float FeedbackTime { get; private set; }
-        public int PendingPoints => IsAirborne ? BasePoints(SpinDegrees(), GrabHeld()) + railPoints : 0;
+        public int PendingPoints => IsAirborne ? BasePoints(SpinDegrees(), GrabHeld(), CompletedFlip()) + railPoints : 0;
+
+        internal void SampleFlip(float degrees) => flipRotation = degrees;
 
         internal void BeginGrind(float heading)
         {
@@ -49,7 +54,7 @@ namespace EchoMountain.Riding
             if (ChainTime == 0f) Chain = 0;
         }
 
-        public void SampleAir(float heading, BoardGrab grab, float seconds)
+        public void SampleAir(float heading, BoardGrab grab, float seconds, bool trackSpin = true)
         {
             if (!IsAirborne)
             {
@@ -57,7 +62,8 @@ namespace EchoMountain.Riding
                 previousHeading = heading;
             }
 
-            TrackHeading(heading);
+            if (trackSpin) TrackHeading(heading);
+            else previousHeading = heading;
             if (grab != CurrentGrab) currentHold = 0f;
             CurrentGrab = grab;
             if (grab == BoardGrab.None) return;
@@ -73,9 +79,10 @@ namespace EchoMountain.Riding
 
             TrackHeading(heading);
             int spin = SpinDegrees();
+            int flip = CompletedFlip();
             BoardGrab grab = GrabHeld();
             int rail = railPoints;
-            int basis = BasePoints(spin, grab) + rail;
+            int basis = BasePoints(spin, grab, flip) + rail;
             CancelAir();
             if (outcome == LandingOutcome.Bail)
             {
@@ -88,7 +95,8 @@ namespace EchoMountain.Riding
             }
 
             if (basis == 0) return;
-            bool repeated = spin == previousSpin && grab == previousGrab && (rail > 0) == (previousRail > 0);
+            bool repeated = spin == previousSpin && flip == previousFlip && grab == previousGrab &&
+                (rail > 0) == (previousRail > 0);
             bool clean = outcome == LandingOutcome.Clean;
             Chain = clean ? repeated ? 1 : Mathf.Min(Chain + 1, 4) : 0;
             ChainTime = clean ? ChainWindow : 0f;
@@ -96,11 +104,17 @@ namespace EchoMountain.Riding
             LastAward = Mathf.RoundToInt(basis * (clean ? 1f : 0.5f) * (repeated ? 0.6f : 1f) * Multiplier);
             Points += LastAward;
             previousSpin = spin;
+            previousFlip = flip;
             previousGrab = grab;
             previousRail = rail;
 
             string trick = spin == 0 ? (grab == BoardGrab.None ? "" : grab.ToString())
                 : grab == BoardGrab.None ? spin.ToString() : $"{spin} {grab}";
+            if (flip != 0)
+            {
+                string name = flip > 0 ? "Frontflip" : "Backflip";
+                trick = trick.Length == 0 ? name : $"{name} + {trick}";
+            }
             if (rail > 0) trick = trick.Length == 0 ? "Grind" : $"Grind + {trick}";
             string landing = clean ? repeated ? "Repeat" : "Clean" : "Recovered";
             Feedback = $"{trick}   /   {landing}   +{LastAward}";
@@ -112,7 +126,7 @@ namespace EchoMountain.Riding
             IsAirborne = false;
             railPoints = 0;
             CurrentGrab = BoardGrab.None;
-            rotation = currentHold = indyHold = melonHold = 0f;
+            rotation = flipRotation = currentHold = indyHold = melonHold = 0f;
         }
 
         public void Reset(bool preservePoints = false)
@@ -120,7 +134,7 @@ namespace EchoMountain.Riding
             CancelAir();
             if (!preservePoints)
             {
-                Points = previousSpin = previousRail = 0;
+                Points = previousSpin = previousFlip = previousRail = 0;
                 previousGrab = BoardGrab.None;
             }
             Chain = LastAward = 0;
@@ -148,7 +162,9 @@ namespace EchoMountain.Riding
             return melonHold >= GrabHold ? BoardGrab.Melon : BoardGrab.None;
         }
 
-        private static int BasePoints(int spin, BoardGrab grab) =>
-            spin + (grab == BoardGrab.Indy ? 80 : grab == BoardGrab.Melon ? 90 : 0);
+        private int CompletedFlip() => Mathf.Abs(flipRotation) >= 335f ? (int)Mathf.Sign(flipRotation) : 0;
+
+        private static int BasePoints(int spin, BoardGrab grab, int flip) =>
+            spin + (flip == 0 ? 0 : 300) + (grab == BoardGrab.Indy ? 80 : grab == BoardGrab.Melon ? 90 : 0);
     }
 }

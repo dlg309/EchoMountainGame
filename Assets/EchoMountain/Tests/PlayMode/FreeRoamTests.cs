@@ -12,6 +12,7 @@ namespace EchoMountain.Tests
     public sealed class FreeRoamTests
     {
         private Scene basin;
+        private static readonly int[] NarrowRails = { 1, 2 };
         private bool testedMenu;
 
         [UnityTearDown]
@@ -102,6 +103,8 @@ namespace EchoMountain.Tests
             var rider = run.GetComponent<LabRider>();
             var body = rider.GetComponent<Rigidbody>();
             var rail = map.Rails[0];
+            Assert.That(rail.surface, Is.Not.Null);
+            Assert.That(rail.surface.isTrigger, Is.False);
             Vector3 axis = (rail.end - rail.start).normalized;
 
             Vector3 aboveRail = Vector3.Lerp(rail.start, rail.end, 0.30f) + Vector3.up * 0.85f;
@@ -123,7 +126,8 @@ namespace EchoMountain.Tests
             for (int i = 0; i < 140 && !rider.IsGrinding; i++) yield return new WaitForFixedUpdate();
             Assert.That(rider.IsGrinding, $"Popped from the Switchyard approach, board at {body.position}");
             Assert.That(run.Tricks.Points, Is.Zero);
-            Assert.That(body.useGravity, Is.False);
+            Assert.That(body.useGravity, Is.True);
+            Assert.That(body.isKinematic, Is.False);
             for (int i = 0; i < 140 && rider.IsGrinding; i++) yield return new WaitForFixedUpdate();
             Assert.That(rider.IsGrinding, Is.False);
             Assert.That(body.useGravity);
@@ -174,6 +178,80 @@ namespace EchoMountain.Tests
             Assert.That(rider.LastLanding, Is.Not.EqualTo(LandingOutcome.Bail));
             Assert.That(rider.ResetCount, Is.EqualTo(resets));
             Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding));
+        }
+
+        [UnityTest]
+        public IEnumerator NarrowRailSupportsBoardAndPopsOntoSnow([ValueSource(nameof(NarrowRails))] int index)
+        {
+            yield return LoadBasin();
+            var map = FindInBasin<FreeRoamMap>();
+            var run = FindInBasin<MountainRun>();
+            var rider = run.GetComponent<LabRider>();
+            var body = rider.GetComponent<Rigidbody>();
+            var rail = map.Rails[index];
+            Vector3 top = Vector3.Lerp(rail.start, rail.end, 0.53f);
+            Vector3 normal = rail.surface.transform.up;
+            Vector3 direction = rail.surface.transform.forward;
+            Assert.That(rail.surface.Raycast(new Ray(top + normal, -normal), out var hit, 2f));
+            Assert.That(Vector3.Distance(hit.point, top), Is.LessThan(0.01f));
+            Assert.That(rail.surface.transform.lossyScale.x, Is.LessThan(0.30f));
+
+            body.position = top + normal * 0.63f;
+            body.rotation = Quaternion.LookRotation(direction, normal);
+            body.linearVelocity = direction * 9f - normal * 1.5f;
+            for (int step = 0; step < 60 && !rider.IsGrinding; step++) yield return new WaitForFixedUpdate();
+            Assert.That(rider.IsGrinding);
+            Vector3 entry = body.position;
+            for (int step = 0; step < 16; step++)
+            {
+                yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrinding);
+            }
+            Assert.That(Vector3.Dot(body.position - entry, direction), Is.GreaterThan(1.8f));
+            Assert.That(run.Tricks.Points, Is.Zero);
+            rider.RequestJump();
+            yield return new WaitForFixedUpdate();
+            Assert.That(rider.IsGrinding, Is.False);
+            Assert.That(Vector3.Dot(body.linearVelocity, normal), Is.GreaterThan(2f));
+            for (int step = 0; step < 155 && rider.LandingCount == 0; step++) yield return new WaitForFixedUpdate();
+            Assert.That(rider.LandingCount, Is.EqualTo(1));
+            Assert.That(run.Tricks.Feedback, Does.Contain("Grind"));
+            Assert.That(run.Tricks.Points, Is.GreaterThan(0));
+        }
+
+        [UnityTest]
+        public IEnumerator VisibleDeckMeetsFlatAndSlopingSnow()
+        {
+            yield return LoadBasin();
+            var map = FindInBasin<FreeRoamMap>();
+            var rider = FindInBasin<LabRider>();
+            var deck = rider.GetComponent<MeshFilter>().sharedMesh;
+            float underside = deck.bounds.min.y;
+            var flat = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Vector3 location = map.DropIn(0).position;
+            flat.transform.position = location + Vector3.up * 5f;
+            flat.transform.localScale = new Vector3(12f, 1f, 12f);
+            try
+            {
+                rider.SetSpawn(flat.transform.position + Vector3.up * 0.66f, Quaternion.identity);
+                for (int step = 0; step < 45; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded);
+                Vector3 deckCenter = rider.transform.TransformPoint(0f, underside, 0f);
+                float flatGap = deckCenter.y - (flat.transform.position.y + 0.5f);
+                Assert.That(flatGap, Is.InRange(-0.015f, 0.025f));
+
+                rider.SetSpawn(location, map.DropIn(0).rotation);
+                for (int step = 0; step < 100; step++) yield return new WaitForFixedUpdate();
+                Assert.That(rider.IsGrounded);
+                deckCenter = rider.transform.TransformPoint(0f, underside, 0f);
+                float slopeGap = deckCenter.y - map.Terrain.SampleHeight(deckCenter);
+                Debug.Log($"Basin deck gap: flat={flatGap:F3} m, slope={slopeGap:F3} m");
+                Assert.That(slopeGap, Is.InRange(-0.02f, 0.05f));
+            }
+            finally
+            {
+                Object.Destroy(flat);
+            }
         }
 
         private IEnumerator LoadBasin()
