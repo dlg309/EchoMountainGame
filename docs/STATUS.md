@@ -8,6 +8,30 @@ The riding and park specs were updated before implementation. The new deck sits 
 
 On `experiment/carve-brake-r3` at starting commit `3b55431`, the selected project now contains the Sunset Basin scene, terrain, three drop-ins, marked jumps and rails, and a Free Roam main-menu entry. Unity 6000.3.28f1 generated the assets in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Focused PlayMode tests passed 4/4. The full graphical run passed 48/48, including both existing routes and the capture fixture. The Windows x64 build succeeded and initialized graphics, physics, and input from `Builds/SunsetBasin/EchoMountain.exe`. Hands-on traversal and profiling remain open. The older rider redesign worktree is separate.
 
+## Wide Board v7 — 2026-11-23
+
+The snowboard deck now measures 0.3048 m (12 inches) at the waist in PlayMode. It retains the twin-tip profile, and grab targets match the wider deck. The Windows player at `Builds/StarterRedesign-WideBoard-v7/EchoMountain.exe` is open in the foreground (PID 10120). Four focused tests passed, the Windows build succeeded, and its close view was inspected. Hands-on riding remains open.
+
+## Floor Recovery v6 relaunch — 2026-11-23
+
+Relaunched the latest Windows playtest, `Builds/StarterRedesign-FloorRecovery-v6/EchoMountain.exe`, and brought its responsive Glacier Pass window to the foreground (PID 19480). Hands-on testing is ready.
+
+## Snow recovery v6 — 2026-11-23
+
+The Starter run now checks the actual snow collider and restarts from the run start if the rider ends up upside down at snow level or the board body sinks below the surface. Upright travel and airborne rotation passed the targeted test. Full PlayMode suite passed 45/45, including both routes. The new Windows player at `Builds/StarterRedesign-FloorRecovery-v6/EchoMountain.exe` is open (PID 29808 at launch). Hands-on reproduction in the standalone build remains open.
+
+## Twin-tip snowboard v5 — 2026-11-23
+
+Snowboard v5 replaces the Starter board cube with a 24 mm deck, rounded raised tips, and a narrow waist. The visual rig and grab targets follow the new deck. The original physics collider and board body settings are retained. Focused tests passed 3/3, the Windows build succeeded, and three player captures were checked. Latest playtest is open at `Builds/StarterRedesign-Snowboard-v5/EchoMountain.exe` (PID 13140 at launch). Full hands-on riding remains open.
+
+## Slim rider v4 — 2026-11-23
+
+Slim Rider v4 removes the backpack, orange straps, hood emblem, and protruding thigh panels, and reduces jacket and limb thickness by 13–14%. The Windows player at `Builds/StarterRedesign-SlimRider-v4/EchoMountain.exe` in the selected repository is open (PID 20620 at launch). Unity focused tests passed 3/3, the build succeeded, and two close views were checked. Full run and visual checks in motion remain open.
+
+## Skinned rider playtest launch — 2026-11-23
+
+The latest local Windows playtest, `Builds/StarterRedesign-SkinnedRider-v3/EchoMountain.exe`, is open and responsive (PID 11248). It was built from the isolated `redesign/starter-r2` source at `4f432db`. Hands-on testing is ready. See QA for the launch command and observed startup.
+
 ## Player running — 2026-11-19 14:45 EST
 
 The current r3 Windows build, `Builds/GlacierPass-Carve-r3/EchoMountain.exe`, was launched windowed from `experiment/carve-brake-r3` at `fa9b608`. PID 26092 showed a responsive `Echo Mountain - Glacier Pass` window; graphics and input initialized in the startup log. It is left open for hands-on review. No new tests or build were run, and gameplay/record reopening remain unverified. The pre-existing untracked `Assets/Resources/GDKEditionAutoGen*` remains untouched. Next: play Pine and Summit and report handling, landing, UI, and saved-record reopen behavior; see QA and the r3 gate below.

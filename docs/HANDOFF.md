@@ -10,6 +10,30 @@ Use the selected EchoMountainGame repository on `experiment/carve-brake-r3`. Ope
 
 The tested Windows player is at `Builds/SunsetBasin/EchoMountain.exe`. Use `EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam` for a fresh build. The current notes and graphical captures are in `Logs/SunsetBasin-QA`.
 
+## Wide Board v7 — 2026-11-23
+
+Continue on `redesign/starter-r2` in `%TEMP%/EchoMountain-StarterR2-20261119`. `StarterLookBuilder.ApplyRider` regenerates the deck mesh in place, accounting for the runtime board scale. Latest playtest is `Builds/StarterRedesign-WideBoard-v7/EchoMountain.exe` in the selected repository. See the worktree QA for commands. Verified source checkpoint: 2cf073b.
+
+## Floor Recovery v6 relaunch — 2026-11-23
+
+The latest Floor Recovery v6 player is open in the foreground (PID 19480 at relaunch). Use `Builds/StarterRedesign-FloorRecovery-v6/EchoMountain.exe` for the current test and see the v6 checkpoint below for source and test evidence.
+
+## Snow recovery v6 — 2026-11-23
+
+Continue in `%TEMP%/EchoMountain-StarterR2-20261119` on `redesign/starter-r2`. The Starter scene wires `MountainRun.snowSurface` through `StarterLookBuilder.ApplyRiding`; the existing collider supplies the recovery surface. The new player is `Builds/StarterRedesign-FloorRecovery-v6/EchoMountain.exe` in the selected repository. See worktree QA for test and build commands. Verified source checkpoint: 1c975e1.
+
+## Twin-tip snowboard v5 — 2026-11-23
+
+Continue in `%TEMP%/EchoMountain-StarterR2-20261119` on `redesign/starter-r2`. `StarterLookBuilder.ApplyRider` creates and assigns the owned deck asset in the Starter scene. The selected repository has the v5 executable in `Builds/StarterRedesign-Snowboard-v5`. Earlier builds remain available. See the isolated worktree QA for visual evidence and exact flags. Verified source checkpoint: c556761.
+
+## Slim rider v4 — 2026-11-23
+
+Rider source is in the existing `redesign/starter-r2` worktree at `%TEMP%/EchoMountain-StarterR2-20261119`. `RiderMeshBuilder.Rebuild` updated the owned mesh asset in place. Test the latest Windows player at `Builds/StarterRedesign-SlimRider-v4/EchoMountain.exe` in the selected repository. The previous v3 build remains available. See the isolated worktree QA for commands and captures. Verified source checkpoint: 02786b5.
+
+## Skinned rider playtest launch — 2026-11-23
+
+The latest local player is open in a window from `Builds/StarterRedesign-SkinnedRider-v3/EchoMountain.exe` (PID 11248 at launch). The corresponding source is `redesign/starter-r2` at `4f432db` in `%TEMP%/EchoMountain-StarterR2-20261119`. The selected checkout remains on `experiment/carve-brake-r3`. Next, manually ride and check the skinned rider during carving, jumps, landings, and replay.
+
 ## Player launch — 2026-11-19 14:45 EST
 
 The r3 player is open from `Builds/GlacierPass-Carve-r3/EchoMountain.exe` (PID 26092 at launch) on `experiment/carve-brake-r3`, commit `fa9b608`. Its window was responsive and startup graphics/input initialization logged to `%TEMP%/EchoMountain-r3-launch-20261119.log`. No test/build or hands-on gameplay was performed in this launch. Leave the player available for the user's Pine/Summit handling and record-reopen check; consult the r3 section and QA for the acceptance gate. Untracked `Assets/Resources/GDKEditionAutoGen*` was not changed.

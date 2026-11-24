@@ -46,6 +46,30 @@ Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.E
 - Windows x64 build exited 0 and was copied to `Builds/SunsetBasin/EchoMountain.exe` with both scene files and matching player, runtime DLL, and scene hashes. Launched `EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile "<repo>/Logs/SunsetBasin-QA/windows-player.log"` with the build directory as the working directory. The smoke process was responsive (PID 35352) and initialized Direct3D 11, PhysX, and input with no inspected startup exceptions. This background smoke check did not exercise standalone menus or controls. Evidence is in `Logs/SunsetBasin-QA`.
 - Hands-on rail timing, the longer rails and linked tricks, the steeper drops at different speeds, rider readability through trees and in the air, hardware input/audio, and traversal frame times remain manual checks. See the play mode checklist in README.
 
+## Wide Board v7 — 2026-11-23
+
+Wide Board v7 passed all four focused tests, built, and launched. Confirmed 12-inch runtime waist and inspected a close Windows capture. See `%TEMP%/EchoMountain-StarterR2-20261119/docs/QA.md` for exact commands and limitations.
+
+## Floor Recovery v6 relaunch — 2026-11-23
+
+Relaunched `Builds/StarterRedesign-FloorRecovery-v6/EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile "%TEMP%/EchoMountain-FloorRecovery-v6-launch-20261123-132747.log"` from the executable folder. PID 19480 initialized input and opened a responsive Glacier Pass window. Foreground activation succeeded. No new build or gameplay test ran.
+
+## Snow recovery v6 — 2026-11-23
+
+Snow Recovery v6 built and launched responsively. Unity reproduced the inverted sliding failure before the fix, then passed the full 45-case suite. Exact commands and observations are in `%TEMP%/EchoMountain-StarterR2-20261119/docs/QA.md`.
+
+## Twin-tip snowboard v5 — 2026-11-23
+
+Snowboard v5 built successfully and launched responsively. Focused Unity PlayMode tests passed 3/3. Inspected two close views and a short scripted Summit descent. Full commands and evidence paths are in `%TEMP%/EchoMountain-StarterR2-20261119/docs/QA.md`.
+
+## Slim rider v4 — 2026-11-23
+
+The latest local Windows player, `Builds/StarterRedesign-SlimRider-v4/EchoMountain.exe`, built successfully and launched responsively. Focused PlayMode tests passed 3/3. Build and capture commands, logs, and limitations are recorded in `%TEMP%/EchoMountain-StarterR2-20261119/docs/QA.md`.
+
+## Skinned rider playtest launch — 2026-11-23
+
+Launched `Builds/StarterRedesign-SkinnedRider-v3/EchoMountain.exe -screen-fullscreen 0 -logFile "%TEMP%/EchoMountain-SkinnedRider-v3-launch-20261123-123533.log"` with the executable folder as the working directory. PID 11248 opened a responsive `Echo Mountain - Glacier Pass` window. Unity 6000.3.28f1 initialized Direct3D 11, PhysX, and input. No new build, automated tests, or hands-on gameplay were performed.
+
 ## Windows player launch — 2026-11-19 14:45 EST
 
 - On `experiment/carve-brake-r3` at `fa9b608`, launched `Builds/GlacierPass-Carve-r3/EchoMountain.exe` from its build directory with PowerShell `Start-Process -FilePath $game -WorkingDirectory (Split-Path $game) -ArgumentList @('-screen-fullscreen','0','-screen-width','1280','-screen-height','720','-logFile',"`"$log`"") -PassThru`, where `$game` resolves to that executable and `$log` is `%TEMP%/EchoMountain-r3-launch-20261119.log`. PID 26092 remained responsive and exposed the `Echo Mountain - Glacier Pass` window. Startup log reports Unity 6000.3.28f1, Direct3D 11 on Intel Iris Xe, and input initialized. No new Unity test or build ran.
