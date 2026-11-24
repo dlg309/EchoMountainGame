@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace EchoMountain.Riding
 {
@@ -9,7 +10,8 @@ namespace EchoMountain.Riding
         private const float FootSpread = 0.31f;
         private const float SegmentLength = 0.43f;
         [SerializeField] private Material paletteSource;
-        [SerializeField] private bool sunsetOutfit;
+        [FormerlySerializedAs("sunsetOutfit")]
+        [SerializeField] private bool twinTipDeck;
         private readonly Transform[] thighs = new Transform[2];
         private readonly Transform[] shins = new Transform[2];
         private readonly Transform[] sleeves = new Transform[2];
@@ -18,10 +20,13 @@ namespace EchoMountain.Riding
         private Transform rig, jacket, helmet;
         private Material trousers, fabric, trim, shell, visor;
         private LabRider rider;
+        private Rigidbody body;
         private uint lastReset;
         private float hipHeight = 0.91f;
         private float lean;
         private float tuck;
+        private float brakeShift;
+        private float brakeEdge;
         private readonly float[] grabBlend = new float[2];
         private bool replaying;
         private float replayEdge;
@@ -29,7 +34,7 @@ namespace EchoMountain.Riding
         public RiderVisualPose CapturePose() => new()
         {
             edge = replaying ? replayEdge : rider.SteerInput, hipHeight = hipHeight,
-            lean = lean, tuck = tuck, indy = grabBlend[0], melon = grabBlend[1]
+            lean = lean, tuck = tuck, brakeShift = brakeShift, indy = grabBlend[0], melon = grabBlend[1]
         };
 
         public void ApplyReplayPose(RiderVisualPose pose)
@@ -39,6 +44,7 @@ namespace EchoMountain.Riding
             hipHeight = pose.hipHeight;
             lean = pose.lean;
             tuck = pose.tuck;
+            brakeShift = pose.brakeShift;
             grabBlend[0] = pose.indy;
             grabBlend[1] = pose.melon;
             if (rig) Pose(0f, 0f);
@@ -51,6 +57,7 @@ namespace EchoMountain.Riding
         private void Awake()
         {
             rider = GetComponent<LabRider>();
+            body = GetComponent<Rigidbody>();
             if (!paletteSource)
             {
                 enabled = false;
@@ -59,20 +66,13 @@ namespace EchoMountain.Riding
 
             rig = new GameObject("Segmented rider").transform;
             rig.SetParent(transform.parent, false);
-            trousers = MakeMaterial("Rider trousers", sunsetOutfit ? new Color(0.29f, 0.32f, 0.31f) : new Color(0.10f, 0.19f, 0.25f));
-            fabric = MakeMaterial("Rider jacket", sunsetOutfit ? new Color(0.74f, 0.44f, 0.24f) : new Color(0.96f, 0.25f, 0.09f));
+            trousers = MakeMaterial("Rider trousers", new Color(0.15f, 0.21f, 0.24f));
+            fabric = MakeMaterial("Rider jacket", new Color(0.80f, 0.36f, 0.16f));
             trim = MakeMaterial("Rider trim", new Color(0.03f, 0.06f, 0.08f));
-            shell = MakeMaterial("Rider helmet", sunsetOutfit ? new Color(0.11f, 0.13f, 0.14f) : new Color(0.89f, 0.93f, 0.92f));
-            visor = MakeMaterial("Rider visor", sunsetOutfit ? new Color(0.85f, 0.69f, 0.46f) : new Color(0.12f, 0.67f, 0.82f));
-            PrimitiveType garment = sunsetOutfit ? PrimitiveType.Cube : PrimitiveType.Capsule;
+            shell = MakeMaterial("Rider helmet", new Color(0.86f, 0.90f, 0.90f));
+            visor = MakeMaterial("Rider visor", new Color(0.12f, 0.56f, 0.65f));
+            const PrimitiveType garment = PrimitiveType.Capsule;
             jacket = MakePart(garment, "Jacket", fabric, Vector3.zero, new Vector3(0.26f, 0.28f, 0.48f));
-            if (sunsetOutfit)
-            {
-                var hem = MakePart(PrimitiveType.Cube, "Ivory jacket hem", visor, Vector3.zero, Vector3.one);
-                hem.SetParent(jacket, false);
-                hem.localPosition = new Vector3(0f, -0.29f, 0f);
-                hem.localScale = new Vector3(1.03f, 0.25f, 1.02f);
-            }
             helmet = MakePart(PrimitiveType.Sphere, "Helmet", shell, Vector3.zero, new Vector3(0.25f, 0.27f, 0.26f));
             var goggles = MakePart(PrimitiveType.Cube, "Goggles", visor, Vector3.zero, Vector3.one);
             goggles.SetParent(helmet, false);
@@ -102,25 +102,31 @@ namespace EchoMountain.Riding
             if (replaying) { Pose(0f, 0f); return; }
             bool reset = lastReset != rider.ResetCount;
             lastReset = rider.ResetCount;
+            if (reset) brakeEdge = 0f;
             Pose(reset ? 1f : 1f - Mathf.Exp(-12f * Time.deltaTime),
                 reset ? 1f : 1f - Mathf.Exp(-19f * Time.deltaTime));
         }
 
         private void Pose(float blend, float leanBlend)
         {
-            // The basin deck sits at the bottom of its physics box. Keep the bindings and rider with it.
-            Vector3 deckOffset = sunsetOutfit ? -transform.up * 0.166f : Vector3.zero;
+            // The twin-tip deck's center surface is 0.156 m below the diagnostic board's top.
+            Vector3 deckOffset = twinTipDeck ? -transform.up * 0.156f : Vector3.zero;
             rig.SetPositionAndRotation(transform.position + deckOffset, transform.rotation);
             float edge = replaying ? replayEdge : rider.SteerInput;
-            float targetHeight = rider.IsRecovering ? 0.59f : rider.IsGrinding ? 0.70f
-                : rider.IsGrounded ? 0.91f - 0.12f * Mathf.Abs(edge) : 0.76f;
-            if (rider.ActiveGrab != BoardGrab.None) targetHeight = Mathf.Min(targetHeight, 0.58f);
-            hipHeight = Mathf.Lerp(hipHeight, targetHeight, blend);
-            lean = Mathf.Lerp(lean, rider.LeanInput * 0.22f, leanBlend);
-            tuck = Mathf.Lerp(tuck, rider.IsGrounded ? 0f : 1f, blend);
+            if (!replaying)
+            {
+                brakeShift = Mathf.Lerp(brakeShift, BrakeShiftTarget(), blend);
+                float targetHeight = rider.IsRecovering ? 0.59f : rider.IsGrinding ? 0.70f
+                    : rider.IsGrounded ? 0.91f - 0.12f * Mathf.Abs(edge) - 0.13f * Mathf.Abs(brakeShift) : 0.76f;
+                if (rider.ActiveGrab != BoardGrab.None) targetHeight = Mathf.Min(targetHeight, 0.58f);
+                hipHeight = Mathf.Lerp(hipHeight, targetHeight, blend);
+                lean = Mathf.Lerp(lean, rider.LeanInput * 0.22f, leanBlend);
+                tuck = Mathf.Lerp(tuck, rider.IsGrounded ? 0f : 1f, blend);
+            }
 
-            var hips = new Vector3(-0.04f + lean * 0.32f, hipHeight, 0f);
-            var shoulder = hips + new Vector3(0.12f + tuck * 0.05f + lean * 0.68f, 0.37f, 0f);
+            float turnLean = lean * (1f - Mathf.Abs(brakeShift));
+            var hips = new Vector3(-0.04f + turnLean * 0.32f + brakeShift * 0.14f, hipHeight, 0f);
+            var shoulder = hips + new Vector3(0.12f + tuck * 0.05f + turnLean * 0.68f + brakeShift * 0.14f, 0.37f, 0f);
             SetSegment(jacket, hips, shoulder, 0.32f, 0.48f, 0.16f);
             helmet.localPosition = shoulder + new Vector3(0.035f + lean * 0.14f, 0.22f, 0f);
             helmet.localRotation = Quaternion.Euler(0f, -42f - edge * 16f, 0f);
@@ -139,11 +145,11 @@ namespace EchoMountain.Riding
                 SetSegment(shins[i], knee, ankle, 0.15f, 0.15f, 0.08f);
 
                 Vector3 upper = shoulder + new Vector3(0f, 0f, side * 0.23f);
-                Vector3 elbow = upper + new Vector3(0.10f, -0.18f, side * 0.22f);
-                Vector3 hand = elbow + new Vector3(0.15f + tuck * 0.08f, -0.15f + side * lean, side * 0.05f);
+                Vector3 elbow = upper + new Vector3(0.06f, -0.23f, side * (0.075f + 0.09f * tuck));
+                Vector3 hand = elbow + new Vector3(0.10f + tuck * 0.08f, -0.17f + side * turnLean * 0.22f, side * 0.025f);
                 BoardGrab edgeGrab = i == 0 ? BoardGrab.Indy : BoardGrab.Melon;
                 grabBlend[i] = Mathf.Lerp(grabBlend[i], rider.ActiveGrab == edgeGrab ? 1f : 0f, blend);
-                Vector3 boardEdge = new(-side * (sunsetOutfit ? 0.16f : 0.263f), 0.14f, side * -0.06f);
+                Vector3 boardEdge = new(-side * (twinTipDeck ? 0.17f : 0.263f), 0.11f, side * -0.06f);
                 hand = Vector3.Lerp(hand, boardEdge, grabBlend[i]);
                 elbow = Vector3.Lerp(elbow, (upper + hand) * 0.5f + new Vector3(0.04f, 0f, side * 0.15f), grabBlend[i]);
                 SetSegment(sleeves[i], upper, elbow, 0.15f, 0.15f, 0.08f);
@@ -152,12 +158,36 @@ namespace EchoMountain.Riding
             }
         }
 
-        private void SetSegment(Transform part, Vector3 from, Vector3 to, float width, float depth, float overlap)
+        private float BrakeShiftTarget()
+        {
+            if (!rider.isActiveAndEnabled || !rider.IsGrounded || rider.IsGrinding ||
+                rider.IsRecovering || rider.BrakeInput < 0.05f)
+            {
+                brakeEdge = 0f;
+                return 0f;
+            }
+
+            // Boots point toward local +X. Load the edge uphill of the skid in either stance.
+            float slip = rider.LateralSlip;
+            if (Mathf.Abs(slip) > 0.65f)
+                brakeEdge = -Mathf.Sign(slip);
+            else if (brakeEdge == 0f)
+            {
+                float travelDirection = Mathf.Sign(Vector3.Dot(body.linearVelocity, body.rotation * Vector3.forward));
+                float turnEdge = rider.AppliedSteer * travelDirection;
+                brakeEdge = Mathf.Abs(turnEdge) > 0.15f ? Mathf.Sign(turnEdge) : -1f;
+            }
+
+            float speed = Vector3.ProjectOnPlane(body.linearVelocity, rider.ContactNormal).magnitude;
+            return brakeEdge * rider.BrakeInput * Mathf.InverseLerp(0.5f, 3f, speed);
+        }
+
+        private static void SetSegment(Transform part, Vector3 from, Vector3 to, float width, float depth, float overlap)
         {
             Vector3 axis = to - from;
             part.localPosition = (from + to) * 0.5f;
             part.localRotation = Quaternion.FromToRotation(Vector3.up, axis);
-            part.localScale = new Vector3(width, (axis.magnitude + overlap) * (sunsetOutfit ? 1f : 0.5f), depth);
+            part.localScale = new Vector3(width, (axis.magnitude + overlap) * 0.5f, depth);
         }
 
         private Transform MakePart(PrimitiveType shape, string label, Material material, Vector3 position, Vector3 scale)

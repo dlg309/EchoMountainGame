@@ -3634,7 +3634,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 186656ff3f274ce4ea648ad9e428f76e, type: 2}
+  - {fileID: 2100000, guid: 9fc93cbe30328c344988de26a5894c8f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3686,7 +3686,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 159711853}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 00349969debfac545869b3c084036e7a, type: 2}
 --- !u!114 &159711860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3712,6 +3712,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: EchoMountain.Runtime::EchoMountain.Riding.LabRiderVisual
   paletteSource: {fileID: 2100000, guid: 186656ff3f274ce4ea648ad9e428f76e, type: 2}
+  twinTipDeck: 1
 --- !u!114 &159711862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3724,6 +3725,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 509b0e0ef75c91848a87f5c6b565e039, type: 3}
   m_Name: 
   m_EditorClassIdentifier: EchoMountain.Runtime::EchoMountain.Riding.MountainRun
+  freeRoam: {fileID: 0}
 --- !u!1 &159841106
 GameObject:
   m_ObjectHideFlags: 0

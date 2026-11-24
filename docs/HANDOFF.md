@@ -1,5 +1,9 @@
 # Handoff
 
+## Riding presentation — 2026-11-24
+
+Continue in the selected repository on `experiment/carve-brake-r3`. Launch `Builds/SunsetBasin-RidePolish/EchoMountain.exe` for the current playtest. The isolated project is `%TEMP%/EchoMountain-SunsetBasin-QA-20261123` and copied evidence is in `Logs/RidePresentation-QA`. The two Glacier Pass scenes use the original Sunset Basin twin-tip mesh and material. `EchoMountain.EditorTools.MountainBuilder.ApplySharedDeck` reapplies those references in the owned Glacier Pass scenes. See [QA](QA.md) for the test, build, and runtime verification.
+
 ## Linked turns — 2026-11-23
 
 Resume the linked-turn update in the selected checkout. The isolated QA project is %TEMP%/EchoMountain-SunsetBasin-QA-20261123. Use `Builds/SunsetBasin-Carving/EchoMountain.exe` for the verified Windows build. All 55 Unity PlayMode tests passed. The r4 baseline, final r5 log, and Windows build log are in `Logs/LinkedTurnsR5-QA`.

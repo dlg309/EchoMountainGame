@@ -9,7 +9,7 @@ namespace EchoMountain.Riding
         private Rigidbody targetBody;
         private LabRider rider;
         private uint lastReset;
-        private float heading;
+        private float travelHeading, heading, headingRate, lookHeading, lookRate, lookSpeed;
         private Vector3 lastTargetPosition;
         private bool forceSnap, replayTravel;
         private Vector3 recordedVelocity;
@@ -52,18 +52,29 @@ namespace EchoMountain.Riding
                 ? Vector3.ProjectOnPlane(targetBody.linearVelocity, Vector3.up)
                 : Vector3.zero;
             float speed = travel.magnitude;
-            float damping = 1f - Mathf.Exp(-5f * Time.unscaledDeltaTime);
-            float edge = !replayTravel && rider && rider.IsGrounded ? Mathf.Abs(rider.AppliedSteer) : 0f;
+            float deltaTime = Time.unscaledDeltaTime;
+            float damping = 1f - Mathf.Exp(-5f * deltaTime);
+            float trackingDeltaTime = replayTravel ? deltaTime : Time.deltaTime;
             if (speed > 1f)
-            {
-                float travelHeading = Mathf.Atan2(travel.x, travel.z) * Mathf.Rad2Deg;
-                float yawDamping = 1f - Mathf.Exp(-Mathf.Lerp(5f, 9f, edge) * Time.unscaledDeltaTime);
-                heading = snap ? travelHeading : Mathf.LerpAngle(heading, travelHeading, yawDamping);
-            }
+                travelHeading = Mathf.Atan2(travel.x, travel.z) * Mathf.Rad2Deg;
             else if (snap)
             {
                 Vector3 forward = (targetBody ? targetBody.rotation : target.rotation) * Vector3.forward;
-                heading = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+                travelHeading = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
+            }
+
+            if (snap)
+            {
+                heading = lookHeading = travelHeading;
+                headingRate = lookRate = 0f;
+                lookSpeed = speed;
+            }
+            else if (trackingDeltaTime > 0f)
+            {
+                // Keep aim and orbit continuous through edge releases. Aim follows travel a little sooner.
+                heading = Mathf.SmoothDampAngle(heading, travelHeading, ref headingRate, 0.17f, 110f, trackingDeltaTime);
+                lookHeading = Mathf.SmoothDampAngle(lookHeading, travelHeading, ref lookRate, 0.075f, 150f, trackingDeltaTime);
+                lookSpeed = Mathf.Lerp(lookSpeed, speed, damping);
             }
 
             Vector3 direction = Quaternion.Euler(0f, heading, 0f) * Vector3.forward;
@@ -73,10 +84,9 @@ namespace EchoMountain.Riding
             // Constrain after damping: new obstacles must pull the view in immediately.
             // Moving back out remains damped, avoiding a sudden zoom when a tree clears.
             transform.position = ResolveObstruction(position + Vector3.up * 0.9f, candidate);
-            float lookAhead = Mathf.Lerp(3.5f, 8f, Mathf.InverseLerp(2f, 22f, speed));
-            // Lead the view through a carve while the chase position catches up.
-            Vector3 lookDirection = Vector3.Slerp(direction, travel.normalized,
-                edge * 0.85f * Mathf.InverseLerp(1f, 3f, speed));
+            float lookAhead = Mathf.Lerp(3.5f, 8f, Mathf.InverseLerp(2f, 22f, lookSpeed));
+            float lead = Mathf.Clamp(Mathf.DeltaAngle(heading, lookHeading) * 1.6f, -10f, 10f);
+            Vector3 lookDirection = Quaternion.Euler(0f, lookHeading + lead, 0f) * Vector3.forward;
             transform.LookAt(position + lookDirection * lookAhead + Vector3.up * 0.7f, Vector3.up);
         }
 

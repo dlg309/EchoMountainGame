@@ -52,6 +52,8 @@ namespace EchoMountain.EditorTools
             tuning.FindProperty("quadraticDrag").floatValue = 0.0057f;
             tuning.ApplyModifiedPropertiesWithoutUndo();
             board.gameObject.AddComponent<MountainRun>();
+            if (AssetDatabase.IsValidFolder(SunsetBasinBuilder.Folder))
+                SunsetBasinBuilder.ApplySharedDeck(board);
 
             Camera camera = GameObject.Find("Lab Camera").GetComponent<Camera>();
             camera.clearFlags = CameraClearFlags.SolidColor;
@@ -67,6 +69,23 @@ namespace EchoMountain.EditorTools
             if (!EditorSceneManager.SaveScene(scene, ScenePath))
                 throw new InvalidOperationException("Could not save Glacier Pass.");
             AssetDatabase.SaveAssets();
+        }
+
+        [MenuItem("Echo Mountain/Apply shared deck to Glacier Pass")]
+        public static void ApplySharedDeck()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            foreach (string path in new[] { ScenePath, PolishedScenePath })
+            {
+                var scene = EditorSceneManager.GetSceneByPath(path);
+                if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(path);
+                var root = Array.Find(scene.GetRootGameObjects(), root => root.name == "Glacier Pass");
+                var board = root.transform.Find("Diagnostic board");
+                SunsetBasinBuilder.ApplySharedDeck(board);
+                EditorSceneManager.MarkSceneDirty(scene);
+                if (!EditorSceneManager.SaveScene(scene))
+                    throw new InvalidOperationException("Could not save " + path);
+            }
         }
 
         [MenuItem("Echo Mountain/Create Glacier Pass polish (once)")]

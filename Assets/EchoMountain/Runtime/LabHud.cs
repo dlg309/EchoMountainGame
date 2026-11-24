@@ -10,6 +10,7 @@ namespace EchoMountain.Riding
         private MountainRun run;
         private GUIStyle title, text, large, small, button;
         private readonly Color panel = new Color(0.025f, 0.065f, 0.10f, 0.96f);
+        private static readonly Color RidePanelTint = new(0.025f, 0.065f, 0.10f, 0.15f);
         private readonly Color accent = new Color(0.40f, 0.87f, 0.93f, 1f);
         private readonly Color ink = new Color(0.90f, 0.96f, 0.98f, 1f);
         private readonly Color muted = new Color(0.67f, 0.78f, 0.82f, 1f);
@@ -82,6 +83,7 @@ namespace EchoMountain.Riding
 
             float trickOffset = ShowTricks ? 70f : 0f;
             float controlTop = height - 176f - trickOffset;
+            DrawRidePanel(new Rect(18f, controlTop, ShowTricks ? 332f : 272f, 162f + trickOffset));
             RideLabel(new Rect(34f, controlTop + 9f, 240f, 22f), "RIDE CONTROLS", title);
             bool pad = rider.UsingGamepad;
             RideLabel(new Rect(34f, controlTop + 34f, 240f, 24f), pad ? "LEFT STICK    Steer" : "A / D     Steer", text);
@@ -99,6 +101,7 @@ namespace EchoMountain.Riding
             if (ShowDiagnostics)
             {
                 float right = width - 270f;
+                DrawRidePanel(new Rect(right, 18f, 252f, 184f));
                 RideLabel(new Rect(right + 16f, 28f, 220f, 22f), "PHYSICS  /  LAB", title);
                 RideLabel(new Rect(right + 16f, 53f, 220f, 22f), rider.IsRecovering ? "CONTACT    Recovering" : rider.IsGrounded ? "CONTACT    Grounded" : "CONTACT    Airborne", text);
                 RideLabel(new Rect(right + 16f, 77f, 220f, 22f), $"SLIP             {rider.LateralSlip:F1} m/s", text);
@@ -110,6 +113,7 @@ namespace EchoMountain.Riding
 
             float gaugeX = width - 270f;
             float gaugeY = height - 184f;
+            DrawRidePanel(new Rect(gaugeX, gaugeY, 252f, 166f));
             RideLabel(new Rect(gaugeX + 16f, gaugeY + 9f, 220f, 20f), "SPEED", title);
             Vector2 centre = new Vector2(gaugeX + 126f, gaugeY + 114f);
             for (int i = 0; i <= 10; i++)
@@ -171,6 +175,15 @@ namespace EchoMountain.Riding
             GUI.color = accent;
             GUI.DrawTexture(new Rect(rect.x, rect.y, 3f, rect.height), Texture2D.whiteTexture);
             GUI.color = Color.white;
+        }
+
+        internal static void DrawRidePanel(Rect rect)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            Color previous = GUI.color;
+            GUI.color = RidePanelTint;
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+            GUI.color = previous;
         }
 
         internal static void RideLabel(Rect rect, string value, GUIStyle style)

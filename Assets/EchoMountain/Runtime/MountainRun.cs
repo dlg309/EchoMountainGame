@@ -341,6 +341,7 @@ namespace EchoMountain.Riding
 
             if (Phase == MountainPhase.Riding)
             {
+                LabHud.DrawRidePanel(new Rect(18f, 18f, 326f, IsFreeRoam ? 72f : 98f));
                 if (IsFreeRoam)
                 {
                     LabHud.RideLabel(new Rect(36f, 28f, 293f, 25f), "SUNSET BASIN   /   FREE ROAM", eyebrow);
@@ -401,6 +402,7 @@ namespace EchoMountain.Riding
 
         private void DrawScore(Rect rect)
         {
+            LabHud.DrawRidePanel(rect);
             LabHud.RideLabel(new Rect(rect.x + 17f, rect.y + 10f, 175f, 24f), "TRICK SCORE", eyebrow);
             if (GUI.Button(new Rect(rect.x + 223f, rect.y + 11f, 86f, 29f), hud.IsPaused ? "Resume" : "Pause"))
                 hud.SetPaused(!hud.IsPaused);

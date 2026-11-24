@@ -146,6 +146,8 @@ namespace EchoMountain.Tests
                 Assert.That(distance[2], Is.LessThan(distance[0] * 0.75f));
                 Assert.That(distance[2], Is.LessThanOrEqualTo(13.43f),
                     "Braking through S-turns must not exceed the measured R2 13.33 m by more than 0.10 m.");
+                Assert.That(distance[1], Is.EqualTo(13.47f).Within(0.20f), "Match r5 straight-line braking.");
+                Assert.That(distance[2], Is.EqualTo(13.11f).Within(0.20f), "Match r5 braking through S-turns.");
             }
             finally
             {

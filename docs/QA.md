@@ -1,5 +1,47 @@
 # QA evidence
 
+## Riding presentation — 2026-11-24
+
+Baseline source was `3e58735`. QA used Unity 6000.3.28f1 / URP 17.3.0 at 60 Hz with Direct3D 11 in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. The project used its bundled fonts for the local playtest. Unity 6000.3.29f1 includes a FreeType fix for malformed variable fonts. [Unity release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)
+
+The original r5 High Traverse and packed-snow brake fixtures passed 4/4. A second r5 camera pass used the same updated measurement fixture to capture the largest single-frame change in camera yaw in the first eight frames after each of three steering reversals. Steering, supported motion, and braking are owned by the original `LabRider` code. The brake pose reads existing support, slip, steer, and speed. Positive toe-side slip loads the heels and heel-side slip loads the toes. On centered travel, the pose uses the engaged turn edge or defaults to heels.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter "HighTraverse|PackedSnowBrakeMetrics" -testResults <QA>/presentation-r5-baseline.xml -logFile <QA>/presentation-r5-baseline.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.MountainBuilder.ApplySharedDeck -logFile <QA>/presentation-scenes.log -quit
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/presentation-first.xml -logFile <QA>/presentation-first.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter HighTraverseLinkedTurns -testResults <QA>/presentation-r5-camera.xml -logFile <QA>/presentation-r5-camera.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter "HighTraverseLinkedTurns|MainMenuOpensBasinAndReturnsToRouteSelection|CameraObstructionTests|CameraLooksAlongSwitchTravelAndSnapsOnReset" -testResults <QA>/presentation-focused.xml -logFile <QA>/presentation-focused.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/presentation-final.xml -logFile <QA>/presentation-final.log
+```
+
+Scene authoring exited 0 and preserved the scene GUIDs. The first suite passed 53/56. The tests caught slower aim at both speeds and an assertion that used the mesh's generator name in place of its imported name. The next focused run passed 5/6. The fast-turn view was still 7.1° behind travel at the end of the first turn, above the existing 6.9° limit, so look-ahead gained more lead from the difference between the smoothed orbit and look headings.
+
+| High Traverse check | 6 m/s r5 → revised | 16 m/s r5 → revised |
+| --- | --- | --- |
+| Board yaw reversal | 11 → 11 frames | 11 → 11 frames |
+| Travel change in the first turn | 17.0° → 17.0° | 9.9° → 9.9° |
+| Speed after four turns | 8.501 → 8.501 m/s | 16.943 → 16.943 m/s |
+| View yaw step at an edge change | 1.44° → 0.40° | 0.74° → 0.23° |
+| View yaw lag at the end of the first turn | 11.8° → 11.0° | 6.5° → 6.6° |
+
+The brake pose reached a signed shift of −0.97 and +0.97 under opposite local slip, with hips lowered to 0.80 m in both tests. The signed shift decayed on a pop and interpolated in replay tests. The High Traverse roller climbed 3.34 m above the snow and registered one recoverable landing. Straight braking covered 13.47 m and braking through linked turns covered 13.11 m, matching r5 at the recorded precision.
+
+The revised full suite passed 55/56. The new Summit presentation assertion sampled a moving board transform before the visual rig's LateUpdate. The shared-scene test now checks the authored twin-tip mount setting and rig-local binding height, along with the shared mesh, material, rider palette, and HUD activation in Pine, Summit, Jump Practice, and Free Roam. The existing airborne rig test checks boot attachment during a pop.
+
+The final full suite passed **56/56** and exited 0. Pine finished in 84.49 seconds and Summit in 85.30 seconds. Summit recorded two landings. The regression also covered braking, spins, flips, rails, camera obstruction, switch riding, replay, and retry.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/presentation-acceptance.xml -logFile <QA>/presentation-acceptance.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/SunsetBasin-RidePolish/EchoMountain.exe -logFile <QA>/presentation-windows.log -quit
+```
+
+The Windows x64 build succeeded and exited 0. The copied executable, runtime DLL, and both levels match the isolated build by SHA-256. The player opened at the Glacier Pass menu and initialized Direct3D 11, PhysX, and input. The startup log contained no exception or error lines. Desktop input and capture did not reliably reach a riding view, so in-motion HUD readability, brake-pose feel, and camera comfort in the Windows player remain hands-on checks. Logs are in `Logs/RidePresentation-QA`.
+
+```text
+Builds/SunsetBasin-RidePolish/EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -force-d3d11 -logFile Logs/RidePresentation-QA/presentation-player.log
+```
+
 ## Linked turns (r5) — 2026-11-23
 
 The Windows helper found the running Snowboard Starter Kit but could not activate its window on either attempt. Direct comparison of slow turns, S-turns, and the roller with the Starter Kit remains open. The reference direction came from the user’s requested handling and existing playtest notes. The measured comparison uses the previous Echo r4 runtime and the same High Traverse scene, start, and virtual gamepad sequence for both versions.

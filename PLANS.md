@@ -46,3 +46,10 @@ Glacier Pass now includes spins, grabs, landing-based scoring, a short practice 
 ## Linked turns
 
 Measure slow and fast edge changes on High Traverse. Track turn timing, speed retention, rider lean, and camera heading against the previous build. Keep skids and braking effective. Verify the roller jump, flips, grind entries and exits, and all existing modes. Use a separate record book when handling changes.
+
+## Riding presentation
+
+- Keep r5 handling and compare edge-change timing, exit speed, and straight and turning braking distance against the r5 baseline.
+- Show heel or toe pressure with a grounded weight shift and knee compression. Blend the pose out during jumps and carry it into replay.
+- Smooth chase aim and orbit through edge releases while keeping the camera focused ahead. Retain camera obstruction and reset behavior.
+- Use one simple rider and the Sunset Basin deck in Pine, Summit, Jump Practice, and Free Roam. Reduce arm swing and use a 15% tint behind riding HUD text.

@@ -4,12 +4,13 @@ namespace EchoMountain.Riding
 {
     public struct RiderVisualPose
     {
-        public float edge, hipHeight, lean, tuck, indy, melon;
+        public float edge, hipHeight, lean, tuck, brakeShift, indy, melon;
 
         public static RiderVisualPose Lerp(RiderVisualPose a, RiderVisualPose b, float t) => new()
         {
             edge = Mathf.Lerp(a.edge, b.edge, t), hipHeight = Mathf.Lerp(a.hipHeight, b.hipHeight, t),
             lean = Mathf.Lerp(a.lean, b.lean, t), tuck = Mathf.Lerp(a.tuck, b.tuck, t),
+            brakeShift = Mathf.Lerp(a.brakeShift, b.brakeShift, t),
             indy = Mathf.Lerp(a.indy, b.indy, t), melon = Mathf.Lerp(a.melon, b.melon, t)
         };
     }
@@ -110,6 +111,7 @@ namespace EchoMountain.Riding
                 && float.IsFinite(squareLength) && Mathf.Abs(squareLength - 1f) < 0.01f
                 && float.IsFinite(frame.pose.edge) && float.IsFinite(frame.pose.hipHeight)
                 && float.IsFinite(frame.pose.lean) && float.IsFinite(frame.pose.tuck)
+                && float.IsFinite(frame.pose.brakeShift)
                 && float.IsFinite(frame.pose.indy) && float.IsFinite(frame.pose.melon)
                 && frame.points >= 0 && frame.landings >= 0;
         }

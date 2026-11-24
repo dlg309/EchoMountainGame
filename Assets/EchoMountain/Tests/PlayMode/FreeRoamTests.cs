@@ -2,6 +2,7 @@
 using System.Collections;
 using EchoMountain.Riding;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -40,6 +41,26 @@ namespace EchoMountain.Tests
             yield return null;
             var course = Object.FindFirstObjectByType<MountainRun>();
             Assert.That(course.Phase, Is.EqualTo(MountainPhase.Ready));
+            var deck = course.GetComponent<MeshFilter>().sharedMesh;
+            var finish = course.GetComponent<MeshRenderer>().sharedMaterial;
+            var jacket = SharedRiderJacket(course);
+            Assert.That(deck.name, Is.EqualTo("Twin-tip"));
+
+            course.SelectLine(MountainLine.Pine);
+            course.StartRun();
+            yield return null;
+            AssertRidePresentation(course, deck, finish, jacket);
+            course.ShowStart();
+            course.SelectLine(MountainLine.Summit);
+            course.StartRun();
+            yield return null;
+            AssertRidePresentation(course, deck, finish, jacket);
+            course.ShowStart();
+            course.StartPractice();
+            yield return null;
+            Assert.That(course.IsPractice);
+            AssertRidePresentation(course, deck, finish, jacket);
+            course.ShowStart();
 
             course.StartFreeRoam();
             yield return WaitForScene(FreeRoamMap.ScenePath);
@@ -49,12 +70,29 @@ namespace EchoMountain.Tests
             Assert.That(roam.Phase, Is.EqualTo(MountainPhase.Riding));
             Assert.That(roam.Replay, Is.Null);
             Assert.That(roam.Elapsed, Is.Zero);
+            AssertRidePresentation(roam, deck, finish, jacket);
 
             roam.ShowStart();
             yield return WaitForScene(FreeRoamMap.MainMenuPath);
             course = Object.FindFirstObjectByType<MountainRun>();
             Assert.That(course.IsFreeRoam, Is.False);
             Assert.That(course.Phase, Is.EqualTo(MountainPhase.Ready));
+        }
+
+        private static Color SharedRiderJacket(MountainRun run) =>
+            run.transform.parent.Find("Segmented rider/Jacket").GetComponent<Renderer>().sharedMaterial.color;
+
+        private static void AssertRidePresentation(MountainRun run, Mesh deck, Material finish, Color jacket)
+        {
+            Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding));
+            Assert.That(run.GetComponent<LabHud>().enabled);
+            Assert.That(run.GetComponent<MeshFilter>().sharedMesh, Is.SameAs(deck));
+            Assert.That(run.GetComponent<MeshRenderer>().sharedMaterial, Is.SameAs(finish));
+            Assert.That(SharedRiderJacket(run), Is.EqualTo(jacket));
+            var pose = new SerializedObject(run.GetComponent<LabRiderVisual>());
+            Assert.That(pose.FindProperty("twinTipDeck").boolValue, "Use the mount offset for the lower deck surface.");
+            var binding = run.transform.parent.Find("Segmented rider/Front binding");
+            Assert.That(binding.localPosition.y - binding.localScale.y * 0.5f, Is.EqualTo(0.10f).Within(0.001f));
         }
 
         [UnityTest]
@@ -174,7 +212,7 @@ namespace EchoMountain.Tests
                 body.linearVelocity = aim * speed;
                 float startHeight = body.position.y;
                 int boardReversal = -1, leanReversal = -1, support = 0;
-                float cameraLag = 0f, firstTurn = 0f;
+                float cameraLag = 0f, firstTurn = 0f, peakCameraStep = 0f;
                 uint resets = rider.ResetCount;
                 for (int leg = 0; leg < 4; leg++)
                 {
@@ -182,7 +220,11 @@ namespace EchoMountain.Tests
                     InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = Vector2.right * steer });
                     for (int frame = 0; frame < 36; frame++)
                     {
+                        Vector3 previousView = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up);
                         yield return null;
+                        if (leg > 0 && frame < 8)
+                            peakCameraStep = Mathf.Max(peakCameraStep, Vector3.Angle(previousView,
+                                Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up)));
                         if (rider.IsGrounded) support++;
                         if (leg != 1) continue;
                         if (boardReversal < 0 && body.angularVelocity.y < -0.05f) boardReversal = frame + 1;
@@ -199,16 +241,20 @@ namespace EchoMountain.Tests
                 float finishSpeed = body.linearVelocity.magnitude;
                 float remainingEnergy = (finishSpeed * finishSpeed +
                     2f * -Physics.gravity.y * (body.position.y - startHeight)) / (speed * speed);
-                Debug.Log($"High Traverse {speed:F0}m/s: turn={firstTurn:F1}deg, reversal={boardReversal} frames, lean={leanReversal} frames, cameraLag={cameraLag:F1}deg, finish={finishSpeed:F3}m/s, energy={remainingEnergy:F3}, support={support}/144");
+                Debug.Log($"High Traverse {speed:F0}m/s: turn={firstTurn:F1}deg, reversal={boardReversal} frames, lean={leanReversal} frames, cameraLag={cameraLag:F1}deg, peakCameraStep={peakCameraStep:F2}deg, finish={finishSpeed:F3}m/s, energy={remainingEnergy:F3}, support={support}/144");
                 Assert.That(rider.ResetCount, Is.EqualTo(resets));
                 Assert.That(support, Is.GreaterThanOrEqualTo(137));
                 Assert.That(boardReversal, Is.InRange(1, 15), "Change edges faster than the r4 18-frame baseline.");
                 Assert.That(leanReversal, Is.InRange(1, 6));
                 Assert.That(cameraLag, Is.LessThan(speed < 8f ? 12.3f : 6.9f),
                     "Keep the camera closer to the travel heading than the r4 baseline.");
+                Assert.That(peakCameraStep, Is.LessThan(speed < 8f ? 1.0f : 0.6f),
+                    "Reduce the largest camera yaw step at an edge change compared with r5.");
                 Assert.That(remainingEnergy, Is.GreaterThan(speed < 8f ? 0.18f : 0.43f),
                     "Keep more speed after accounting for the downhill height change.");
                 Assert.That(firstTurn, Is.GreaterThan(6f));
+                Assert.That(boardReversal, Is.EqualTo(11), "Match r5 edge timing.");
+                Assert.That(finishSpeed, Is.EqualTo(speed < 8f ? 8.501f : 16.943f).Within(0.10f));
             }
             finally
             {
@@ -216,6 +262,60 @@ namespace EchoMountain.Tests
                 InputSystem.settings.backgroundBehavior = oldBackground;
                 InputSystem.settings.editorInputBehaviorInPlayMode = oldRouting;
                 Time.captureDeltaTime = oldCapture;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator BrakingLoadsBothEdgesAndReleasesInTheAir()
+        {
+            yield return LoadBasin();
+            var map = FindInBasin<FreeRoamMap>();
+            var rider = FindInBasin<LabRider>();
+            var body = rider.GetComponent<Rigidbody>();
+            var visual = rider.GetComponent<LabRiderVisual>();
+            var background = InputSystem.settings.backgroundBehavior;
+            var routing = InputSystem.settings.editorInputBehaviorInPlayMode;
+            float capture = Time.captureDeltaTime;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode =
+                InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            Time.captureDeltaTime = Time.fixedDeltaTime;
+            var pad = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                var dropIn = map.DropIn(0);
+                foreach (float direction in new[] { 1f, -1f })
+                {
+                    Quaternion rotation = direction > 0f ? dropIn.rotation
+                        : dropIn.rotation * Quaternion.Euler(0f, 180f, 0f);
+                    rider.SetSpawn(dropIn.position, rotation);
+                    for (int frame = 0; frame < 25; frame++) yield return null;
+                    Assert.That(rider.IsGrounded);
+                    InputSystem.QueueStateEvent(pad, new GamepadState { leftTrigger = 1f });
+                    for (int frame = 0; frame < 18; frame++)
+                    {
+                        body.linearVelocity = body.rotation * new Vector3(direction * 2f, 0f, direction * 9f);
+                        yield return null;
+                    }
+                    var braking = visual.CapturePose();
+                    Debug.Log($"Brake pose {direction:+0;-0}: slip={rider.LateralSlip:F2} shift={braking.brakeShift:F2} hips={braking.hipHeight:F2}");
+                    Assert.That(rider.IsGrounded);
+                    Assert.That(braking.brakeShift * direction, Is.LessThan(-0.7f));
+                    Assert.That(braking.hipHeight, Is.LessThan(0.84f));
+
+                    rider.RequestJump();
+                    for (int frame = 0; frame < 16; frame++) yield return null;
+                    Assert.That(rider.IsGrounded, Is.False);
+                    Assert.That(Mathf.Abs(visual.CapturePose().brakeShift), Is.LessThan(0.15f));
+                    InputSystem.QueueStateEvent(pad, new GamepadState());
+                }
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(pad);
+                InputSystem.settings.backgroundBehavior = background;
+                InputSystem.settings.editorInputBehaviorInPlayMode = routing;
+                Time.captureDeltaTime = capture;
             }
         }
 

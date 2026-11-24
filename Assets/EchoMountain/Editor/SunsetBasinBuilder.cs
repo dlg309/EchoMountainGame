@@ -45,9 +45,6 @@ namespace EchoMountain.EditorTools
             var rider = new SerializedObject(board.GetComponent<LabRider>());
             rider.FindProperty("quadraticDrag").floatValue = 0.0057f;
             rider.ApplyModifiedPropertiesWithoutUndo();
-            var rig = new SerializedObject(board.GetComponent<LabRiderVisual>());
-            rig.FindProperty("sunsetOutfit").boolValue = true;
-            rig.ApplyModifiedPropertiesWithoutUndo();
             var run = new SerializedObject(board.gameObject.AddComponent<MountainRun>());
             run.FindProperty("freeRoam").objectReferenceValue = map;
             run.ApplyModifiedPropertiesWithoutUndo();
@@ -211,9 +208,28 @@ namespace EchoMountain.EditorTools
             mesh.RecalculateNormals();
             if (!existing)
             {
-                board.GetComponent<MeshFilter>().sharedMesh = Save(mesh, "Twin-tip.asset");
-                board.GetComponent<MeshRenderer>().sharedMaterial = Material("Graphite board", new Color(0.12f, 0.13f, 0.15f));
+                Save(mesh, "Twin-tip.asset");
+                Material("Graphite board", new Color(0.12f, 0.13f, 0.15f));
+                ApplySharedDeck(board);
             }
+        }
+
+        internal static void ApplySharedDeck(Transform board)
+        {
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(Folder + "/Twin-tip.asset");
+            var material = AssetDatabase.LoadAssetAtPath<Material>(Folder + "/Graphite board.mat");
+            if (!mesh || !material)
+                throw new InvalidOperationException("The shared twin-tip deck assets are missing.");
+
+            var filter = board.GetComponent<MeshFilter>();
+            var renderer = board.GetComponent<MeshRenderer>();
+            var visual = board.GetComponent<LabRiderVisual>();
+            Undo.RecordObjects(new Object[] { filter, renderer, visual }, "Apply the shared twin-tip deck");
+            filter.sharedMesh = mesh;
+            renderer.sharedMaterial = material;
+            var rig = new SerializedObject(visual);
+            rig.FindProperty("twinTipDeck").boolValue = true;
+            rig.ApplyModifiedProperties();
         }
 
         private static void SetupLighting()

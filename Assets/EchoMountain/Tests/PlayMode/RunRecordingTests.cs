@@ -19,7 +19,7 @@ namespace EchoMountain.Tests
             clip.Add(new ReplayFrame
             {
                 time = 1f, position = new Vector3(0f, 0f, 10f), rotation = Quaternion.Euler(0f, 10f, 0f),
-                velocity = Vector3.forward * 10f, pose = new RiderVisualPose { hipHeight = 0.6f, indy = 1f },
+                velocity = Vector3.forward * 10f, pose = new RiderVisualPose { hipHeight = 0.6f, indy = 1f, brakeShift = -1f },
                 grab = BoardGrab.Indy, landings = 1, points = 260
             }, true);
             clip.Seal();
@@ -32,6 +32,7 @@ namespace EchoMountain.Tests
             Assert.That(Quaternion.Angle(middle.rotation, Quaternion.identity), Is.LessThan(0.01f), "Interpolate across heading wrap.");
             Assert.That(middle.pose.hipHeight, Is.EqualTo(0.75f).Within(0.001f));
             Assert.That(middle.pose.indy, Is.EqualTo(0.5f).Within(0.001f));
+            Assert.That(middle.pose.brakeShift, Is.EqualTo(-0.5f).Within(0.001f));
             Assert.That(middle.points, Is.Zero, "Future landing events must not appear early.");
             Assert.That(clip.Sample(10f).points, Is.EqualTo(260));
             Assert.That(clip.Sample(-10f).time, Is.Zero);

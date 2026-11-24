@@ -19,7 +19,7 @@ At a rail, follow the teal markers, pop onto the solid top, and land with the bo
 
 ## Play Glacier Pass
 
-Run `Builds/SunsetBasin-Carving/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
+Run `Builds/SunsetBasin-RidePolish/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
