@@ -19,7 +19,7 @@ At a rail, follow the teal markers, pop onto the solid top, and land with the bo
 
 ## Play Glacier Pass
 
-Run `Builds/SunsetBasin-Riding/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
+Run `Builds/SunsetBasin-Carving/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |
@@ -47,7 +47,7 @@ A completed 180 earns 180 base points and a 360 earns 360. Continuously holding 
 
 A clean landing banks the points. A recovered landing earns half and ends the chain. A bail earns zero. Different clean tricks within eight seconds build a multiplier from ×1 to ×1.75. Consecutive repeats earn 60% of their usual value and restart the chain. For example, a clean 180 Indy starts at 260 points, followed by a clean 360 Melon for 562 points at ×1.25.
 
-Press a flip direction with the pop or early in the air. A completed frontflip or backflip adds 300 base points on a valid landing. The board can complete one flip per jump. The updated handling and scoring use a separate r4 record book and carry the sound and line preferences forward from a valid r3 file.
+Press a flip direction with the pop or early in the air. A completed frontflip or backflip adds 300 base points on a valid landing. The board can complete one flip per jump. The updated carving uses a separate r5 record book and reads sound and line preferences from the most recent valid r4 or r3 file.
 
 ## Edit, build, and test
 

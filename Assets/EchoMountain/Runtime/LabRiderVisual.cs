@@ -41,7 +41,7 @@ namespace EchoMountain.Riding
             tuck = pose.tuck;
             grabBlend[0] = pose.indy;
             grabBlend[1] = pose.melon;
-            if (rig) Pose(0f);
+            if (rig) Pose(0f, 0f);
         }
 
         public void ClearReplayPose() => replaying = false;
@@ -94,18 +94,19 @@ namespace EchoMountain.Riding
                 forearms[i] = MakePart(garment, label + "forearm", fabric, Vector3.zero, Vector3.one);
                 gloves[i] = MakePart(PrimitiveType.Sphere, label + "glove", trim, Vector3.zero, new Vector3(0.12f, 0.14f, 0.12f));
             }
-            Pose(1f);
+            Pose(1f, 1f);
         }
 
         private void LateUpdate()
         {
-            if (replaying) { Pose(0f); return; }
-            float blend = lastReset != rider.ResetCount ? 1f : 1f - Mathf.Exp(-12f * Time.deltaTime);
+            if (replaying) { Pose(0f, 0f); return; }
+            bool reset = lastReset != rider.ResetCount;
             lastReset = rider.ResetCount;
-            Pose(blend);
+            Pose(reset ? 1f : 1f - Mathf.Exp(-12f * Time.deltaTime),
+                reset ? 1f : 1f - Mathf.Exp(-19f * Time.deltaTime));
         }
 
-        private void Pose(float blend)
+        private void Pose(float blend, float leanBlend)
         {
             // The basin deck sits at the bottom of its physics box. Keep the bindings and rider with it.
             Vector3 deckOffset = sunsetOutfit ? -transform.up * 0.166f : Vector3.zero;
@@ -115,13 +116,13 @@ namespace EchoMountain.Riding
                 : rider.IsGrounded ? 0.91f - 0.12f * Mathf.Abs(edge) : 0.76f;
             if (rider.ActiveGrab != BoardGrab.None) targetHeight = Mathf.Min(targetHeight, 0.58f);
             hipHeight = Mathf.Lerp(hipHeight, targetHeight, blend);
-            lean = Mathf.Lerp(lean, edge * 0.22f, blend);
+            lean = Mathf.Lerp(lean, rider.LeanInput * 0.22f, leanBlend);
             tuck = Mathf.Lerp(tuck, rider.IsGrounded ? 0f : 1f, blend);
 
-            var hips = new Vector3(-0.04f, hipHeight, lean * 0.5f);
-            var shoulder = hips + new Vector3(0.12f + tuck * 0.05f, 0.37f, lean * 0.42f);
+            var hips = new Vector3(-0.04f + lean * 0.32f, hipHeight, 0f);
+            var shoulder = hips + new Vector3(0.12f + tuck * 0.05f + lean * 0.68f, 0.37f, 0f);
             SetSegment(jacket, hips, shoulder, 0.32f, 0.48f, 0.16f);
-            helmet.localPosition = shoulder + new Vector3(0.035f, 0.22f, lean * 0.14f);
+            helmet.localPosition = shoulder + new Vector3(0.035f + lean * 0.14f, 0.22f, 0f);
             helmet.localRotation = Quaternion.Euler(0f, -42f - edge * 16f, 0f);
 
             for (int i = 0; i < 2; i++)

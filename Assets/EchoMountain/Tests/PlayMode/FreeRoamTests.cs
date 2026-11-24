@@ -4,6 +4,8 @@ using EchoMountain.Riding;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
@@ -13,6 +15,7 @@ namespace EchoMountain.Tests
     {
         private Scene basin;
         private static readonly int[] NarrowRails = { 1, 2 };
+        private static readonly float[] CarveSpeeds = { 6f, 16f };
         private bool testedMenu;
 
         [UnityTearDown]
@@ -144,6 +147,76 @@ namespace EchoMountain.Tests
             Assert.That(run.Tricks.Points, Is.EqualTo(bank));
             Assert.That(run.Tricks.PendingPoints, Is.Zero);
             Assert.That(run.Elapsed, Is.Zero);
+        }
+
+        [UnityTest]
+        public IEnumerator HighTraverseLinkedTurns([ValueSource(nameof(CarveSpeeds))] float speed)
+        {
+            yield return LoadBasin();
+            var map = FindInBasin<FreeRoamMap>();
+            var rider = FindInBasin<LabRider>();
+            var body = rider.GetComponent<Rigidbody>();
+            var visual = rider.GetComponent<LabRiderVisual>();
+            var camera = FindInBasin<LabCamera>();
+            float oldCapture = Time.captureDeltaTime;
+            var oldBackground = InputSystem.settings.backgroundBehavior;
+            var oldRouting = InputSystem.settings.editorInputBehaviorInPlayMode;
+            Time.captureDeltaTime = Time.fixedDeltaTime;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var pad = InputSystem.AddDevice<Gamepad>();
+            try
+            {
+                rider.SetSpawn(map.DropIn(0).position, map.DropIn(0).rotation);
+                for (int frame = 0; frame < 32; frame++) yield return null;
+                Assert.That(rider.IsGrounded);
+                Vector3 aim = Vector3.ProjectOnPlane(body.rotation * Vector3.forward, rider.ContactNormal).normalized;
+                body.linearVelocity = aim * speed;
+                float startHeight = body.position.y;
+                int boardReversal = -1, leanReversal = -1, support = 0;
+                float cameraLag = 0f, firstTurn = 0f;
+                uint resets = rider.ResetCount;
+                for (int leg = 0; leg < 4; leg++)
+                {
+                    float steer = leg % 2 == 0 ? 1f : -1f;
+                    InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = Vector2.right * steer });
+                    for (int frame = 0; frame < 36; frame++)
+                    {
+                        yield return null;
+                        if (rider.IsGrounded) support++;
+                        if (leg != 1) continue;
+                        if (boardReversal < 0 && body.angularVelocity.y < -0.05f) boardReversal = frame + 1;
+                        if (leanReversal < 0 && visual.CapturePose().lean < -0.012f) leanReversal = frame + 1;
+                    }
+                    if (leg == 0)
+                    {
+                        Vector3 travel = Vector3.ProjectOnPlane(body.linearVelocity, Vector3.up);
+                        firstTurn = Vector3.SignedAngle(Vector3.ProjectOnPlane(aim, Vector3.up), travel, Vector3.up);
+                        cameraLag = Mathf.Abs(Vector3.SignedAngle(
+                            Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up), travel, Vector3.up));
+                    }
+                }
+                float finishSpeed = body.linearVelocity.magnitude;
+                float remainingEnergy = (finishSpeed * finishSpeed +
+                    2f * -Physics.gravity.y * (body.position.y - startHeight)) / (speed * speed);
+                Debug.Log($"High Traverse {speed:F0}m/s: turn={firstTurn:F1}deg, reversal={boardReversal} frames, lean={leanReversal} frames, cameraLag={cameraLag:F1}deg, finish={finishSpeed:F3}m/s, energy={remainingEnergy:F3}, support={support}/144");
+                Assert.That(rider.ResetCount, Is.EqualTo(resets));
+                Assert.That(support, Is.GreaterThanOrEqualTo(137));
+                Assert.That(boardReversal, Is.InRange(1, 15), "Change edges faster than the r4 18-frame baseline.");
+                Assert.That(leanReversal, Is.InRange(1, 6));
+                Assert.That(cameraLag, Is.LessThan(speed < 8f ? 12.3f : 6.9f),
+                    "Keep the camera closer to the travel heading than the r4 baseline.");
+                Assert.That(remainingEnergy, Is.GreaterThan(speed < 8f ? 0.18f : 0.43f),
+                    "Keep more speed after accounting for the downhill height change.");
+                Assert.That(firstTurn, Is.GreaterThan(6f));
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(pad);
+                InputSystem.settings.backgroundBehavior = oldBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = oldRouting;
+                Time.captureDeltaTime = oldCapture;
+            }
         }
 
         [UnityTest]

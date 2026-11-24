@@ -45,10 +45,10 @@ namespace EchoMountain.Riding
     {
         public const string Course = "glacier-pass";
         public const int CourseVersion = 1;
-        public const int RulesVersion = 4;
+        public const int RulesVersion = 5;
         public const string Assist = "balanced-lab-v1";
         public const int Schema = 1;
-        public const string FileName = "runs-glacier-pass-c1-r4.json";
+        public const string FileName = "runs-glacier-pass-c1-r5.json";
         private const int MaximumBytes = 65536;
         private readonly string path;
         private bool readOnly;
@@ -71,20 +71,22 @@ namespace EchoMountain.Riding
             if (Application.isBatchMode)
                 directory = Path.Combine(Application.temporaryCachePath, "EchoMountain-Batch", Guid.NewGuid().ToString("N"));
             string currentPath = Path.Combine(directory, FileName);
-            string r3Path = Path.Combine(directory, "runs-glacier-pass-c1-r3.json");
-            bool previousBook = File.Exists(r3Path) || File.Exists(r3Path + ".bak") ||
-                File.Exists(Path.Combine(directory, "runs-v1.json")) ||
-                File.Exists(Path.Combine(directory, "runs-glacier-pass-c1-r2.json"));
             var store = new LocalRunStore(currentPath);
-            if (previousBook && !File.Exists(currentPath) && !File.Exists(currentPath + ".bak"))
+            if (File.Exists(currentPath) || File.Exists(currentPath + ".bak")) return store;
+
+            bool previousBook = File.Exists(Path.Combine(directory, "runs-v1.json")) ||
+                File.Exists(Path.Combine(directory, "runs-glacier-pass-c1-r2.json"));
+            for (int version = RulesVersion - 1; version >= 3; version--)
             {
-                store.Notice = "New handling rules: earlier records are kept separately.";
-                if (TryRead(r3Path, out var old, out _, 3) || TryRead(r3Path + ".bak", out old, out _, 3))
-                {
-                    store.Data.sound = old.sound;
-                    store.Data.selectedLine = old.selectedLine;
-                }
+                string previousPath = Path.Combine(directory, $"runs-glacier-pass-c1-r{version}.json");
+                previousBook |= File.Exists(previousPath) || File.Exists(previousPath + ".bak");
+                if (!TryRead(previousPath, out var old, out _, version) &&
+                    !TryRead(previousPath + ".bak", out old, out _, version)) continue;
+                store.Data.sound = old.sound;
+                store.Data.selectedLine = old.selectedLine;
+                break;
             }
+            if (previousBook) store.Notice = "New handling rules: earlier records are kept separately.";
             return store;
         }
 

@@ -1,5 +1,9 @@
 # Handoff
 
+## Linked turns — 2026-11-23
+
+Resume the linked-turn update in the selected checkout. The isolated QA project is %TEMP%/EchoMountain-SunsetBasin-QA-20261123. Use `Builds/SunsetBasin-Carving/EchoMountain.exe` for the verified Windows build. All 55 Unity PlayMode tests passed. The r4 baseline, final r5 log, and Windows build log are in `Logs/LinkedTurnsR5-QA`.
+
 ## Riding and park update — 2026-11-23
 
 The r4 implementation is in the selected repository. The existing Sunset Basin scene and Twin-tip mesh use the same Unity GUIDs. Reapply authored geometry with EchoMountain.EditorTools.SunsetBasinBuilder.UpdateRidingGeometry. The isolated project is %TEMP%/EchoMountain-SunsetBasin-QA-20261123. All 53 PlayMode tests passed. Use `Builds/SunsetBasin-Riding/EchoMountain.exe` for the new Windows player. The final test log, Windows build log, and HUD images are in `Logs/RidingParkR4-QA`. See QA for verified scope and reference input limitations.

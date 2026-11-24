@@ -1,5 +1,39 @@
 # QA evidence
 
+## Linked turns (r5) — 2026-11-23
+
+The Windows helper found the running Snowboard Starter Kit but could not activate its window on either attempt. Direct comparison of slow turns, S-turns, and the roller with the Starter Kit remains open. The reference direction came from the user’s requested handling and existing playtest notes. The measured comparison uses the previous Echo r4 runtime and the same High Traverse scene, start, and virtual gamepad sequence for both versions.
+
+Unity 6.3 LTS 6000.3.28f1, Direct3D 11, URP 17.3.0, 60 Hz physics in the isolated `%TEMP%/EchoMountain-SunsetBasin-QA-20261123` project. The mounted camera, rider rig, and actual board motion were sampled independently. Each run applied four alternating turns for 0.6 s each.
+
+| High Traverse measure | 6 m/s start, r4 → r5 | 16 m/s start, r4 → r5 |
+| --- | --- | --- |
+| Board yaw reversal | 18 → 11 frames | 18 → 11 frames |
+| Rider lean reversal | 5 → 4 frames | 5 → 4 frames |
+| Travel heading change after first turn | 13.2° → 17.0° | 7.7° → 9.9° |
+| Speed after four turns | 7.550 → 8.501 m/s | 16.450 → 16.943 m/s |
+| Mechanical energy remaining, adjusted for height | 15.2% → 43.4% | 41.6% → 46.2% |
+| Camera yaw error at the end of the first turn | 12.6° → 11.8° | 7.1° → 6.5° |
+| Ground support | 144/144 in each run | 144/144 in each run |
+
+- Faster edge release and engagement shortened board response. Aligned carving now directs grip closer to perpendicular to the board's travel, reducing the speed it scrubs. Braking and skids retain grip that opposes lateral slip. The rider shifts weight across the board and the camera aims into the carve as its position catches up.
+- The matched roller cleared 3.34 m in both versions and landed with Recover. Final **55/55** PlayMode tests passed. They include flat/sloped board contact, low/high turns, braking, spins, flips, grind entries and exits, Free Roam, Jump Practice, Pine and Summit finish/retry, and replay. Pine finished in 84.49 s and Summit in 85.30 s.
+- The initial r5 runtime run passed 55/55 but showed greater camera yaw error. Aiming the camera through the turn reduced the error. The next run passed 54/55. The slow camera measured 11.76°, outside the initial 11.5° test target, and improved over the 12.6° baseline. The final assertion checks for an improvement against the r4 measurement with a margin. No runtime changes were made between those last two runs.
+- New handling records use r5. Sound and selected line are read from the newest valid r4 or r3 book if r5 has yet to be created.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter EchoMountain.Tests.FreeRoamTests.HighTraverse -testResults <QA>/carve-r4-high-traverse.xml -logFile <QA>/carve-r4-high-traverse.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/carve-r5-final.xml -logFile <QA>/carve-r5-final.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/carve-r5-verified.xml -logFile <QA>/carve-r5-verified.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/carve-r5-acceptance.xml -logFile <QA>/carve-r5-acceptance.log
+```
+
+- Windows x64 build exited 0. The executable, runtime DLL, and both scene files match the isolated artifacts. The build is at `Builds/SunsetBasin-Carving/EchoMountain.exe`. Exact outputs are in `Logs/LinkedTurnsR5-QA`.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/SunsetBasin-Carving/EchoMountain.exe -logFile <QA>/carve-r5-windows.log -quit
+```
+
 ## Riding and park update (r4) — 2026-11-23
 
 Unity 6.3 LTS 6000.3.28f1, URP 17.3.0, fixed physics at 60 Hz. PlayMode used Direct3D 11 on Intel Iris Xe in the existing isolated snapshot `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. All scene and mesh references retained their GUIDs. The reference Starter Kit was launched and exposed a window. The first window had higher Windows integrity than the input helper. Activation also failed for the second launch. The qualitative reference comes from the earlier Starter Kit playtest notes. A matched speed comparison could only be measured against Echo Mountain r3.

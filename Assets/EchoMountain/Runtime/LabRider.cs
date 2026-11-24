@@ -49,6 +49,10 @@ namespace EchoMountain.Riding
         public Vector3 ContactNormal => normal;
         public float LateralSlip => slip;
         public float SteerInput => steer;
+        internal float AppliedSteer => smoothedSteer;
+        internal float LeanInput => contact
+            ? steer * Mathf.Sign(Vector3.Dot(body.linearVelocity, body.rotation * Vector3.forward))
+            : 0f;
         public float GripAcceleration => gripForce;
         public string LandingText => landing;
         public void RequestJump() => bufferedJump = jumpBufferSeconds;
@@ -290,20 +294,29 @@ namespace EchoMountain.Riding
                 float desiredGrip = Mathf.Clamp(-slip * edgeGrip * surface.Grip,
                     -maxGripAcceleration * surface.Grip, maxGripAcceleration * surface.Grip);
                 gripForce = desiredGrip;
-                body.AddForce(side * desiredGrip, ForceMode.Acceleration);
+                float speed = Mathf.Abs(forwardSpeed);
+                Vector3 travel = forward * forwardSpeed + side * slip;
+                float stanceAlignment = speed / Mathf.Max(travel.magnitude, 0.01f);
+                // An aligned edge steers along the snow with minimal speed loss. Skids and braking
+                // retain drag from the board's sideways motion.
+                float carve = 0.88f * Mathf.InverseLerp(0.70f, 0.97f, stanceAlignment)
+                    * Mathf.InverseLerp(2.5f, 5.5f, speed) * (1f - brake);
+                Vector3 gripDirection = Vector3.Lerp(side, Vector3.ProjectOnPlane(side, travel).normalized, carve);
+                body.AddForce(gripDirection * desiredGrip, ForceMode.Acceleration);
                 float resistance = Mathf.Min(Mathf.Abs(forwardSpeed) / Time.fixedDeltaTime,
                     rollingResistance * surface.Roll + brake * braking * surface.Brake);
                 body.AddForce(-forward * Mathf.Sign(forwardSpeed) * resistance, ForceMode.Acceleration);
-                // Ease digital steering and trim yaw at speed to avoid outrunning lateral grip.
-                // Braking also reduces turn authority while the edge is supported.
-                smoothedSteer = Mathf.MoveTowards(smoothedSteer, steer, 8f * Time.fixedDeltaTime);
+                // Unload the old edge quickly before building pressure on the opposite edge.
+                bool changingEdges = smoothedSteer * steer < 0f;
+                float steerGoal = changingEdges ? 0f : steer;
+                float edgeRate = changingEdges ? 20f : 11f;
+                smoothedSteer = Mathf.MoveTowards(smoothedSteer, steerGoal, edgeRate * Time.fixedDeltaTime);
                 float yawRate = Vector3.Dot(body.angularVelocity, normal);
-                float speed = Mathf.Abs(forwardSpeed);
                 // Match the available lateral grip at speed, with some reserve for the next edge change.
                 float yawLimit = maxGripAcceleration * surface.Grip * 0.82f / Mathf.Max(speed, 1f);
                 float yawTarget = smoothedSteer * Mathf.Min(turnAcceleration * 0.40f, yawLimit)
                     * Mathf.Clamp01(speed / 2.2f) * (1f - 0.26f * brake);
-                body.AddTorque(normal * ((yawTarget - yawRate) * 5f), ForceMode.Acceleration);
+                body.AddTorque(normal * ((yawTarget - yawRate) * 7.5f), ForceMode.Acceleration);
                 Vector3 tilt = Vector3.Cross(body.rotation * Vector3.up, normal);
                 Vector3 tiltRate = Vector3.ProjectOnPlane(body.angularVelocity, normal);
                 body.AddTorque(Vector3.ClampMagnitude(tilt * 12f - tiltRate * 4f, 12f), ForceMode.Acceleration);

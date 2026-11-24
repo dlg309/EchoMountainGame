@@ -53,10 +53,12 @@ namespace EchoMountain.Riding
                 : Vector3.zero;
             float speed = travel.magnitude;
             float damping = 1f - Mathf.Exp(-5f * Time.unscaledDeltaTime);
+            float edge = !replayTravel && rider && rider.IsGrounded ? Mathf.Abs(rider.AppliedSteer) : 0f;
             if (speed > 1f)
             {
                 float travelHeading = Mathf.Atan2(travel.x, travel.z) * Mathf.Rad2Deg;
-                heading = snap ? travelHeading : Mathf.LerpAngle(heading, travelHeading, damping);
+                float yawDamping = 1f - Mathf.Exp(-Mathf.Lerp(5f, 9f, edge) * Time.unscaledDeltaTime);
+                heading = snap ? travelHeading : Mathf.LerpAngle(heading, travelHeading, yawDamping);
             }
             else if (snap)
             {
@@ -72,7 +74,10 @@ namespace EchoMountain.Riding
             // Moving back out remains damped, avoiding a sudden zoom when a tree clears.
             transform.position = ResolveObstruction(position + Vector3.up * 0.9f, candidate);
             float lookAhead = Mathf.Lerp(3.5f, 8f, Mathf.InverseLerp(2f, 22f, speed));
-            transform.LookAt(position + direction * lookAhead + Vector3.up * 0.7f, Vector3.up);
+            // Lead the view through a carve while the chase position catches up.
+            Vector3 lookDirection = Vector3.Slerp(direction, travel.normalized,
+                edge * 0.85f * Mathf.InverseLerp(1f, 3f, speed));
+            transform.LookAt(position + lookDirection * lookAhead + Vector3.up * 0.7f, Vector3.up);
         }
 
         private bool IsRider(Collider value) => value.transform == target ||

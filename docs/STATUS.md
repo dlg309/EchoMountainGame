@@ -1,5 +1,9 @@
 # Status
 
+## Linked turns — 2026-11-23
+
+The r5 tuning is in the selected project. The High Traverse baseline passed 3/3. The first r5 PlayMode run passed 55/55 and showed earlier edge changes and improved speed retention at 6 and 16 m/s. The final run passed 55/55 with the improved camera look-ahead. The Windows build is at `Builds/SunsetBasin-Carving/EchoMountain.exe`. Starter Kit activation blocked the direct comparison.
+
 ## Riding and park update — 2026-11-23
 
 The riding and park specs were updated before implementation. The new deck sits at the physics collider, the r4 carve and flip code is in place, and Sunset Basin has solid grind surfaces. The first Unity run passed 52/53. The thin-wall camera check missed its limit by 3.8 mm. The camera sweep radius increased by 1 cm. All 53 PlayMode tests then passed. The Windows build is at `Builds/SunsetBasin-Riding/EchoMountain.exe`. A visible Windows capture confirmed the transparent HUD. Direct comparison with the Starter Kit and hands-on riding remain open.

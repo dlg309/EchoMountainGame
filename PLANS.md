@@ -42,3 +42,7 @@ Glacier Pass now includes spins, grabs, landing-based scoring, a short practice 
 - Give the Sunset Basin box and rails solid colliders on their visible surfaces. Check a top-down entry, a missed approach, a ride-off and a pop-off, and score only after landing on snow.
 - Remove opaque riding HUD backplates and use high-contrast text that stays readable over snow and sky. Keep menu and pause controls readable.
 - Run PlayMode checks in Unity 6.3 LTS and verify Pine, Summit, Jump Practice, and Free Roam. Record reference observations, measured results, and any manual checks still open in `docs/QA.md`.
+
+## Linked turns
+
+Measure slow and fast edge changes on High Traverse. Track turn timing, speed retention, rider lean, and camera heading against the previous build. Keep skids and braking effective. Verify the roller jump, flips, grind entries and exits, and all existing modes. Use a separate record book when handling changes.
