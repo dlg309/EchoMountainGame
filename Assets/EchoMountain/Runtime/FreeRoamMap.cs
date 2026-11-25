@@ -48,17 +48,13 @@ namespace EchoMountain.Riding
             return false;
         }
 
-        internal bool NeedsRecovery(Rigidbody body)
+        internal bool IsOutside(Vector3 position)
         {
-            Vector3 local = body.position - terrain.transform.position;
+            Vector3 local = position - terrain.transform.position;
             Vector3 size = terrain.terrainData.size;
-            if (local.x <= 1f || local.x >= size.x - 1f || local.z <= 1f || local.z >= size.z - 1f)
-                return true;
-
-            float snow = terrain.SampleHeight(body.position) + terrain.transform.position.y;
-            float height = body.position.y - snow;
-            return height < -0.55f ||
-                (height < 0.32f && Vector3.Dot(body.rotation * Vector3.up, Vector3.up) < -0.25f);
+            return local.x <= 1f || local.x >= size.x - 1f || local.z <= 1f || local.z >= size.z - 1f;
         }
+
+        internal float SnowHeight(Vector3 position) => terrain.SampleHeight(position) + terrain.transform.position.y;
     }
 }

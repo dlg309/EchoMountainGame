@@ -1,5 +1,49 @@
 # QA evidence
 
+## Riding parity — 2026-11-25
+
+Baseline `204e0a0`, Unity 6000.3.28f1 and URP 17.3.0, using the existing isolated project at `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Unity ran with the project's bundled fonts. The 6000.3.29f1 release notes document a FreeType fix for malformed variable fonts. [Unity release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)
+
+The production scenes use the same `LabRider`, `LabRideControls`, serialized tuning, and board collider and body settings. Both courses use packed-snow response. Free Roam previously had an additional snow-height recovery check. Its baseline passed the induced inverted and buried cases, while Pine, Summit, and Jump Practice each failed to reset the inverted board. The baseline exited 2 with 1/4 passing.
+
+The shared session check uses the established Free Roam thresholds of 0.55 m below snow, or within 0.32 m above it when the board's up vector has a world-up dot below −0.25. Glacier Pass reads the supporting mesh collider. Sunset Basin reads its terrain height. Mode boundaries, drop-ins, scoring, and finish rules remain course-specific. The r5 record book is retained because handling on a valid run is governed by the same physics.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter RidingModeParityTests -testResults <QA>/mode-parity-baseline.xml -logFile <QA>/mode-parity-baseline.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.MountainBuilder.LinkRecoverySurface -logFile <QA>/mode-parity-scenes.log -quit
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter RidingModeParityTests -testResults <QA>/mode-parity-focused.xml -logFile <QA>/mode-parity-focused.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.MountainBuilder.LinkRecoverySurface -logFile <QA>/mode-parity-scenes-linked.log -quit
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter RidingModeParityTests -testResults <QA>/mode-parity-focused-linked.xml -logFile <QA>/mode-parity-focused-linked.log
+```
+
+The first scene authoring pass applied the references in memory and skipped saving because the scene was not marked dirty. The first focused run passed 1/6 and also showed that a 16 m/s start was nearly at terminal speed on the 9° fixture. After explicitly saving the scenes and checking that fast coast stayed within 0.2 m/s of the start speed, the focused rerun passed **6/6**. Both Glacier Pass scene GUIDs were retained. The scene diffs contain one collider reference each.
+
+Each mode received 246 samples at 60 Hz on the same 9° packed slope. The input ran a coast, four alternating turns, full braking, a pop, an aerial spin input, and a landing. The 6 m/s run used regular stance and the 16 m/s run used switch. Contact and landing states matched every frame. The position tolerance was 3 mm, with instantaneous PhysX collision differences allowed up to 0.08 m/s linear and 0.10 rad/s angular velocity. Course terrain can still change acceleration and jump trajectory during authored runs.
+
+| Start | Braking distance in each mode | Pop height normal to the slope | Landing in each mode | Largest position difference from Free Roam |
+| --- | --- | --- | --- | --- |
+| 6 m/s regular | 3.988 m | 0.867 m | Clean | 1.20 mm |
+| 16 m/s switch | 8.541 m | 0.858 m | Clean | 0.03 mm |
+
+The first full run passed 60/62 and exited 2. Pine and Summit finished in 84.49 s and 85.30 s. The existing lab boot-rig test reported a 1.09 m pose-to-board offset during its frame-sensitive pop check. The 6 m/s comparison timed out during a roughly 100-minute gap in the runner timestamps. The 16 m/s comparison and all four recovery cases passed. The full suite was rerun with the same source and assertions.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/mode-parity-full.xml -logFile <QA>/mode-parity-full.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/mode-parity-acceptance.xml -logFile <QA>/mode-parity-acceptance.log
+```
+
+The complete rerun passed **62/62** and exited 0. The matched traces reproduced the focused results. Pine and Summit again finished in 84.49 s and 85.30 s. Jump Practice scoring, Free Roam rails, the lab boot rig, camera, replay, and retry passed.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/EchoMountain-RidingParity/EchoMountain.exe -logFile <QA>/mode-parity-windows.log -quit
+```
+
+The Windows x64 build exited 0. The local copy's executable, runtime DLL, and both levels matched the isolated build by SHA-256. The player opened a responsive Glacier Pass window and initialized Direct3D 11, PhysX, and input. Ride comparisons were run in Unity PlayMode. The Windows playtest was left open for hands-on riding. Evidence is in `Logs/RidingParity-QA`.
+
+```text
+Builds/EchoMountain-RidingParity/EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -force-d3d11 -logFile Logs/RidingParity-QA/mode-parity-player.log
+```
+
 ## Riding presentation — 2026-11-24
 
 Baseline source was `3e58735`. QA used Unity 6000.3.28f1 / URP 17.3.0 at 60 Hz with Direct3D 11 in `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. The project used its bundled fonts for the local playtest. Unity 6000.3.29f1 includes a FreeType fix for malformed variable fonts. [Unity release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)

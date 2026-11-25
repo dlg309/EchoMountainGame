@@ -20,6 +20,7 @@ namespace EchoMountain.Riding
         public const int PracticeGoal = 250;
         public bool IsPractice { get; private set; }
         [SerializeField] private FreeRoamMap freeRoam;
+        [SerializeField] private MeshCollider courseSnow;
         public bool IsFreeRoam => freeRoam;
         public int DropInCount => IsFreeRoam ? freeRoam.DropInCount : 0;
         public string DropInName(int index) => freeRoam.DropIn(index).name;
@@ -84,6 +85,7 @@ namespace EchoMountain.Riding
             if (IsFreeRoam)
             {
                 Phase = MountainPhase.Riding;
+                SetRiding(true);
                 rider.EnableFreeRoam(freeRoam);
                 MoveToDropIn(0);
                 return;
@@ -151,15 +153,12 @@ namespace EchoMountain.Riding
         private void FixedUpdate()
         {
             if (Phase != MountainPhase.Riding) return;
-            if (IsFreeRoam)
-            {
-                if (freeRoam.NeedsRecovery(body)) rider.ResetRider();
-                return;
-            }
-
             Vector3 position = body.position;
-            if (Mathf.Abs(position.x) > MountainCourse.HalfWidth - 0.25f || position.z < StartZ - 11f || position.y < 4f)
+            bool outside = IsFreeRoam ? freeRoam.IsOutside(position) :
+                Mathf.Abs(position.x) > MountainCourse.HalfWidth - 0.25f || position.z < StartZ - 11f || position.y < 4f;
+            if (outside || NeedsSnowRecovery(position))
                 rider.ResetRider();
+            if (IsFreeRoam) return;
 
             if (resetCount != rider.ResetCount)
             {
@@ -182,6 +181,29 @@ namespace EchoMountain.Riding
                 SetRiding(false);
                 Records.Finish(Line, IsPractice, Elapsed, PeakSpeed, Tricks.Points, Application.version);
             }
+        }
+
+        private bool NeedsSnowRecovery(Vector3 position)
+        {
+            float snowHeight;
+            if (freeRoam)
+            {
+                snowHeight = freeRoam.SnowHeight(position);
+            }
+            else
+            {
+                if (!courseSnow) return false;
+                Bounds bounds = courseSnow.bounds;
+                if (position.y >= bounds.max.y + 0.32f) return false;
+                Vector3 aboveSnow = new(position.x, bounds.max.y + 1f, position.z);
+                if (!courseSnow.Raycast(new Ray(aboveSnow, Vector3.down), out var hit, bounds.size.y + 2f))
+                    return false;
+                snowHeight = hit.point.y;
+            }
+
+            float height = position.y - snowHeight;
+            return height < -0.55f ||
+                (height < 0.32f && Vector3.Dot(body.rotation * Vector3.up, Vector3.up) < -0.25f);
         }
 
         public void SelectLine(MountainLine line)

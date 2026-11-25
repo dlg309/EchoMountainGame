@@ -3726,6 +3726,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: EchoMountain.Runtime::EchoMountain.Riding.MountainRun
   freeRoam: {fileID: 0}
+  courseSnow: {fileID: 1316530177}
 --- !u!1 &159841106
 GameObject:
   m_ObjectHideFlags: 0

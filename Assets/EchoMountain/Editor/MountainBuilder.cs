@@ -42,7 +42,7 @@ namespace EchoMountain.EditorTools
             Material blue = Material("Pine blue", new Color(0.05f, 0.62f, 0.84f));
             Material amber = Material("Summit amber", new Color(0.99f, 0.45f, 0.09f));
             Material stone = Material("Blue granite", new Color(0.24f, 0.37f, 0.46f));
-            BuildGround(root, snow, pineLane, summitLane);
+            var snowSurface = BuildGround(root, snow, pineLane, summitLane);
             BuildScenery(root, pine, snow, stone);
             BuildTrail(root, blue, amber, stone);
 
@@ -51,7 +51,7 @@ namespace EchoMountain.EditorTools
             var tuning = new SerializedObject(board.GetComponent<LabRider>());
             tuning.FindProperty("quadraticDrag").floatValue = 0.0057f;
             tuning.ApplyModifiedPropertiesWithoutUndo();
-            board.gameObject.AddComponent<MountainRun>();
+            SetRecoverySurface(board.gameObject.AddComponent<MountainRun>(), snowSurface);
             if (AssetDatabase.IsValidFolder(SunsetBasinBuilder.Folder))
                 SunsetBasinBuilder.ApplySharedDeck(board);
 
@@ -146,7 +146,31 @@ namespace EchoMountain.EditorTools
             AssetDatabase.SaveAssets();
         }
 
-        private static void BuildGround(Transform parent, Material snow, Material pine, Material summit)
+        [MenuItem("Echo Mountain/Link Glacier Pass recovery surface")]
+        public static void LinkRecoverySurface()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            foreach (string path in new[] { ScenePath, PolishedScenePath })
+            {
+                var scene = EditorSceneManager.GetSceneByPath(path);
+                if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(path);
+                var root = Array.Find(scene.GetRootGameObjects(), root => root.name == "Glacier Pass").transform;
+                var run = root.Find("Diagnostic board").GetComponent<MountainRun>();
+                SetRecoverySurface(run, root.Find("Connected snow surface").GetComponent<MeshCollider>());
+                EditorSceneManager.MarkSceneDirty(scene);
+                if (!EditorSceneManager.SaveScene(scene))
+                    throw new InvalidOperationException("Could not save " + path);
+            }
+        }
+
+        private static void SetRecoverySurface(MountainRun run, MeshCollider snow)
+        {
+            var settings = new SerializedObject(run);
+            settings.FindProperty("courseSnow").objectReferenceValue = snow;
+            settings.ApplyModifiedProperties();
+        }
+
+        private static MeshCollider BuildGround(Transform parent, Material snow, Material pine, Material summit)
         {
             const int width = 45;
             const int length = 969;
@@ -181,8 +205,10 @@ namespace EchoMountain.EditorTools
             ground.transform.SetParent(parent, false);
             ground.AddComponent<MeshFilter>().sharedMesh = mesh;
             ground.AddComponent<MeshRenderer>().sharedMaterials = new[] { snow, pine, summit };
-            ground.AddComponent<MeshCollider>().sharedMesh = mesh;
+            var collider = ground.AddComponent<MeshCollider>();
+            collider.sharedMesh = mesh;
             ground.isStatic = true;
+            return collider;
         }
 
         private static void BuildScenery(Transform parent, Material pine, Material snow, Material stone)

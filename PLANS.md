@@ -53,3 +53,9 @@ Measure slow and fast edge changes on High Traverse. Track turn timing, speed re
 - Show heel or toe pressure with a grounded weight shift and knee compression. Blend the pose out during jumps and carry it into replay.
 - Smooth chase aim and orbit through edge releases while keeping the camera focused ahead. Retain camera obstruction and reset behavior.
 - Use one simple rider and the Sunset Basin deck in Pine, Summit, Jump Practice, and Free Roam. Reduce arm swing and use a 15% tint behind riding HUD text.
+
+## Riding parity
+
+- Use Sunset Basin as the movement reference. Compare regular and switch rides on the same test slope with matching start speed, steering, braking, pop, and aerial input.
+- Apply the same snow-level recovery in every mode. Keep route boundaries, spawn points, scoring, and finish rules tied to their courses.
+- Run the authored routes and full PlayMode regression before building the Windows playtest.

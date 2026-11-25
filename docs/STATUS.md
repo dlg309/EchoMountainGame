@@ -1,5 +1,9 @@
 # Status
 
+## Riding parity — 2026-11-25
+
+On `experiment/carve-brake-r3` from `204e0a0`, Pine, Summit, and Jump Practice now use the Free Roam snow recovery thresholds. Matched regular and switch rides reproduced Free Roam braking distance, jump height, and landing timing. All 62 PlayMode tests passed on the full rerun. The Windows build succeeded at `Builds/EchoMountain-RidingParity/EchoMountain.exe`. See [QA](QA.md).
+
 ## Riding presentation — 2026-11-24
 
 On `experiment/carve-brake-r3` from `3e58735`, added heel/toe braking poses, quieter arm movement, smoother chase aiming, a shared rider/deck, and 15% riding HUD backgrounds. The 6 and 16 m/s High Traverse fixtures matched r5 turn timing and exit speed, with about 70% smaller peak view yaw steps at edge changes. Braking distance also matched r5. All 56 PlayMode tests passed. The Windows build succeeded at `Builds/SunsetBasin-RidePolish/EchoMountain.exe`. The next hands-on check is the camera and brake animation through linked High Traverse turns. See [QA](QA.md).
