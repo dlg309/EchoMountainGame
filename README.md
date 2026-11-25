@@ -19,7 +19,9 @@ At a rail, follow the teal markers, pop onto the solid top, and land with the bo
 
 ## Play Glacier Pass
 
-Run `Builds/GlacierPass-FasterDropIn/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
+Run `Builds/EchoMountain-Customization/EchoMountain.exe` from its full build folder. Choose a line and select **Drop in**, or select **Jump practice**. Results show time, top speed, and banked trick points. Use **Retry** to repeat the same route or practice segment.
+
+Select **Customize rider and board** on the Glacier Pass menu to choose jacket, pants, helmet, and goggle colors. Topside and underside snowboard graphics can be selected separately; bindings match the topside. The color and graphic swatches update as you choose. Select **Done** before riding. Your look is saved on this PC and appears in Pine, Summit, Jump Practice, and Free Roam.
 
 | Action | Keyboard | Gamepad |
 | --- | --- | --- |

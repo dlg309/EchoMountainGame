@@ -26,6 +26,7 @@ namespace EchoMountain.Riding
         public string DropInName(int index) => freeRoam.DropIn(index).name;
         public bool SoundEnabled { get; private set; } = true;
         public LocalRunStore Records { get; private set; }
+        public RiderCustomizationStore Customization { get; private set; }
         public MountainReplay Replay { get; private set; }
         public TrickScore Tricks { get; } = new();
         public float StartZ => IsPractice ? PracticeStart : MountainCourse.Start;
@@ -40,6 +41,7 @@ namespace EchoMountain.Riding
         private InputAction advance, choose, left, right, practice, watch, sandbox;
         private int dropIn;
         private bool changingScene;
+        private bool customizing;
         private GUIStyle headline, copy, eyebrow, button;
         private readonly Color ink = new(0.92f, 0.96f, 1f);
         private readonly Color ice = new(0.40f, 0.87f, 0.93f);
@@ -74,6 +76,8 @@ namespace EchoMountain.Riding
         private void Start()
         {
             Records ??= LocalRunStore.OpenDefault();
+            Customization ??= RiderCustomizationStore.OpenDefault();
+            GetComponent<LabRiderVisual>()?.ApplyCustomization(Customization.Look);
             SoundEnabled = Records.Data.sound;
             Line = Records.Data.selectedLine;
             hud.ShowDiagnostics = false;
@@ -321,6 +325,34 @@ namespace EchoMountain.Riding
             SoundEnabled = store.Data.sound;
         }
 
+        public void UseCustomization(RiderCustomizationStore store)
+        {
+            if (store == null) return;
+            Customization = store;
+            GetComponent<LabRiderVisual>()?.ApplyCustomization(store.Look);
+        }
+
+        public void ChooseLookPart(int part, int direction)
+        {
+            if (Phase != MountainPhase.Ready || Customization == null || part < 0 || part > 5) return;
+            RiderLook look = Customization.Look.Copy();
+            int count = part < 4 ? RiderCustomization.ColorNames.Length : RiderCustomization.DeckNames.Length;
+            int value = part == 0 ? look.jacket : part == 1 ? look.pants : part == 2 ? look.helmet
+                : part == 3 ? look.goggles : part == 4 ? look.topside : look.underside;
+            value = (value + (direction < 0 ? count - 1 : 1)) % count;
+            switch (part)
+            {
+                case 0: look.jacket = value; break;
+                case 1: look.pants = value; break;
+                case 2: look.helmet = value; break;
+                case 3: look.goggles = value; break;
+                case 4: look.topside = value; break;
+                case 5: look.underside = value; break;
+            }
+            Customization.Set(look);
+            GetComponent<LabRiderVisual>()?.ApplyCustomization(look);
+        }
+
         public void ToggleSound()
         {
             SoundEnabled = !SoundEnabled;
@@ -361,6 +393,14 @@ namespace EchoMountain.Riding
             float width = Screen.width / scale;
             float height = Screen.height / scale;
 
+            if (customizing && Phase == MountainPhase.Ready)
+            {
+                DrawCustomization(width, height);
+                GUI.color = color;
+                GUI.matrix = matrix;
+                return;
+            }
+
             if (Phase == MountainPhase.Riding)
             {
                 LabHud.DrawRidePanel(new Rect(18f, 18f, 326f, IsFreeRoam ? 72f : 98f));
@@ -383,7 +423,7 @@ namespace EchoMountain.Riding
             {
                 float x = (width - 644f) * 0.5f;
                 bool showSandbox = Phase == MountainPhase.Ready && Application.CanStreamedLevelBeLoaded(FreeRoamMap.ScenePath);
-                float panelHeight = showSandbox ? 496f : 436f;
+                float panelHeight = showSandbox ? 556f : 496f;
                 float y = (height - panelHeight) * 0.5f;
                 Panel(new Rect(x, y, 644f, panelHeight), LineColor);
                 GUI.Label(new Rect(x + 29f, y + 20f, 580f, 27f), "ECHO MOUNTAIN    /    COURSE 01", eyebrow);
@@ -402,6 +442,8 @@ namespace EchoMountain.Riding
                     if (GUI.Button(new Rect(x + 513f, y + 299f, 102f, 44f), "Quit", button)) Application.Quit();
                     if (showSandbox && GUI.Button(new Rect(x + 29f, y + 354f, 586f, 44f),
                         "Free Roam  /  Sunset Basin  [F / RB]", button)) StartFreeRoam();
+                    if (GUI.Button(new Rect(x + 29f, y + (showSandbox ? 410f : 354f), 586f, 44f),
+                        "Customize rider and board", button)) customizing = true;
                 }
                 else
                 {
@@ -415,11 +457,39 @@ namespace EchoMountain.Riding
                     if (GUI.Button(new Rect(x + 29f, y + 299f, 281f, 44f), "Retry  [Enter / A]", button)) StartRun();
                     if (GUI.Button(new Rect(x + 334f, y + 299f, 281f, 44f), "Choose line  [Esc / B]", button)) ShowStart();
                 }
-                DrawRecords(x + 29f, y + (showSandbox ? 413f : 353f));
+                DrawRecords(x + 29f, y + (showSandbox ? 469f : 413f));
             }
 
             GUI.color = color;
             GUI.matrix = matrix;
+        }
+
+        private void DrawCustomization(float width, float height)
+        {
+            float x = (width - 700f) * 0.5f;
+            float y = (height - 610f) * 0.5f;
+            Panel(new Rect(x, y, 700f, 610f), ice);
+            GUI.Label(new Rect(x + 28f, y + 18f, 640f, 28f), "ECHO MOUNTAIN    /    YOUR LOOK", eyebrow);
+            GUI.Label(new Rect(x + 26f, y + 47f, 640f, 64f), "Customize", headline);
+            GUI.Label(new Rect(x + 29f, y + 112f, 630f, 32f), "Choose a color or graphic. Your look follows you into every mode.", copy);
+            string[] labels = { "Jacket", "Pants", "Helmet", "Goggles", "Topside", "Underside" };
+            RiderLook look = Customization.Look;
+            int[] choices = { look.jacket, look.pants, look.helmet, look.goggles, look.topside, look.underside };
+            for (int index = 0; index < labels.Length; index++)
+            {
+                float row = y + 161f + 61f * index;
+                GUI.Label(new Rect(x + 29f, row + 8f, 135f, 31f), labels[index], copy);
+                if (GUI.Button(new Rect(x + 176f, row, 45f, 39f), "<", button)) ChooseLookPart(index, -1);
+                string name = index < 4 ? RiderCustomization.ColorNames[choices[index]] : RiderCustomization.DeckNames[choices[index]];
+                GUI.Label(new Rect(x + 239f, row + 8f, 205f, 30f), name, copy);
+                if (GUI.Button(new Rect(x + 451f, row, 45f, 39f), ">", button)) ChooseLookPart(index, 1);
+                Color swatch = index < 4 ? RiderCustomization.Colors[choices[index]] : RiderCustomization.DeckColors[choices[index]];
+                Fill(new Rect(x + 535f, row + 3f, 120f, 33f), swatch);
+                if (index >= 4)
+                    Fill(new Rect(x + 585f, row + 3f, 19f, 33f), RiderCustomization.DeckAccents[choices[index]]);
+            }
+            GUI.Label(new Rect(x + 29f, y + 537f, 440f, 29f), Customization.Notice, eyebrow);
+            if (GUI.Button(new Rect(x + 525f, y + 538f, 130f, 43f), "Done", button)) customizing = false;
         }
 
         private void DrawScore(Rect rect)

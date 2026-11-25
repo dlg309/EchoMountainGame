@@ -1,5 +1,9 @@
 # Status
 
+## Rider customization — 2026-11-25
+
+The current branch includes saved jacket, pants, helmet, and goggle colors plus independent topside and underside snowboard graphics and matching binding colors. A new Customize button opens choices from the main menu. The four modes use the same cosmetic save, while the existing riding mesh, collider, physics, and camera remain in place. The final focused tests passed 2/2 and the full PlayMode suite passed 65/65 in Unity. The Windows build succeeded and opened at `Builds/EchoMountain-Customization/EchoMountain.exe`. Actual menu interaction and riding visuals still need a hands-on check. See [QA](QA.md).
+
 ## Glacier Pass drop-in — 2026-11-25
 
 On `experiment/carve-brake-r3` from `d233726`, Pine and Summit have a steeper 60 m opening. Both reached 23.64 km/h after five seconds, up from 10.87 km/h. All 63 PlayMode tests passed. The updated geometry starts a new descent record book and carries forward earlier preferences and same-rules Jump Practice results. The Windows playtest is at `Builds/GlacierPass-FasterDropIn/EchoMountain.exe`. See [QA](QA.md).

@@ -18,7 +18,10 @@ namespace EchoMountain.Riding
         private readonly Transform[] forearms = new Transform[2];
         private readonly Transform[] gloves = new Transform[2];
         private Transform rig, jacket, helmet;
-        private Material trousers, fabric, trim, shell, visor;
+        private Material trousers, fabric, trim, shell, visor, bindings, topGraphic, baseGraphic;
+        private Mesh graphicMesh;
+        private Texture2D topTexture, baseTexture;
+        private Transform graphicDeck;
         private LabRider rider;
         private Rigidbody body;
         private uint lastReset;
@@ -71,6 +74,7 @@ namespace EchoMountain.Riding
             trim = MakeMaterial("Rider trim", new Color(0.03f, 0.06f, 0.08f));
             shell = MakeMaterial("Rider helmet", new Color(0.86f, 0.90f, 0.90f));
             visor = MakeMaterial("Rider visor", new Color(0.12f, 0.56f, 0.65f));
+            bindings = MakeMaterial("Binding color", Color.white);
             const PrimitiveType garment = PrimitiveType.Capsule;
             jacket = MakePart(garment, "Jacket", fabric, Vector3.zero, new Vector3(0.26f, 0.28f, 0.48f));
             helmet = MakePart(PrimitiveType.Sphere, "Helmet", shell, Vector3.zero, new Vector3(0.25f, 0.27f, 0.26f));
@@ -84,7 +88,7 @@ namespace EchoMountain.Riding
                 float side = i == 0 ? -1f : 1f;
                 string label = i == 0 ? "Rear " : "Front ";
                 var bindingPosition = new Vector3(0f, 0.125f, side * FootSpread);
-                MakePart(PrimitiveType.Cube, label + "binding", trim, bindingPosition, new Vector3(0.34f, 0.05f, 0.2f));
+                MakePart(PrimitiveType.Cube, label + "binding", bindings, bindingPosition, new Vector3(0.34f, 0.05f, 0.2f));
                 var boot = MakePart(PrimitiveType.Cube, label + "boot", trim,
                     bindingPosition + new Vector3(0.025f, 0.08f, 0f), new Vector3(0.29f, 0.13f, 0.16f));
                 boot.localRotation = Quaternion.Euler(0f, side * 12f, 0f);
@@ -94,7 +98,87 @@ namespace EchoMountain.Riding
                 forearms[i] = MakePart(garment, label + "forearm", fabric, Vector3.zero, Vector3.one);
                 gloves[i] = MakePart(PrimitiveType.Sphere, label + "glove", trim, Vector3.zero, new Vector3(0.12f, 0.14f, 0.12f));
             }
+            BuildBoardGraphics();
+            ApplyCustomization(RiderCustomizationStore.OpenDefault().Look);
             Pose(1f, 1f);
+        }
+
+        public void ApplyCustomization(RiderLook look)
+        {
+            if (!RiderCustomization.Valid(look) || fabric == null) return;
+            fabric.color = RiderCustomization.Colors[look.jacket];
+            trousers.color = RiderCustomization.Colors[look.pants];
+            shell.color = RiderCustomization.Colors[look.helmet];
+            visor.color = RiderCustomization.Colors[look.goggles];
+            bindings.color = RiderCustomization.DeckAccents[look.topside];
+            if (graphicDeck)
+            {
+                Paint(topTexture, look.topside);
+                Paint(baseTexture, look.underside);
+            }
+        }
+
+        private void BuildBoardGraphics()
+        {
+            var original = GetComponent<MeshFilter>()?.sharedMesh;
+            if (!twinTipDeck || !original || original.vertexCount != 66 || original.triangles.Length != 384) return;
+            var vertices = original.vertices;
+            var sourceTriangles = original.triangles;
+            var top = new int[96];
+            var bottom = new int[96];
+            for (int slice = 0; slice < 32; slice++)
+            {
+                int source = slice * 12;
+                int destination = slice * 3;
+                for (int index = 0; index < 3; index++)
+                {
+                    top[destination + index] = sourceTriangles[source + index];
+                    bottom[destination + index] = sourceTriangles[source + index + 3];
+                }
+            }
+            var uv = new Vector2[vertices.Length];
+            for (int index = 0; index < vertices.Length; index++)
+            {
+                uv[index] = new Vector2(Mathf.InverseLerp(-0.41f, 0.41f, vertices[index].x),
+                    Mathf.InverseLerp(-0.64f, 0.64f, vertices[index].z));
+                vertices[index].y += index == 0 || (index >= 2 && index % 2 == 0) ? 0.006f : -0.006f;
+            }
+            graphicMesh = new Mesh { name = "Cosmetic deck surfaces" };
+            graphicMesh.vertices = vertices;
+            graphicMesh.uv = uv;
+            graphicMesh.subMeshCount = 2;
+            graphicMesh.SetTriangles(top, 0);
+            graphicMesh.SetTriangles(bottom, 1);
+            graphicMesh.RecalculateNormals();
+            graphicDeck = new GameObject("Board graphics").transform;
+            graphicDeck.SetParent(transform, false);
+            graphicDeck.gameObject.AddComponent<MeshFilter>().sharedMesh = graphicMesh;
+            topGraphic = MakeMaterial("Topside design", Color.white);
+            baseGraphic = MakeMaterial("Underside design", Color.white);
+            topTexture = new Texture2D(64, 128, TextureFormat.RGBA32, false) { name = "Topside graphic" };
+            baseTexture = new Texture2D(64, 128, TextureFormat.RGBA32, false) { name = "Underside graphic" };
+            topGraphic.SetTexture("_BaseMap", topTexture);
+            baseGraphic.SetTexture("_BaseMap", baseTexture);
+            graphicDeck.gameObject.AddComponent<MeshRenderer>().sharedMaterials = new[] { topGraphic, baseGraphic };
+        }
+
+        private static void Paint(Texture2D texture, int design)
+        {
+            Color body = RiderCustomization.DeckColors[design];
+            Color accent = RiderCustomization.DeckAccents[design];
+            var pixels = new Color[64 * 128];
+            for (int y = 0; y < 128; y++)
+            for (int x = 0; x < 64; x++)
+            {
+                float u = (x + 0.5f) / 64f;
+                float v = (y + 0.5f) / 128f;
+                bool motif = design == 0 ? Mathf.Abs(u - 0.5f) < 0.08f || (v > 0.78f && v < 0.84f)
+                    : design == 1 ? Mathf.Abs(u - (0.24f + v * 0.52f)) < 0.11f
+                    : (Mathf.Abs(u - 0.5f) < 0.035f || (v > 0.18f && v < 0.22f) || (v > 0.78f && v < 0.82f));
+                pixels[y * 64 + x] = motif ? accent : body;
+            }
+            texture.SetPixels(pixels);
+            texture.Apply(false);
         }
 
         private void LateUpdate()
@@ -214,6 +298,13 @@ namespace EchoMountain.Riding
             Destroy(trim);
             Destroy(shell);
             Destroy(visor);
+            Destroy(bindings);
+            if (graphicDeck) Destroy(graphicDeck.gameObject);
+            Destroy(graphicMesh);
+            Destroy(topGraphic);
+            Destroy(baseGraphic);
+            Destroy(topTexture);
+            Destroy(baseTexture);
         }
     }
 }

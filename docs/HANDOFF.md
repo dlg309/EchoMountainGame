@@ -1,5 +1,9 @@
 # Handoff
 
+## Rider customization — 2026-11-25
+
+Continue on `experiment/carve-brake-r3`. The new Windows player is open from `Builds/EchoMountain-Customization/EchoMountain.exe`. From Glacier Pass's main menu, use **Customize rider and board**, change each of six choices, select Done, and check the look while riding all four modes. Restart the player and verify the same look is restored. Cosmetic data is saved separately as `rider-look-v1.json` under Unity's persistent data folder; existing course records remain in their own versioned file. The shared runtime implementation is `LabRiderVisual.cs`, `RiderCustomization.cs`, and `MountainRun.cs`. The isolated QA project is `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`, with copied results in `Logs/Customization-QA`. Unity passed 65/65 PlayMode tests. Desktop input automation did not operate the standalone menu, so visual customization and restart checks are pending. See [QA](QA.md).
+
 ## Glacier Pass drop-in — 2026-11-25
 
 Continue on `experiment/carve-brake-r3`. Use `Builds/GlacierPass-FasterDropIn/EchoMountain.exe` for the current playtest. `EchoMountain.EditorTools.MountainBuilder.UpdateDropIn` updates the owned Glacier Pass snow asset and aligns the starts and early route markers in both scenes. The isolated project is `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Evidence is in `Logs/DropIn-QA`. See [QA](QA.md).

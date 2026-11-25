@@ -1,5 +1,25 @@
 # QA evidence
 
+## Rider and snowboard customization — 2026-11-25
+
+Starting source `cad11d0` on `experiment/carve-brake-r3`. Unity 6000.3.28f1 with URP 17.3.0 imported the updated runtime code in the existing isolated project at `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`; its lock was absent before each run. The player now has five named colors each for jacket, pants, helmet, and goggles; three independent topside and underside deck graphics; and binding color matched to the chosen topside. The menu includes choice labels and immediate color/graphic swatches. The runtime graphic is a separate mesh with a 6 mm render offset over the original twin-tip top and base. The shared deck mesh, collider, rider tuning, input, and camera assets were not edited. A separate `rider-look-v1.json` in Unity persistent data carries the cosmetic selection across scenes without changing course records.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter EchoMountain.Tests.RiderCustomizationTests -testResults <QA>/customization-focused.xml -logFile <QA>/customization-focused.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter EchoMountain.Tests.RiderCustomizationTests -testResults <QA>/customization-focused-r2.xml -logFile <QA>/customization-focused-r2.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter EchoMountain.Tests.RiderCustomizationTests -testResults <QA>/customization-focused-r3.xml -logFile <QA>/customization-focused-r3.log
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/customization-full.xml -logFile <QA>/customization-full.log
+```
+
+The first focused run passed 1/2. It compared floating point colors for exact equality although the printed colors matched. The second passed 1/2 because its Free Roam scene wait stopped after 120 frames, before activation. The final focused run passed **2/2** after using a 0.001 color tolerance and a real-time scene deadline. It selected all six parts, saved and reloaded them, checked Pine, Summit, Jump Practice and Free Roam rider and board materials, and checked invalid selections and damaged JSON. The complete PlayMode suite passed **65/65** and exited 0. Both board graphics were independently selected in the fixture.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/EchoMountain-Customization/EchoMountain.exe -logFile <QA>/customization-build.log -quit
+Builds/EchoMountain-Customization/EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -force-d3d11 -logFile Logs/Customization-QA/customization-player.log
+```
+
+The Windows build exited 0. SHA-256 matched between isolated output and the repository copy for the executable, managed runtime DLL, and both scene levels. The player reached a responsive Glacier Pass menu and initialized Direct3D 11, PhysX, and input; PID 8212 at inspection. The new Customize button was visible and aligned in the menu. Automated desktop clicks and Return did not register in this session, so direct inspection of the customization panel, the actual rendered graphic on a moving board, and close/reopen persistence in the standalone player remain hands-on checks. The player is left open for these checks. Test, build, and startup logs are in `Logs/Customization-QA`.
+
 ## Glacier Pass drop-in — 2026-11-25
 
 Baseline `d233726`, Unity 6000.3.28f1 and URP 17.3.0 in the existing isolated project at `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. The editor version was retained for the local bundled-font playtest. The next 6.3 patch fixes a malformed variable-font issue. [Unity release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)
