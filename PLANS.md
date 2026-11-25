@@ -59,3 +59,9 @@ Measure slow and fast edge changes on High Traverse. Track turn timing, speed re
 - Use Sunset Basin as the movement reference. Compare regular and switch rides on the same test slope with matching start speed, steering, braking, pop, and aerial input.
 - Apply the same snow-level recovery in every mode. Keep route boundaries, spawn points, scoring, and finish rules tied to their courses.
 - Run the authored routes and full PlayMode regression before building the Windows playtest.
+
+## Glacier Pass drop-in
+
+- Steepen the 60 m lead-in to Pine and Summit with a smooth return to the original grade. Match the authored snow mesh and collider to the start pose and early route markers.
+- Measure speed five seconds after a standing drop-in. Check both route finishes, retry, Jump Practice, and Free Roam.
+- Keep pre-change descent times in the original course record book. Carry forward preferences and same-rules Jump Practice records.

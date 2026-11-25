@@ -1,5 +1,9 @@
 # Status
 
+## Glacier Pass drop-in — 2026-11-25
+
+On `experiment/carve-brake-r3` from `d233726`, Pine and Summit have a steeper 60 m opening. Both reached 23.64 km/h after five seconds, up from 10.87 km/h. All 63 PlayMode tests passed. The updated geometry starts a new descent record book and carries forward earlier preferences and same-rules Jump Practice results. The Windows playtest is at `Builds/GlacierPass-FasterDropIn/EchoMountain.exe`. See [QA](QA.md).
+
 ## Riding parity — 2026-11-25
 
 On `experiment/carve-brake-r3` from `204e0a0`, Pine, Summit, and Jump Practice now use the Free Roam snow recovery thresholds. Matched regular and switch rides reproduced Free Roam braking distance, jump height, and landing timing. All 62 PlayMode tests passed on the full rerun. The Windows build succeeded at `Builds/EchoMountain-RidingParity/EchoMountain.exe`. See [QA](QA.md).

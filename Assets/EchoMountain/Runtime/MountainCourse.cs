@@ -7,6 +7,7 @@ namespace EchoMountain.Riding
     public static class MountainCourse
     {
         public const float Start = 5f;
+        public const float DropInBlendEnd = 65f;
         public const float Finish = 865f;
         public const float HalfWidth = 24f;
 
@@ -26,7 +27,17 @@ namespace EchoMountain.Riding
             float edge = Mathf.Clamp(Mathf.Abs(x) - 17f, 0f, 7f);
             float summit = Mathf.SmoothStep(0f, 1f, (x - 3f) / 4f);
             float features = Roller(z, 220f, 1.25f) + Roller(z, 408f, 1.55f) + Roller(z, 608f, 1.65f);
-            return baseHeight + divider + 0.056f * edge * edge + summit * features;
+            return baseHeight + DropInHeight(z) + divider + 0.056f * edge * edge + summit * features;
+        }
+
+        private static float DropInHeight(float z)
+        {
+            const float lift = 2.7f;
+            const float length = DropInBlendEnd - Start;
+            // Continue the starting grade uphill of the spawn, then ease to the original grade.
+            if (z < Start) return lift + (Start - z) * (2f * lift / length);
+            float remaining = Mathf.Clamp01((DropInBlendEnd - z) / length);
+            return lift * remaining * remaining;
         }
 
         public static Vector3 Point(float x, float z, float clearance = 0f) =>

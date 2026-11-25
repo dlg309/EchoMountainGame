@@ -1,5 +1,9 @@
 # Handoff
 
+## Glacier Pass drop-in — 2026-11-25
+
+Continue on `experiment/carve-brake-r3`. Use `Builds/GlacierPass-FasterDropIn/EchoMountain.exe` for the current playtest. `EchoMountain.EditorTools.MountainBuilder.UpdateDropIn` updates the owned Glacier Pass snow asset and aligns the starts and early route markers in both scenes. The isolated project is `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Evidence is in `Logs/DropIn-QA`. See [QA](QA.md).
+
 ## Riding parity — 2026-11-25
 
 Continue in the selected checkout on `experiment/carve-brake-r3`. Launch `Builds/EchoMountain-RidingParity/EchoMountain.exe` for the playtest. `EchoMountain.EditorTools.MountainBuilder.LinkRecoverySurface` wires both owned Glacier Pass scenes to their snow collider. The parity fixture loads each mode and feeds the same input on an identical slope. The isolated project is `%TEMP%/EchoMountain-SunsetBasin-QA-20261123` and copied evidence is in `Logs/RidingParity-QA`. See [QA](QA.md).

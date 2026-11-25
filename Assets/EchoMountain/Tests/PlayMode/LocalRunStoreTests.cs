@@ -72,6 +72,30 @@ namespace EchoMountain.Tests
         }
 
         [Test]
+        public void UpdatedCourseKeepsPreferencesAndPracticeFromPreviousCourse()
+        {
+            var earlier = new LocalRunStore(path);
+            Assert.That(earlier.SetPreferences(false, MountainLine.Summit));
+            Assert.That(earlier.Finish(MountainLine.Pine, false, 84f, 45f, 260, "test"));
+            Assert.That(earlier.Finish(MountainLine.Summit, true, 20f, 40f, 300, "test"));
+            earlier.Data.courseVersion = 1;
+            string earlierJson = JsonUtility.ToJson(earlier.Data);
+            string previous = Path.Combine(directory, "runs-glacier-pass-c1-r5.json");
+            File.WriteAllText(previous, earlierJson);
+
+            var updated = LocalRunStore.OpenDirectory(directory);
+            Assert.That(updated.Data.courseVersion, Is.EqualTo(2));
+            Assert.That(updated.Data.sound, Is.False);
+            Assert.That(updated.Data.selectedLine, Is.EqualTo(MountainLine.Summit));
+            Assert.That(updated.Record(MountainLine.Pine, false).finishes, Is.Zero);
+            Assert.That(updated.Record(MountainLine.Summit, true).highestScore.points, Is.EqualTo(300));
+            Assert.That(updated.SetPreferences(false, MountainLine.Pine));
+
+            Assert.That(LocalRunStore.OpenDirectory(directory).Record(MountainLine.Summit, true).finishes, Is.EqualTo(1));
+            Assert.That(File.ReadAllText(previous), Is.EqualTo(earlierJson));
+        }
+
+        [Test]
         public void CorruptPrimaryRecoversBackupAndPreservesItOnNextWrite()
         {
             var store = new LocalRunStore(path);

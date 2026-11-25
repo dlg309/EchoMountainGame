@@ -73,6 +73,7 @@ namespace EchoMountain.Tests
                 Assert.That(spray.enabled, Is.True, "The owned particle material must be included.");
                 float furthest = body.position.z;
                 float maximumLaneOffset = 0f;
+                float speedAtFiveSeconds = 0f;
                 float laneX = MountainCourse.LaneX(line);
                 float deadline = Time.fixedTime + 105f;
                 while (run.Phase == MountainPhase.Riding && Time.fixedTime < deadline && rider.ResetCount == resets)
@@ -86,6 +87,8 @@ namespace EchoMountain.Tests
                         InputSystem.QueueStateEvent(pad, new GamepadState { leftStick = Vector2.right * steer });
                     }
                     yield return null;
+                    if (run.Elapsed >= 5f && speedAtFiveSeconds == 0f)
+                        speedAtFiveSeconds = rider.SpeedKmh;
                     sawSpray |= spray.ParticleCount > 0;
                     Assert.That(spray.ParticleCount, Is.LessThanOrEqualTo(MountainSnowSpray.ParticleLimit));
                     furthest = Mathf.Max(furthest, body.position.z);
@@ -93,6 +96,8 @@ namespace EchoMountain.Tests
                     maximumLaneOffset = Mathf.Max(maximumLaneOffset, Mathf.Abs(body.position.x - laneX));
                 }
                 Debug.Log($"Glacier Pass {line}: phase={run.Phase}, time={run.Elapsed:F2}s, peak={run.PeakSpeed:F1}km/h, landings={landings}, lane offset={maximumLaneOffset:F2}m, furthest={furthest:F1}m, position={body.position}, rotation={body.rotation.eulerAngles}, recovery={rider.IsRecovering}");
+                Debug.Log($"Glacier Pass {line} speed at 5 s: {speedAtFiveSeconds:F2} km/h");
+                Assert.That(speedAtFiveSeconds, Is.InRange(21f, 30f), "The drop-in should build usable speed in five seconds.");
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Results));
                 Assert.That(run.Elapsed, Is.InRange(60f, 90f));
                 Assert.That(maximumLaneOffset, Is.LessThan(5f), "Stay within the chosen line.");

@@ -44,11 +44,11 @@ namespace EchoMountain.Riding
     public sealed class LocalRunStore
     {
         public const string Course = "glacier-pass";
-        public const int CourseVersion = 1;
+        public const int CourseVersion = 2;
         public const int RulesVersion = 5;
         public const string Assist = "balanced-lab-v1";
         public const int Schema = 1;
-        public const string FileName = "runs-glacier-pass-c1-r5.json";
+        public const string FileName = "runs-glacier-pass-c2-r5.json";
         private const int MaximumBytes = 65536;
         private readonly string path;
         private bool readOnly;
@@ -70,23 +70,30 @@ namespace EchoMountain.Riding
                 : Application.persistentDataPath;
             if (Application.isBatchMode)
                 directory = Path.Combine(Application.temporaryCachePath, "EchoMountain-Batch", Guid.NewGuid().ToString("N"));
+            return OpenDirectory(directory);
+        }
+
+        public static LocalRunStore OpenDirectory(string directory)
+        {
             string currentPath = Path.Combine(directory, FileName);
             var store = new LocalRunStore(currentPath);
             if (File.Exists(currentPath) || File.Exists(currentPath + ".bak")) return store;
 
             bool previousBook = File.Exists(Path.Combine(directory, "runs-v1.json")) ||
                 File.Exists(Path.Combine(directory, "runs-glacier-pass-c1-r2.json"));
-            for (int version = RulesVersion - 1; version >= 3; version--)
+            for (int version = RulesVersion; version >= 3; version--)
             {
                 string previousPath = Path.Combine(directory, $"runs-glacier-pass-c1-r{version}.json");
                 previousBook |= File.Exists(previousPath) || File.Exists(previousPath + ".bak");
-                if (!TryRead(previousPath, out var old, out _, version) &&
-                    !TryRead(previousPath + ".bak", out old, out _, version)) continue;
+                if (!TryRead(previousPath, out var old, out _, version, 1) &&
+                    !TryRead(previousPath + ".bak", out old, out _, version, 1)) continue;
                 store.Data.sound = old.sound;
                 store.Data.selectedLine = old.selectedLine;
+                // Jump Practice starts well below the regraded section.
+                if (version == RulesVersion) store.Data.records[2] = old.records[2];
                 break;
             }
-            if (previousBook) store.Notice = "New handling rules: earlier records are kept separately.";
+            if (previousBook) store.Notice = "Updated course. Earlier descent records are kept separately.";
             return store;
         }
 
@@ -156,12 +163,12 @@ namespace EchoMountain.Riding
                 Notice = "Local records could not be read. Starting a fresh record book.";
         }
 
-        private static bool Compatible(LocalRunData data, int rulesVersion) =>
-            data.schema == Schema && data.course == Course && data.courseVersion == CourseVersion
+        private static bool Compatible(LocalRunData data, int rulesVersion, int courseVersion) =>
+            data.schema == Schema && data.course == Course && data.courseVersion == courseVersion
             && data.rulesVersion == rulesVersion && data.assist == Assist;
 
         private static bool TryRead(string file, out LocalRunData data, out bool incompatible,
-            int rulesVersion = RulesVersion)
+            int rulesVersion = RulesVersion, int courseVersion = CourseVersion)
         {
             data = null;
             incompatible = false;
@@ -170,7 +177,7 @@ namespace EchoMountain.Riding
                 if (!File.Exists(file) || new FileInfo(file).Length > MaximumBytes) return false;
                 data = JsonUtility.FromJson<LocalRunData>(File.ReadAllText(file));
                 if (data == null) return false;
-                incompatible = data.schema > 0 && !Compatible(data, rulesVersion);
+                incompatible = data.schema > 0 && !Compatible(data, rulesVersion, courseVersion);
                 // Unity serializes null inline class fields as empty objects. Normalize only
                 // the exact empty sentinel, so corrupt nonzero records still fail validation.
                 if (data.records != null && data.records.Length == 3)
@@ -181,7 +188,7 @@ namespace EchoMountain.Riding
                             if (EmptyRun(record.fastest)) record.fastest = null;
                             if (EmptyRun(record.highestScore)) record.highestScore = null;
                         }
-                return !incompatible && Valid(data, rulesVersion);
+                return !incompatible && Valid(data, rulesVersion, courseVersion);
             }
             catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is ArgumentException)
             {
@@ -193,9 +200,9 @@ namespace EchoMountain.Riding
             (run.seconds == 0f && run.peakKmh == 0f && run.points == 0
             && string.IsNullOrEmpty(run.completedUtc) && string.IsNullOrEmpty(run.build));
 
-        private static bool Valid(LocalRunData data, int rulesVersion = RulesVersion)
+        private static bool Valid(LocalRunData data, int rulesVersion = RulesVersion, int courseVersion = CourseVersion)
         {
-            if (!Compatible(data, rulesVersion) || data.records == null || data.records.Length != 3
+            if (!Compatible(data, rulesVersion, courseVersion) || data.records == null || data.records.Length != 3
                 || (data.selectedLine != MountainLine.Pine && data.selectedLine != MountainLine.Summit)) return false;
             for (int index = 0; index < data.records.Length; index++)
             {

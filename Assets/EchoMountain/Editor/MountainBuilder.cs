@@ -170,6 +170,57 @@ namespace EchoMountain.EditorTools
             settings.ApplyModifiedProperties();
         }
 
+        [MenuItem("Echo Mountain/Update Glacier Pass drop-in")]
+        public static void UpdateDropIn()
+        {
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var surface = AssetDatabase.LoadAssetAtPath<Mesh>(AssetFolder + "/Snow Surface.asset");
+            var vertices = surface.vertices;
+            Undo.RecordObject(surface, "Update Glacier Pass drop-in");
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                if (vertices[i].z >= MountainCourse.DropInBlendEnd) continue;
+                vertices[i].y = MountainCourse.Height(vertices[i].x, vertices[i].z);
+            }
+            surface.vertices = vertices;
+            surface.RecalculateNormals();
+            surface.RecalculateBounds();
+            EditorUtility.SetDirty(surface);
+            AssetDatabase.SaveAssets();
+
+            foreach (string path in new[] { ScenePath, PolishedScenePath })
+            {
+                var scene = EditorSceneManager.GetSceneByPath(path);
+                if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(path);
+                var root = Array.Find(scene.GetRootGameObjects(), root => root.name == "Glacier Pass").transform;
+                var board = root.Find("Diagnostic board");
+                Undo.RecordObject(board, "Align board to the new drop-in");
+                float lane = MountainCourse.LaneX(MountainLine.Pine);
+                board.SetPositionAndRotation(MountainCourse.Point(lane, MountainCourse.Start, 0.15f),
+                    MountainCourse.Heading(lane, MountainCourse.Start));
+
+                foreach (Transform prop in root)
+                {
+                    Vector3 position = prop.position;
+                    if (position.z >= MountainCourse.DropInBlendEnd) continue;
+                    float clearance = prop.name switch
+                    {
+                        "Route stake" => 0.75f,
+                        "Route flag" => 1.3f,
+                        "Timberline fir" => -0.3f,
+                        _ => float.NaN
+                    };
+                    if (float.IsNaN(clearance)) continue;
+                    Undo.RecordObject(prop, "Align drop-in scenery to the snow");
+                    prop.position = MountainCourse.Point(position.x, position.z, clearance);
+                }
+
+                EditorSceneManager.MarkSceneDirty(scene);
+                if (!EditorSceneManager.SaveScene(scene))
+                    throw new InvalidOperationException("Could not save " + path);
+            }
+        }
+
         private static MeshCollider BuildGround(Transform parent, Material snow, Material pine, Material summit)
         {
             const int width = 45;

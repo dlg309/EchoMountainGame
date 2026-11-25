@@ -1,5 +1,31 @@
 # QA evidence
 
+## Glacier Pass drop-in — 2026-11-25
+
+Baseline `d233726`, Unity 6000.3.28f1 and URP 17.3.0 in the existing isolated project at `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. The editor version was retained for the local bundled-font playtest. The next 6.3 patch fixes a malformed variable-font issue. [Unity release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)
+
+The new drop-in check was run against the baseline geometry. Pine and Summit both reached 10.87 km/h after five seconds, below the new acceptance range of 21–30 km/h. The baseline command intentionally exited 2. The opening pitch at the spawn increases from about 4.9° to 10.0°. The grade blends into the original at course position 65 m, 60 m after the start. The change uses gravity and the existing ride controller. The course record key changes to `runs-glacier-pass-c2-r5.json`. That book reads earlier sound and line preferences and carries over same-rules Jump Practice records.
+
+```text
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testFilter MountainRunTests -testResults <QA>/drop-in-baseline.xml -logFile <QA>/drop-in-baseline.log
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.MountainBuilder.UpdateDropIn -logFile <QA>/drop-in-scenes.log -quit
+Unity.exe -batchmode -force-d3d11 -projectPath <QA> -runTests -testPlatform PlayMode -testResults <QA>/drop-in-full.xml -logFile <QA>/drop-in-full.log
+```
+
+Scene generation exited 0. A Python comparison of the old and regenerated mesh vertex streams found 3,645 height changes among 43,605 vertices, all at z = −16 to 64 m. X/Z coordinates and the triangle index buffer matched. Both scenes and the snow mesh kept their original GUIDs.
+
+The full PlayMode suite passed **63/63**. Both routes reached 23.64 km/h at five seconds. Pine finished in 78.82 s and Summit in 79.62 s with two landings. Peak speeds were 44.7 and 44.6 km/h. Jump Practice scoring, Free Roam movement parity, replay, retry, and the course record transfer passed.
+
+```text
+Unity.exe -batchmode -nographics -projectPath <QA> -executeMethod EchoMountain.EditorTools.LabBuild.BuildWindowsFreeRoam -echoBuildOutput <QA>/Builds/GlacierPass-FasterDropIn/EchoMountain.exe -logFile <QA>/drop-in-build.log -quit
+```
+
+The Windows build exited 0. The copied executable, runtime DLL, and both levels matched the isolated output by SHA-256. The player opened a responsive Glacier Pass window and initialized Direct3D 11, PhysX, and input. Acceleration was measured in PlayMode. The Windows build is open for the hands-on check. Evidence is in `Logs/DropIn-QA`.
+
+```text
+Builds/GlacierPass-FasterDropIn/EchoMountain.exe -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -force-d3d11 -logFile Logs/DropIn-QA/drop-in-player.log
+```
+
 ## Riding parity — 2026-11-25
 
 Baseline `204e0a0`, Unity 6000.3.28f1 and URP 17.3.0, using the existing isolated project at `%TEMP%/EchoMountain-SunsetBasin-QA-20261123`. Unity ran with the project's bundled fonts. The 6000.3.29f1 release notes document a FreeType fix for malformed variable fonts. [Unity release notes](https://unity.com/releases/editor/whats-new/6000.3.29f1)
