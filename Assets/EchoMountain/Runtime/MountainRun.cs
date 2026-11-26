@@ -15,6 +15,8 @@ namespace EchoMountain.Riding
         public MountainLine Line { get; private set; }
         public float Elapsed { get; private set; }
         public float PeakSpeed { get; private set; }
+        public float DistanceMeters { get; private set; }
+        public string CompletedAttemptId { get; private set; }
         public const float PracticeStart = 155f;
         public const float PracticeFinish = 285f;
         public const int PracticeGoal = 250;
@@ -34,11 +36,13 @@ namespace EchoMountain.Riding
         public float Progress => Mathf.InverseLerp(StartZ, FinishZ, body.position.z);
 
         private Rigidbody body;
+        private Vector3 previousRidePosition;
         private LabRider rider;
         private LabHud hud;
         private uint resetCount;
         private int replayEndedFrame = -1;
-        private InputAction advance, choose, left, right, practice, watch, sandbox;
+        private InputAction advance, choose, left, right, practice, watch, sandbox, account;
+        private AccountPanel accountPanel;
         private int dropIn;
         private bool changingScene;
         private bool customizing;
@@ -60,6 +64,7 @@ namespace EchoMountain.Riding
             practice = Button("Practice jumps", "<Keyboard>/p", "<Gamepad>/buttonNorth");
             watch = Button("Watch run replay", "<Keyboard>/v", "<Gamepad>/buttonWest");
             sandbox = Button("Free Roam", "<Keyboard>/f", "<Gamepad>/rightShoulder");
+            account = Button("Account", "<Keyboard>/o", "<Gamepad>/leftShoulder");
         }
 
         private void OnEnable()
@@ -71,6 +76,7 @@ namespace EchoMountain.Riding
             practice.Enable();
             watch.Enable();
             sandbox.Enable();
+            account.Enable();
         }
 
         private void Start()
@@ -95,6 +101,7 @@ namespace EchoMountain.Riding
                 return;
             }
             Replay = gameObject.AddComponent<MountainReplay>();
+            accountPanel = gameObject.AddComponent<AccountPanel>();
             ShowStart();
         }
 
@@ -107,6 +114,7 @@ namespace EchoMountain.Riding
             practice.Disable();
             watch.Disable();
             sandbox.Disable();
+            account.Disable();
         }
 
         private void OnDestroy()
@@ -118,6 +126,7 @@ namespace EchoMountain.Riding
             practice.Dispose();
             watch.Dispose();
             sandbox.Dispose();
+            account.Dispose();
         }
 
         private static InputAction Button(string name, string keyboard, string gamepad)
@@ -132,6 +141,8 @@ namespace EchoMountain.Riding
             // The same Escape/B event that exits replay must not also leave Results.
             if (replayEndedFrame == Time.frameCount) return;
             if (Phase == MountainPhase.Riding || Phase == MountainPhase.Replay) return;
+            if (accountPanel != null && accountPanel.IsOpen) return;
+            if (account.WasPressedThisFrame()) { accountPanel?.Open(); return; }
             if (Phase == MountainPhase.Results && watch.WasPressedThisFrame()) { StartReplay(); return; }
             if (Phase == MountainPhase.Ready)
             {
@@ -169,11 +180,15 @@ namespace EchoMountain.Riding
                 resetCount = rider.ResetCount;
                 Elapsed = 0f;
                 PeakSpeed = 0f;
+                DistanceMeters = 0f;
+                previousRidePosition = position;
                 Replay.BeginCapture();
                 return;
             }
 
             Elapsed += Time.fixedDeltaTime;
+            DistanceMeters += Mathf.Min(Vector3.Distance(position, previousRidePosition), 30f);
+            previousRidePosition = position;
             PeakSpeed = Mathf.Max(PeakSpeed, rider.SpeedKmh);
             bool finished = position.z >= FinishZ && rider.IsGrounded && !rider.IsRecovering;
             Replay.Capture(Elapsed, finished);
@@ -184,6 +199,7 @@ namespace EchoMountain.Riding
                 Phase = MountainPhase.Results;
                 SetRiding(false);
                 Records.Finish(Line, IsPractice, Elapsed, PeakSpeed, Tricks.Points, Application.version);
+                CompletedAttemptId = System.Guid.NewGuid().ToString();
             }
         }
 
@@ -228,11 +244,14 @@ namespace EchoMountain.Riding
             Phase = MountainPhase.Riding;
             Elapsed = 0f;
             PeakSpeed = 0f;
+            DistanceMeters = 0f;
+            CompletedAttemptId = null;
             SetRiding(true);
             float x = MountainCourse.LaneX(Line);
             rider.SetSpawn(MountainCourse.Point(x, StartZ, 0.15f),
                 MountainCourse.Heading(x, StartZ));
             resetCount = rider.ResetCount;
+            previousRidePosition = body.position;
             Replay.BeginCapture();
         }
 
@@ -378,6 +397,7 @@ namespace EchoMountain.Riding
         private void OnGUI()
         {
             if (Phase == MountainPhase.Replay) return;
+            if (accountPanel != null && accountPanel.IsOpen) return;
             if (headline == null)
             {
                 headline = Style(44, ink, FontStyle.Bold);
@@ -427,6 +447,7 @@ namespace EchoMountain.Riding
                 float y = (height - panelHeight) * 0.5f;
                 Panel(new Rect(x, y, 644f, panelHeight), LineColor);
                 GUI.Label(new Rect(x + 29f, y + 20f, 580f, 27f), "ECHO MOUNTAIN    /    COURSE 01", eyebrow);
+                if (GUI.Button(new Rect(x + 475f, y + 20f, 140f, 30f), "Account [O]", button)) accountPanel?.Open();
                 GUI.Label(new Rect(x + 27f, y + 48f, 590f, 70f),
                     Phase == MountainPhase.Ready ? "Glacier Pass" : IsPractice ? "Practice complete" : "Descent complete", headline);
                 if (Phase == MountainPhase.Ready)

@@ -43,6 +43,9 @@ namespace EchoMountain.Tests
             score.SampleAir(0f, BoardGrab.None, 0.01f);
             score.Land(0f, LandingOutcome.Clean);
             Assert.That(score.Points, Is.EqualTo(90));
+            Assert.That(score.CompletedTricks, Does.Contain("Melon +90"));
+            score.Reset();
+            Assert.That(score.CompletedTricks, Is.Empty);
         }
 
         [UnityTest]

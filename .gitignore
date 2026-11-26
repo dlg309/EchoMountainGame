@@ -2,6 +2,8 @@
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
+**/bin/
+**/obj/
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
@@ -11,6 +13,8 @@
 .vs/
 .idea/
 *.csproj
+!AccountService/*.csproj
+!AccountService.Tests/*.csproj
 *.sln
 *.slnx
 *.user

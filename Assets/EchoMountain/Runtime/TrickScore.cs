@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Text;
 
 namespace EchoMountain.Riding
 {
@@ -16,6 +17,8 @@ namespace EchoMountain.Riding
         private float flipRotation;
         private int railPoints, previousRail;
         private BoardGrab previousGrab;
+        private readonly StringBuilder completedTricks = new();
+        public string CompletedTricks => completedTricks.ToString();
 
         public bool IsAirborne { get; private set; }
         public float Rotation => rotation;
@@ -119,6 +122,11 @@ namespace EchoMountain.Riding
             string landing = clean ? repeated ? "Repeat" : "Clean" : "Recovered";
             Feedback = $"{trick}   /   {landing}   +{LastAward}";
             FeedbackTime = 2.8f;
+            if (completedTricks.Length < 1800)
+            {
+                if (completedTricks.Length > 0) completedTricks.Append("; ");
+                completedTricks.Append(trick).Append(" +").Append(LastAward);
+            }
         }
 
         public void CancelAir()
@@ -134,6 +142,7 @@ namespace EchoMountain.Riding
             CancelAir();
             if (!preservePoints)
             {
+                completedTricks.Clear();
                 Points = previousSpin = previousFlip = previousRail = 0;
                 previousGrab = BoardGrab.None;
             }

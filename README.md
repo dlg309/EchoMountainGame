@@ -1,5 +1,20 @@
 # Echo Mountain
 
+## Optional private account prototype (Review 2)
+
+The existing offline game and local records remain available. To use private account history on this PC, run the local ASP.NET Core service with .NET 10:
+
+```powershell
+dotnet dev-certs https --check --trust
+dotnet run --project AccountService/EchoMountain.Accounts.csproj
+```
+
+The service listens on `https://localhost:7186` by default and creates `AccountService/bin/.../accounts.db` on first run. For a different HTTPS endpoint, set `ECHO_ACCOUNT_URL` for the game and `ECHO_ACCOUNT_URL` plus `ECHO_ACCOUNT_DB` for the service. Keep the database, its backups, and the HTTPS certificate outside Git. No public host is configured.
+
+In the Glacier Pass menu or Results screen, select **Account [O]**. Sign up with an email, 12-character password, and display name, then sign in. Tab moves through account fields; Enter signs in and Ctrl+N creates an account. After a finished Pine, Summit, or Jump Practice run, open Account and select **Save result** (or Enter). **History [H]** shows private recent runs and personal bests. **Settings [S]** changes the display name (Ctrl+Enter saves); **Sign out [L]** revokes the current session. Escape closes the account panel. The service must be running for these actions; offline riding still works when it is unavailable. Sessions are held only in game memory and expire server-side after 12 hours.
+
+Saved scores are personal and unverified because the server cannot prove a Unity client's trick or physics values. Free Roam has no completed-run save. See [Review 2 plan](docs/REVIEW2_IMPLEMENTATION.md) and [QA](docs/QA.md).
+
 Glacier Pass is an 860 m snowboarding course for Windows. Ride the smooth **Pine line**, take the marked rollers on the **Summit line**, or use **Jump practice** for a shorter Summit run with a 250-point target.
 
 ## Free Roam in Sunset Basin

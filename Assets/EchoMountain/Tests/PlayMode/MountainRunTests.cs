@@ -20,6 +20,12 @@ namespace EchoMountain.Tests
         private Scene loaded;
         private string recordDirectory;
 
+        [Test]
+        public void AccountEndpointMustUseHttps()
+        {
+            Assert.Throws<ArgumentException>(() => new AccountServiceClient("http://localhost:7186"));
+        }
+
         [UnityTearDown]
         public IEnumerator UnloadCourse()
         {
@@ -56,6 +62,12 @@ namespace EchoMountain.Tests
                 var board = GameObject.Find("Diagnostic board");
                 Assert.That(board, Is.Not.Null);
                 var run = board.GetComponent<MountainRun>();
+                var account = board.GetComponent<AccountPanel>();
+                Assert.That(account, Is.Not.Null);
+                account.Open();
+                Assert.That(account.IsOpen, Is.True);
+                account.Close();
+                Assert.That(account.IsOpen, Is.False);
                 var rider = board.GetComponent<LabRider>();
                 var body = board.GetComponent<Rigidbody>();
                 recordDirectory = Path.Combine(Path.GetTempPath(), "EchoMountain-SceneRecords-" + Guid.NewGuid().ToString("N"));
@@ -99,6 +111,8 @@ namespace EchoMountain.Tests
                 Debug.Log($"Glacier Pass {line} speed at 5 s: {speedAtFiveSeconds:F2} km/h");
                 Assert.That(speedAtFiveSeconds, Is.InRange(21f, 30f), "The drop-in should build usable speed in five seconds.");
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Results));
+                Assert.That(Guid.TryParse(run.CompletedAttemptId, out _), Is.True);
+                Assert.That(run.DistanceMeters, Is.GreaterThan(100f));
                 Assert.That(run.Elapsed, Is.InRange(60f, 90f));
                 Assert.That(maximumLaneOffset, Is.LessThan(5f), "Stay within the chosen line.");
                 if (line == MountainLine.Summit) Assert.That(landings, Is.GreaterThan(0), "Summit must include a natural landing.");
@@ -160,6 +174,8 @@ namespace EchoMountain.Tests
 
                 run.StartRun();
                 Assert.That(run.Phase, Is.EqualTo(MountainPhase.Riding));
+                Assert.That(run.CompletedAttemptId, Is.Null);
+                Assert.That(run.DistanceMeters, Is.Zero);
                 Assert.That(body.isKinematic, Is.False);
                 Assert.That(run.Elapsed, Is.Zero);
                 Assert.That(run.PeakSpeed, Is.Zero);
