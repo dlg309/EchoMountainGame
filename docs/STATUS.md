@@ -1,5 +1,9 @@
 # Status
 
+## Windows performance QA — 2026-11-25
+
+On `experiment/carve-brake-r3` at `eac7c06`, an isolated copy at `%TEMP%/EchoMountain-SunsetBasin-QA-20261123` produced source-matched release-style and development Windows players with QA-only ride instrumentation. The normal player, source scenes, GUIDs, and main Unity project lock remain untouched. Three 61-second 1080p riding runs each for Pine, Summit, and Free Roam are in `Logs/Performance-QA` and summarized in `docs/QA.md`. Average frame time met the capped 16.67 ms target, but P95 was 18.05–18.45 ms and a focused Switchyard approach/runout reached 96.18 ms. A development pass completed ten customization/retry/scene cycles and ten replays with no growing Unity allocated-memory trend, but with frequent Gen 0 collections. A 35-second 30/60/120 comparison matched landing/reset counts yet diverged by about 5.3 m between 30 and 60 FPS; 120 cap delivered about 105 FPS. Next: reproduce and profile the Switchyard hitch, reduce riding HUD allocations, and fix or isolate render-cadence input differences with a fixed-tick trace. The exact previously built customization executable was not directly measured because desktop input automation could not start its ride; all numbers are from an instrumented source-matched rebuild.
+
 ## Rider customization — 2026-11-25
 
 The current branch includes saved jacket, pants, helmet, and goggle colors plus independent topside and underside snowboard graphics and matching binding colors. A new Customize button opens choices from the main menu. The four modes use the same cosmetic save, while the existing riding mesh, collider, physics, and camera remain in place. The final focused tests passed 2/2 and the full PlayMode suite passed 65/65 in Unity. The Windows build succeeded and opened at `Builds/EchoMountain-Customization/EchoMountain.exe`. Actual menu interaction and riding visuals still need a hands-on check. See [QA](QA.md).

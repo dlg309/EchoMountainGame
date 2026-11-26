@@ -12,6 +12,8 @@ The complete brief and acceptance gates are in `docs/BUILD_BRIEF.md`. The latest
 - [ ] **M5 Expanded demo:** rails, physical halfpipe, surfaces, challenges, cosmetics, weather and authoring tools; validate each addition without regressing the slice.
 - [ ] **M6 Release candidate:** regression suite, Windows launch, reproducible build, gameplay performance and QA, known limitations and handoff.
 
+2026-11-25 performance checkpoint: nine one-minute 1080p riding captures from source-matched instrumented Windows players are recorded in `docs/QA.md`. Mean frame time met the capped 60 FPS target; P95/P99 exceeded 16.67 ms, and a focused Switchyard approach/runout had a 96.18 ms hitch. Ten customization/retry/scene cycles and ten replays showed no short-term Unity allocated-memory growth but frequent Gen 0 collections. The 30/60/120 comparison retained landing/reset counts but diverged in path at 30 FPS. M6 remains open for hitch root cause, allocation work, exact-player hands-on verification, and a fixed-tick input comparison.
+
 ## Decisions and dependencies
 
 The Unity project is on 6000.3.28f1 with URP. The current physics step is 60 Hz. The standalone target remains 1080p at 60 FPS, pending gameplay measurement.
