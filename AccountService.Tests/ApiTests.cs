@@ -51,6 +51,10 @@ public sealed class ApiTests
             Assert.Equal("Bob", (await bob.GetFromJsonAsync<Account>("/v1/me"))!.DisplayName);
             Assert.Equal(HttpStatusCode.NoContent, (await alice.PostAsync("/v1/logout", null)).StatusCode);
             Assert.Equal(HttpStatusCode.Unauthorized, (await alice.GetAsync("/v1/runs")).StatusCode);
+            var relogin = await (await alice.PostAsJsonAsync("/v1/login", new Login("alice@example.com", "a-long-password-123")))
+                .Content.ReadFromJsonAsync<Session>();
+            alice.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", relogin!.Token);
+            Assert.Equal("Updated Alice", (await alice.GetFromJsonAsync<Account>("/v1/me"))!.DisplayName);
         }
         finally { if (File.Exists(path)) File.Delete(path); }
     }

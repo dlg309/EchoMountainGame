@@ -3,6 +3,7 @@
 Source: `ai-game-dev-research/docs/spec/review-2-creative-spec.md` (main, read 2026-11-26). The SPEC calls the account architecture a candidate, not a selected stack. The 2026-11-26 implementation request adopts the candidate for a local prototype: Unity client, ASP.NET Core HTTPS API, server-owned SQLite, and ASP.NET Core Identity password hashing. Public hosting and an external identity provider remain unselected.
 
 Tracking issue: [EchoMountainGame #2](https://github.com/dlg309/EchoMountainGame/issues/2). The research SPEC's older 41-test description was historical; this checkout started from the later 65-test branch with Free Roam and customization.
+Implementation checkpoint: `7a955a2` on `experiment/carve-brake-r3`.
 
 ## Audit before edits
 
